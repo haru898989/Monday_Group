@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class HumanGimmick : MonoBehaviour, GimmickBase
 {
+    [SerializeField]
+    private AudioSource audioSource;
+
     public void ActivateMagic()
     {
-        Debug.Log("ƒMƒ~ƒbƒN”­“®");
+        Debug.Log("ã‚®ãƒŸãƒƒã‚¯ç™ºå‹•");
+
+        SoundManager.Instance.PlaySE(0);
     }
+
 }
