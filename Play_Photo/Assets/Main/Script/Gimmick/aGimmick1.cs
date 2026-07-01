@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HumanGimmick : MonoBehaviour, GimmickBase
+public class aGimmick1 : MonoBehaviour, GimmickBase
 {
     public void ActivateMagic()
     {
-        Debug.Log("ギミック発動");
+        Debug.Log("ギミ");
     }
 }
