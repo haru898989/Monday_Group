@@ -42,7 +42,9 @@ def draw_objects(img, objects):
     for obj in objects:
         x1, y1, x2, y2 = obj.box
         label = f"{obj.name}:{obj.reaction}"
+        #四角
         cv2.rectangle(display, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        #ラベル
         cv2.putText(
             display,
             label,
@@ -52,6 +54,25 @@ def draw_objects(img, objects):
             (0, 255, 0),
             2,
         )
+        # 左上
+        cv2.circle(display, (x1, y1), 4, (0, 0, 255), -1)
+        cv2.putText(display, f"({x1},{y1})", (x1, y1+18),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,0), 1)
+
+        # 右上
+        cv2.circle(display, (x2, y1), 4, (0, 0, 255), -1)
+        cv2.putText(display, f"({x2},{y1})", (x2-70, y1+18),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,0), 1)
+
+        # 左下
+        cv2.circle(display, (x1, y2), 4, (0, 0, 255), -1)
+        cv2.putText(display, f"({x1},{y2})", (x1, y2-8),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,0), 1)
+
+        # 右下
+        cv2.circle(display, (x2, y2), 4, (0, 0, 255), -1)
+        cv2.putText(display, f"({x2},{y2})", (x2-70, y2-8),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,0), 1)
     return display
 
 
