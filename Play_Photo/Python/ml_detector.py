@@ -376,9 +376,15 @@ if __name__ == "__main__":
 
     objects = detector.detect(image_path)
 
-    print("===== AI検出結果 =====")
-    for obj in objects:
-        print(obj.to_dict())
+    print("===== 緑の四角の座標一覧 =====")
+    for i, obj in enumerate(objects, start=1):
+        x1, y1, x2, y2 = obj.box
+
+        print(f"\n[{i}] {obj.name} / {obj.reaction} / 信頼度:{obj.confidence:.2f}")
+        print(f"左上     : ({x1}, {y1})")
+        print(f"右上     : ({x2}, {y1})")
+        print(f"左下     : ({x1}, {y2})")
+        print(f"右下     : ({x2}, {y2})")
 
     detector.save_annotated_image(image_path, "result.jpg")
     print("result.jpg に検出結果を保存しました。")
