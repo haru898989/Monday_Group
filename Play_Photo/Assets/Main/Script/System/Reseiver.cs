@@ -11,6 +11,8 @@ public class Reseiver : MonoBehaviour
 {
     private UdpClient client;
     private readonly int port = 1140;
+    public GameObject objectPrefab;
+    private ReceivedData latestData = null;
 
     //Pythonから送られてくるJSONの形に合わせたクラスを定義
     [System.Serializable]
@@ -46,11 +48,37 @@ public class Reseiver : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (latestData == null)
+            return;
+
+        foreach (ObjectData obj in latestData.objects)
+        {
+            float centerX = (obj.x1 + obj.x4) / 2f;
+            float centerY = (obj.y1 + obj.y4) / 2f;
+
+            float width = Mathf.Abs(obj.x2 - obj.x1);
+            float height = Mathf.Abs(obj.y3 - obj.y1);
+
+            GameObject g = Instantiate(
+                objectPrefab,
+                new Vector3(centerX, centerY, 0),
+                Quaternion.identity);
+
+            g.transform.localScale = new Vector3(width, height, 1);
+
+            g.name = obj.name;
+        }
+
+        latestData = null;
     }
 
     private void ReceiveData(IAsyncResult result)
     {
+        if (client == null)
+        {
+            return;
+        }
+
         try
         {
             //どこのデータでも受け取れる設定
@@ -64,16 +92,8 @@ public class Reseiver : MonoBehaviour
 
         ReceivedData receivedData = JsonUtility.FromJson<ReceivedData>(json);
 
-        foreach (ObjectData obj in receivedData.objects)
-        {
-            Debug.Log($"名前：{obj.name}");
+        latestData = receivedData;
 
-            Debug.Log($"左上：({obj.x1},{obj.y1})");
-            Debug.Log($"右上：({obj.x2},{obj.y2})");
-            Debug.Log($"左下：({obj.x3},{obj.y3})");
-            Debug.Log($"右下：({obj.x4},{obj.y4})");
-        }
-        
 
         }
         catch (Exception e)
@@ -82,7 +102,7 @@ public class Reseiver : MonoBehaviour
         }
 
         //次のデータを受け取るために、もう一度待機をスタートする
-        if (client != null)
+        if (client != null && client.Client != null)
         {
             client.BeginReceive(ReceiveData, null);
         }
