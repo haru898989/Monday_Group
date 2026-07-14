@@ -9,12 +9,24 @@ Magic Photo Museum - ML Detector
 - AI検出画像・表示画像・クリック判定座標を同じにする
 """
 
-from dataclasses import dataclass, asdict
-from typing import List, Tuple, Dict, Optional
+from __future__ import annotations
 
-import cv2
-import numpy as np
-from ultralytics import YOLO
+import math
+import os
+import re
+from dataclasses import asdict, dataclass, field, replace
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+from recognition_config import (
+    CANONICAL_NAME_MAP,
+    CATEGORY_MAP,
+    CONFIDENCE_THRESHOLDS,
+    CONFUSABLE_CLASS_PAIRS,
+    CONFUSABLE_IOU_THRESHOLD,
+    CUSTOM_CLASSES,
+    DUPLICATE_IOU_THRESHOLD,
+    PERSON_FILTER,
+)
 
 
 @dataclass
@@ -25,15 +37,263 @@ class DetectedObject:
     confidence: float
     box: Tuple[int, int, int, int]
     center: Tuple[int, int]
+    # 既存5項目は互換性のため維持し、認識用メタデータを末尾へ追加する。
+    canonical_name: str = ""
+    original_name: str = ""
+    aliases: List[str] = field(default_factory=list)
+    category: str = "unknown"
 
-    def to_dict(self) -> Dict:
+    def __post_init__(self) -> None:
+        self.original_name = self.original_name or self.name
+        self.canonical_name = self.canonical_name or canonicalize_name(self.name)
+        if not self.category or self.category == "unknown":
+            self.category = category_for(self.canonical_name)
+        self.aliases = _unique_names(
+            [self.canonical_name, self.original_name, self.name, *self.aliases]
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+
+def _normalized_text(name: Any) -> str:
+    """クラス名の大文字小文字・空白・区切り文字を安全に揃える。"""
+    text = str(name or "").strip().lower().replace("_", "-")
+    text = re.sub(r"\s*-\s*", " ", text)
+    return re.sub(r"\s+", " ", text)
+
+
+def canonicalize_name(name: Any) -> str:
+    """YOLOの予測名を写真理解用canonical_nameへ変換する。"""
+    normalized = _normalized_text(name)
+    return CANONICAL_NAME_MAP.get(normalized, normalized or "unknown")
+
+
+def category_for(canonical_name: str) -> str:
+    """canonical_nameに対応する大分類を返す。未知名はunknownにする。"""
+    return CATEGORY_MAP.get(canonical_name, "unknown")
+
+
+def _unique_names(names: Iterable[Any]) -> List[str]:
+    """空要素を除き、入力順を保った重複なしリストを作る。"""
+    result: List[str] = []
+    for name in names:
+        normalized = _normalized_text(name)
+        if normalized and normalized not in result:
+            result.append(normalized)
+    return result
+
+
+def calculate_iou(
+    first_box: Tuple[int, int, int, int],
+    second_box: Tuple[int, int, int, int],
+) -> float:
+    """2つのxyxy形式boxのIoUを0.0〜1.0で返す。"""
+    ax1, ay1, ax2, ay2 = first_box
+    bx1, by1, bx2, by2 = second_box
+    intersection_width = max(0, min(ax2, bx2) - max(ax1, bx1))
+    intersection_height = max(0, min(ay2, by2) - max(ay1, by1))
+    intersection = intersection_width * intersection_height
+    first_area = max(0, ax2 - ax1) * max(0, ay2 - ay1)
+    second_area = max(0, bx2 - bx1) * max(0, by2 - by1)
+    union = first_area + second_area - intersection
+    return 0.0 if union <= 0 else max(0.0, min(1.0, intersection / union))
+
+
+def _confidence_threshold(canonical_name: str, category: str) -> float:
+    """名前固有→カテゴリ→defaultの順でconfidence閾値を選ぶ。"""
+    by_name = CONFIDENCE_THRESHOLDS.get("by_name", {})
+    by_category = CONFIDENCE_THRESHOLDS.get("by_category", {})
+    default = float(CONFIDENCE_THRESHOLDS.get("default", 0.12))
+    if isinstance(by_name, dict) and canonical_name in by_name:
+        return float(by_name[canonical_name])
+    if isinstance(by_category, dict) and category in by_category:
+        return float(by_category[category])
+    return default
+
+
+def _debug_detection(obj: DetectedObject) -> Dict[str, Any]:
+    """後処理debugへ保存する最小限の検出情報を作る。"""
+    confidence = _finite_confidence(getattr(obj, "confidence", 0.0))
+    try:
+        box = list(obj.box)
+    except (TypeError, ValueError):
+        box = []
+    return {
+        "original_name": str(getattr(obj, "original_name", "") or getattr(obj, "name", "unknown")),
+        "canonical_name": str(getattr(obj, "canonical_name", "") or canonicalize_name(getattr(obj, "name", "unknown"))),
+        "confidence": round(confidence, 6),
+        "box": box,
+    }
+
+
+def _finite_confidence(value: Any) -> float:
+    """confidenceを有限な0.0〜1.0へ安全に変換する。"""
+    try:
+        confidence = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return 0.0
+    return max(0.0, min(1.0, confidence)) if math.isfinite(confidence) else 0.0
+
+
+def _unit_setting(value: Any, default: float) -> float:
+    """設定用比率を検証し、不正値では安全な既定値へ戻す。"""
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+    return max(0.0, min(1.0, number)) if math.isfinite(number) else default
+
+
+def _iou_setting(value: Any, default: float) -> float:
+    """IoU閾値は範囲外を丸めず既定値へ戻し、誤統合を防ぐ。"""
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+    return number if math.isfinite(number) and 0.0 < number <= 1.0 else default
+
+
+def postprocess_detections(
+    objects: Optional[Iterable[DetectedObject]],
+    image_width: int,
+    image_height: int,
+    base_confidence: float = 0.12,
+    duplicate_iou_threshold: float = DUPLICATE_IOU_THRESHOLD,
+    confusable_iou_threshold: float = CONFUSABLE_IOU_THRESHOLD,
+) -> Tuple[List[DetectedObject], Dict[str, List[Dict[str, Any]] | List[str]]]:
+    """confidence・人物形状・IoUを使い、YOLOの生検出を整理する。
+
+    高confidenceのboxを保持し、統合された元名はaliasesとdebugへ残す。
+    """
+    debug: Dict[str, List[Dict[str, Any]] | List[str]] = {
+        "removed_duplicates": [],
+        "removed_low_confidence": [],
+        "removed_invalid": [],
+        "warnings": [],
+    }
+    width = max(0, int(image_width))
+    height = max(0, int(image_height))
+    base_threshold = _unit_setting(
+        base_confidence, float(CONFIDENCE_THRESHOLDS.get("default", 0.12))
+    )
+    duplicate_threshold = _iou_setting(
+        duplicate_iou_threshold, DUPLICATE_IOU_THRESHOLD
+    )
+    confusable_threshold = _iou_setting(
+        confusable_iou_threshold, CONFUSABLE_IOU_THRESHOLD
+    )
+    if width <= 0 or height <= 0:
+        debug["warnings"].append("画像サイズが不正なため、全検出を除外しました。")
+        return [], debug
+
+    filtered: List[DetectedObject] = []
+    image_area = width * height
+    sources: Iterable[DetectedObject] = [] if objects is None else objects
+    for source in sources:
+        confidence = _finite_confidence(source.confidence)
+
+        try:
+            x1, y1, x2, y2 = (int(round(float(value))) for value in source.box)
+        except (TypeError, ValueError, OverflowError):
+            debug["removed_invalid"].append({"name": str(getattr(source, "name", "unknown")), "reason": "invalid_box"})
+            continue
+        x1, x2 = sorted((max(0, min(width, x1)), max(0, min(width, x2))))
+        y1, y2 = sorted((max(0, min(height, y1)), max(0, min(height, y2))))
+        if x2 <= x1 or y2 <= y1:
+            invalid = _debug_detection(source)
+            invalid["reason"] = "empty_box"
+            debug["removed_invalid"].append(invalid)
+            continue
+
+        original_name = str(source.original_name or source.name or "unknown").strip()
+        canonical_name = canonicalize_name(source.canonical_name or original_name)
+        category = category_for(canonical_name)
+        normalized = replace(
+            source,
+            confidence=confidence,
+            box=(x1, y1, x2, y2),
+            center=((x1 + x2) // 2, (y1 + y2) // 2),
+            canonical_name=canonical_name,
+            original_name=original_name,
+            aliases=_unique_names([
+                canonical_name,
+                original_name,
+                *(source.aliases if isinstance(source.aliases, (list, tuple, set)) else []),
+            ]),
+            category=category,
+        )
+        threshold = max(base_threshold, _confidence_threshold(canonical_name, category))
+        if normalized.confidence < threshold:
+            removed = _debug_detection(normalized)
+            removed.update({"threshold": round(threshold, 6), "reason": "low_confidence"})
+            debug["removed_low_confidence"].append(removed)
+            continue
+
+        # faceやhandは全身人物と形が異なるため、この保守的フィルタの対象外にする。
+        if canonical_name == "person":
+            object_width = x2 - x1
+            object_height = y2 - y1
+            area_ratio = (object_width * object_height) / image_area
+            aspect_ratio = object_width / max(1, object_height)
+            tiny = (
+                area_ratio < PERSON_FILTER["tiny_area_ratio"]
+                and normalized.confidence < PERSON_FILTER["tiny_confidence"]
+            )
+            implausibly_wide = (
+                aspect_ratio > PERSON_FILTER["wide_aspect_ratio"]
+                and area_ratio < PERSON_FILTER["wide_max_area_ratio"]
+                and normalized.confidence < PERSON_FILTER["wide_max_confidence"]
+            )
+            if tiny or implausibly_wide:
+                removed = _debug_detection(normalized)
+                removed.update({"reason": "implausible_person_shape", "area_ratio": round(area_ratio, 8)})
+                debug["removed_invalid"].append(removed)
+                continue
+        filtered.append(normalized)
+
+    filtered.sort(key=lambda item: item.confidence, reverse=True)
+    kept: List[DetectedObject] = []
+    for candidate in filtered:
+        duplicate_index: Optional[int] = None
+        duplicate_iou = 0.0
+        for index, current in enumerate(kept):
+            same_canonical = candidate.canonical_name == current.canonical_name
+            confusable = frozenset((candidate.canonical_name, current.canonical_name)) in CONFUSABLE_CLASS_PAIRS
+            if not same_canonical and not confusable:
+                continue
+            iou = calculate_iou(candidate.box, current.box)
+            threshold = duplicate_threshold if same_canonical else confusable_threshold
+            if iou >= threshold:
+                duplicate_index = index
+                duplicate_iou = iou
+                break
+
+        if duplicate_index is None:
+            kept.append(candidate)
+            continue
+
+        winner = kept[duplicate_index]
+        winner.aliases = _unique_names([*winner.aliases, *candidate.aliases])
+        removed = _debug_detection(candidate)
+        removed.update(
+            {
+                "kept_original_name": winner.original_name,
+                "kept_canonical_name": winner.canonical_name,
+                "iou": round(duplicate_iou, 6),
+                "reason": "duplicate",
+            }
+        )
+        debug["removed_duplicates"].append(removed)
+
+    kept.sort(key=lambda item: item.confidence, reverse=True)
+    return kept, debug
 
 
 class MagicPhotoDetector:
     """
     YOLO-Worldを使って、写真内の物体を検出するクラス。
-    検出結果は、後続のクリック判定・演出処理で使いやすい形に整形する。
+    検出結果は、後続のクリック判定・写真理解で使いやすい形に整形する。
     """
 
     def __init__(
@@ -42,57 +302,61 @@ class MagicPhotoDetector:
         confidence: float = 0.12,
         image_size: int = 640,
         max_display_size: int = 1280,
+        duplicate_iou_threshold: float = DUPLICATE_IOU_THRESHOLD,
+        confusable_iou_threshold: float = CONFUSABLE_IOU_THRESHOLD,
     ):
+        # 後処理の単体テストではYOLO/OpenCVを不要にするため、実利用時に読み込む。
+        try:
+            import cv2
+            import numpy as np
+            from ultralytics import YOLO
+        except ImportError as error:
+            raise ImportError(
+                "画像検出には requirements.txt の ultralytics/opencv-python/numpy が必要です。"
+            ) from error
+
+        self._cv2 = cv2
+        self._np = np
         self.model_path = model_path
-        self.confidence = confidence
+        self.confidence = _unit_setting(
+            confidence, float(CONFIDENCE_THRESHOLDS.get("default", 0.12))
+        )
         self.image_size = image_size
         self.max_display_size = max_display_size
+        self.duplicate_iou_threshold = _iou_setting(
+            duplicate_iou_threshold, DUPLICATE_IOU_THRESHOLD
+        )
+        self.confusable_iou_threshold = _iou_setting(
+            confusable_iou_threshold, CONFUSABLE_IOU_THRESHOLD
+        )
         self.model = YOLO(model_path)
 
-        # コンテスト作品用：写真内で反応させたい候補物体
-        self.custom_classes = [
-            # 人
-            "person", "human", "man", "woman", "child", "face",
-
-            # 光・部屋
-            "light", "lamp", "ceiling light", "desk lamp",
-            "window", "door", "clock", "mirror",
-
-            # 音・遊び
-            "musical instrument", "guitar", "piano", "drum", "microphone",
-            "radio", "speaker", "toy", "ball", "balloon",
-
-            # 生き物
-            "animal", "dog", "cat", "bird", "fish", "horse", "rabbit",
-
-            # 読み物・学習
-            "book", "notebook", "paper", "mathematical formula", "whiteboard",
-
-            # 電子機器
-            "computer", "laptop", "monitor", "keyboard", "mouse", "phone", "cell phone",
-
-            # 食べ物
-            "food", "apple", "banana", "cake", "pizza", "cup", "bottle", "ice cream",
-
-            # 乗り物
-            "vehicle", "car", "bus", "train", "bicycle", "motorcycle",
-
-            # 自然・外
-            "sky", "sun", "moon", "cloud", "tree", "flower", "fireworks",
-            "water", "sea", "ocean", "river", "lake", "pond", "pool", "waterfall",
-            "building", "house", "tower", "bridge", "castle", "wall", "city",
-
-            # 企画専用で探したいもの
-            "treasure box", "kettle", "pot", "faucet", "sink", "glass", "firework",
-        ]
+        self.custom_classes = list(CUSTOM_CLASSES)
 
         self.model.set_classes(self.custom_classes)
         self.reaction_rules = self._build_reaction_rules()
         self.last_objects: List[DetectedObject] = []
-        self.last_image: Optional[np.ndarray] = None
+        self.last_detection_objects: Optional[List[DetectedObject]] = None
+        self.last_raw_objects: List[DetectedObject] = []
+        self.last_raw_count = 0
+        self.last_postprocess_debug: Dict[str, Any] = {
+            "removed_duplicates": [],
+            "removed_low_confidence": [],
+            "removed_invalid": [],
+            "warnings": [],
+        }
+        # 短い別名も用意し、MagicBrainへそのまま渡せるようにする。
+        self.last_debug = self.last_postprocess_debug
+        self.last_image: Optional[Any] = None
+        self.last_loaded_path: Optional[str] = None
+        self.last_loaded_mtime_ns: Optional[int] = None
+        self.last_loaded_image_id: Optional[int] = None
+        self.last_detection_path: Optional[str] = None
+        self.last_detection_mtime_ns: Optional[int] = None
+        self.last_detection_shape: Optional[Tuple[int, int]] = None
 
     def _build_reaction_rules(self) -> Dict[str, str]:
-        """検出名から演出カテゴリへ変換する辞書"""
+        """既存クリックデモとの互換性を保つレガシー反応名の辞書。"""
         return {
             "person": "human_reaction",
             "human": "human_reaction",
@@ -191,7 +455,7 @@ class MagicPhotoDetector:
             "glass": "break_glass",
         }
 
-    def resize_image(self, img: np.ndarray, max_size: Optional[int] = None) -> np.ndarray:
+    def resize_image(self, img: Any, max_size: Optional[int] = None) -> Any:
         """
         画像の長辺が max_size を超える場合だけ縮小する。
         縦横比は必ず維持する。
@@ -204,11 +468,11 @@ class MagicPhotoDetector:
             return img
 
         scale = max_size / max(h, w)
-        new_w = int(w * scale)
-        new_h = int(h * scale)
-        return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
+        return self._cv2.resize(img, (new_w, new_h), interpolation=self._cv2.INTER_AREA)
 
-    def resize_image_to_fit(self, img: np.ndarray, max_width: int, max_height: int) -> np.ndarray:
+    def resize_image_to_fit(self, img: Any, max_width: int, max_height: int) -> Any:
         """
         画面サイズに合わせて画像を縮小する。
         画面からはみ出さない最大サイズにするが、縦横比は変えない。
@@ -220,29 +484,30 @@ class MagicPhotoDetector:
         max_height = max(100, int(max_height))
 
         scale = min(max_width / w, max_height / h, 1.0)
-        new_w = int(w * scale)
-        new_h = int(h * scale)
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
 
         if scale >= 1.0:
             return img
 
-        return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        return self._cv2.resize(img, (new_w, new_h), interpolation=self._cv2.INTER_AREA)
 
-    def load_image(self, image_path: str) -> np.ndarray:
+    def load_image(self, image_path: str) -> Any:
         """画像を読み込み、長辺 max_display_size に縮小して返す。"""
-        img = cv2.imread(image_path)
+        img = self._cv2.imread(image_path)
         if img is None:
             raise FileNotFoundError(f"画像が見つかりません: {image_path}")
         img = self.resize_image(img)
         self.last_image = img
+        self._remember_loaded_image(image_path, img)
         return img
 
-    def load_image_for_screen(self, image_path: str, screen_width: int, screen_height: int, margin: int = 80) -> np.ndarray:
+    def load_image_for_screen(self, image_path: str, screen_width: int, screen_height: int, margin: int = 80) -> Any:
         """
         画像を読み込み、現在の画面サイズに収まる最大サイズに縮小して返す。
         AI検出・表示・クリック判定をこの画像で統一する。
         """
-        img = cv2.imread(image_path)
+        img = self._cv2.imread(image_path)
         if img is None:
             raise FileNotFoundError(f"画像が見つかりません: {image_path}")
 
@@ -250,9 +515,20 @@ class MagicPhotoDetector:
         fit_h = max(100, screen_height - margin)
         img = self.resize_image_to_fit(img, fit_w, fit_h)
         self.last_image = img
+        self._remember_loaded_image(image_path, img)
         return img
 
-    def detect_from_image(self, img: np.ndarray) -> List[DetectedObject]:
+    def _remember_loaded_image(self, image_path: str, img: Any) -> None:
+        """直近に読み込んだ画像を、再推論の要否判定用に記録する。"""
+        path = os.path.abspath(image_path)
+        self.last_loaded_path = path
+        self.last_loaded_image_id = id(img)
+        try:
+            self.last_loaded_mtime_ns = os.stat(path).st_mtime_ns
+        except OSError:
+            self.last_loaded_mtime_ns = None
+
+    def detect_from_image(self, img: Any) -> List[DetectedObject]:
         """
         すでにリサイズ済みの画像を解析する。
         表示画像と同じ画像を渡すことで、座標ズレを防ぐ。
@@ -263,13 +539,18 @@ class MagicPhotoDetector:
         for result in results:
             for box in result.boxes:
                 class_id = int(box.cls[0])
-                name = self.model.names[class_id]
+                original_name = str(self.model.names[class_id]).strip()
+                name = _normalized_text(original_name)
                 conf = float(box.conf[0])
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 cx = (x1 + x2) // 2
                 cy = (y1 + y2) // 2
 
-                reaction = self.reaction_rules.get(name, "unknown_magic")
+                canonical_name = canonicalize_name(name)
+                reaction = self.reaction_rules.get(
+                    name,
+                    self.reaction_rules.get(canonical_name, "unknown_magic"),
+                )
 
                 detected.append(
                     DetectedObject(
@@ -278,12 +559,36 @@ class MagicPhotoDetector:
                         confidence=conf,
                         box=(x1, y1, x2, y2),
                         center=(cx, cy),
+                        canonical_name=canonical_name,
+                        original_name=original_name,
+                        aliases=[canonical_name, name],
+                        category=category_for(canonical_name),
                     )
                 )
 
-        detected.sort(key=lambda obj: obj.confidence, reverse=True)
-        self.last_objects = detected
-        return detected
+        self.last_raw_objects = detected
+        self.last_raw_count = len(detected)
+        height, width = img.shape[:2]
+        self.last_detection_shape = (height, width)
+        if id(img) == self.last_loaded_image_id:
+            self.last_detection_path = self.last_loaded_path
+            self.last_detection_mtime_ns = self.last_loaded_mtime_ns
+        else:
+            self.last_detection_path = None
+            self.last_detection_mtime_ns = None
+        processed, debug = postprocess_detections(
+            detected,
+            image_width=width,
+            image_height=height,
+            base_confidence=self.confidence,
+            duplicate_iou_threshold=self.duplicate_iou_threshold,
+            confusable_iou_threshold=self.confusable_iou_threshold,
+        )
+        self.last_postprocess_debug = debug
+        self.last_debug = debug
+        self.last_objects = processed
+        self.last_detection_objects = processed
+        return processed
 
     def detect(self, image_path: str) -> List[DetectedObject]:
         """
@@ -316,30 +621,46 @@ class MagicPhotoDetector:
     def save_annotated_image(self, image_path: str, output_path: str = "result.jpg") -> None:
         """検出結果を四角で描いた画像を保存する"""
         img = self.load_image(image_path)
-
-        if not self.last_objects:
+        current_shape = tuple(img.shape[:2])
+        can_reuse = (
+            self.last_detection_objects is not None
+            and self.last_objects is self.last_detection_objects
+            and self.last_detection_path == self.last_loaded_path
+            and self.last_detection_mtime_ns == self.last_loaded_mtime_ns
+            and self.last_detection_shape == current_shape
+        )
+        # 同一ファイル・更新時刻・画像サイズなら既存結果を使い、それ以外だけ再推論する。
+        if not can_reuse:
             self.detect_from_image(img)
 
         for obj in self.last_objects:
             x1, y1, x2, y2 = obj.box
             label = f"{obj.name} {obj.confidence:.2f}"
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(
+            self._cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            self._cv2.putText(
                 img,
                 label,
                 (x1, max(25, y1 - 8)),
-                cv2.FONT_HERSHEY_SIMPLEX,
+                self._cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
                 (0, 255, 0),
                 2,
             )
 
-        cv2.imwrite(output_path, img)
+        self._cv2.imwrite(output_path, img)
 
-    def detect_unknown_regions_from_image(self, img: np.ndarray, grid_size: int = 4) -> List[DetectedObject]:
+    def detect_unknown_regions_from_image(self, img: Any, grid_size: int = 4) -> List[DetectedObject]:
         """リサイズ済み画像をグリッド分割して unknown_magic のクリック領域を作る。"""
         h, w = img.shape[:2]
         unknowns: List[DetectedObject] = []
+        if w <= 0 or h <= 0:
+            return unknowns
+
+        try:
+            requested_grid_size = int(grid_size)
+        except (TypeError, ValueError, OverflowError):
+            requested_grid_size = 4
+        grid_size = max(1, min(requested_grid_size, max(1, w), max(1, h)))
 
         cell_w = w // grid_size
         cell_h = h // grid_size
