@@ -59,14 +59,34 @@ public class Reseiver : MonoBehaviour
             float width = Mathf.Abs(obj.x2 - obj.x1);
             float height = Mathf.Abs(obj.y3 - obj.y1);
 
+            float imageWidth = 346f;
+            float imageHeight = 620f;
+
+            float worldWidth = 10f;
+            float worldHeight = 10f;
+
+            float unityX =
+                (centerX / imageWidth - 0.5f) * worldWidth;
+
+            float unityY =
+                (0.5f - centerY / imageHeight) * worldHeight;
+
+            float unityWidth =
+                width / imageWidth * worldWidth;
+
+            float unityHeight =
+                height / imageHeight * worldHeight;
+
             GameObject g = Instantiate(
                 objectPrefab,
-                new Vector3(centerX, centerY, 0),
+                new Vector3(unityX, unityY, 0),
                 Quaternion.identity);
 
-            g.transform.localScale = new Vector3(width, height, 1);
+            g.transform.localScale =
+                new Vector3(unityWidth, unityHeight, 1);
 
             g.name = obj.name;
+
         }
 
         latestData = null;
