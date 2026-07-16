@@ -71,8 +71,7 @@ def handle_image(event):
         message_id = event.message.id
         message_content = line_bot_blob_api.get_message_content(message_id)
         
-        now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        file_path = os.path.join(SAVE_DIR, f"photo_{now}.jpg")
+        file_path = os.path.join(SAVE_DIR, "sample.jpg")
         
         with open(file_path, 'wb') as fd:
             fd.write(message_content)
