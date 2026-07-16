@@ -738,7 +738,7 @@ class MagicPhotoDetector:
 
 if __name__ == "__main__":
     detector = MagicPhotoDetector()
-    image_path = "sample.jpg"
+    image_path = "../downloaded_images/sample.jpg"
 
     objects = detector.detect(image_path)
 
