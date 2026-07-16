@@ -12,6 +12,7 @@ public class Reseiver : MonoBehaviour
     private UdpClient client;
     private readonly int port = 1140;
     public GameObject objectPrefab;
+    public GameObject loadingPanel;
     private ReceivedData latestData = null;
 
     //Pythonから送られてくるJSONの形に合わせたクラスを定義
@@ -39,8 +40,15 @@ public class Reseiver : MonoBehaviour
     }
 
     // Start is called before the first frame update
+
     void Start()
     {
+        // Unityを実行した直後はローディング画面を表示
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(true);
+        }
+
         client = new UdpClient(port);
         client.BeginReceive(ReceiveData, null);
     }
@@ -50,6 +58,11 @@ public class Reseiver : MonoBehaviour
     {
         if (latestData == null)
             return;
+
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(false);
+        }
 
         foreach (ObjectData obj in latestData.objects)
         {
