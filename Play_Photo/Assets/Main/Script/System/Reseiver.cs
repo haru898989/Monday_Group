@@ -8,55 +8,55 @@ using UnityEngine.InputSystem;
 
 public class Reseiver : MonoBehaviour
 {
-    // UDP’ÊM
+    // UDPé€šä¿¡
     private UdpClient client;
     private readonly int port = 1140;
 
-    // “ü—ÍŠÇ—
+    // å…¥åŠ›ç®¡ç†
     private PlayerInput playerInput_;
 
-    // ‹@ŠBŠwK‚ÌÀ•W‚Ö¶¬‚·‚éPrefab
+    // æ©Ÿæ¢°å­¦ç¿’ã®åº§æ¨™ã¸ç”Ÿæˆã™ã‚‹Prefab
     [SerializeField]
     private GameObject objectPrefab;
 
-    // ƒ[ƒfƒBƒ“ƒO‰æ–Ê
+    // ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ç”»é¢
     [SerializeField]
     private GameObject loadingPanel;
 
-    // Ray‚ğ”ò‚Î‚·ƒJƒƒ‰
+    // Rayã‚’é£›ã°ã™ã‚«ãƒ¡ãƒ©
     [SerializeField]
     private Camera targetCamera;
 
-    // Python‘¤‚Åg—p‚µ‚Ä‚¢‚é‰æ‘œƒTƒCƒY
+    // Pythonå´ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ç”»åƒã‚µã‚¤ã‚º
     [SerializeField]
     private float imageWidth = 346f;
 
     [SerializeField]
     private float imageHeight = 620f;
 
-    // Unityã‚Å‰æ‘œ‚ğ•\¦‚µ‚Ä‚¢‚é”ÍˆÍ
+    // Unityä¸Šã§ç”»åƒã‚’è¡¨ç¤ºã—ã¦ã„ã‚‹ç¯„å›²
     [SerializeField]
     private float worldWidth = 10f;
 
     [SerializeField]
     private float worldHeight = 10f;
 
-    // Prefab‚ğ¶¬‚·‚éZÀ•W
+    // Prefabã‚’ç”Ÿæˆã™ã‚‹Zåº§æ¨™
     [SerializeField]
     private float objectZ = 0f;
 
-    // óMƒf[ƒ^
+    // å—ä¿¡ãƒ‡ãƒ¼ã‚¿
     private ReceivedData latestData;
 
-    // UDPóMƒXƒŒƒbƒh‚ÆUnity‚ÌƒƒCƒ“ƒXƒŒƒbƒh‚Å‹¤—L‚·‚é‚½‚ß‚Ég—p
+    // UDPå—ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ã¨Unityã®ãƒ¡ã‚¤ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰ã§å…±æœ‰ã™ã‚‹ãŸã‚ã«ä½¿ç”¨
     private readonly object dataLock = new object();
 
-    // ‘O‰ñ¶¬‚µ‚½ƒ^ƒbƒ`”ÍˆÍ
+    // å‰å›ç”Ÿæˆã—ãŸã‚¿ãƒƒãƒç¯„å›²
     private readonly List<GameObject> generatedObjects =
         new List<GameObject>();
 
 
-    // Python‚©‚ç‘—‚ç‚ê‚Ä‚­‚é•¨‘Ìî•ñ
+    // Pythonã‹ã‚‰é€ã‚‰ã‚Œã¦ãã‚‹ç‰©ä½“æƒ…å ±
     [Serializable]
     public class ObjectData
     {
@@ -76,7 +76,7 @@ public class Reseiver : MonoBehaviour
     }
 
 
-    // Python‚©‚ç‘—‚ç‚ê‚Ä‚­‚éJSON‘S‘Ì
+    // Pythonã‹ã‚‰é€ã‚‰ã‚Œã¦ãã‚‹JSONå…¨ä½“
     [Serializable]
     public class ReceivedData
     {
@@ -86,55 +86,55 @@ public class Reseiver : MonoBehaviour
 
     private void Start()
     {
-        // Å‰‚Íƒ[ƒfƒBƒ“ƒO‰æ–Ê‚ğ•\¦
+        // æœ€åˆã¯ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ç”»é¢ã‚’è¡¨ç¤º
         if (loadingPanel != null)
         {
             loadingPanel.SetActive(true);
         }
 
-        // ƒJƒƒ‰‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚ÎMain Camera‚ğg‚¤
+        // ã‚«ãƒ¡ãƒ©ãŒè¨­å®šã•ã‚Œã¦ã„ãªã‘ã‚Œã°Main Cameraã‚’ä½¿ã†
         if (targetCamera == null)
         {
             targetCamera = Camera.main;
         }
 
-        // ƒ^ƒbƒ`“ü—Í‚ğ—LŒø‚É‚·‚é
+        // ã‚¿ãƒƒãƒå…¥åŠ›ã‚’æœ‰åŠ¹ã«ã™ã‚‹
         playerInput_ = new PlayerInput();
         playerInput_.Enable();
 
-        // UDPóM‚ğŠJn
+        // UDPå—ä¿¡ã‚’é–‹å§‹
         try
         {
             client = new UdpClient(port);
             client.BeginReceive(ReceiveData, null);
 
-            Debug.Log($"UDPóM‚ğŠJn‚µ‚Ü‚µ‚½Bƒ|[ƒg”Ô†F{port}");
+            Debug.Log($"UDPå—ä¿¡ã‚’é–‹å§‹ã—ã¾ã—ãŸã€‚ãƒãƒ¼ãƒˆç•ªå·ï¼š{port}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"UDPŠJnƒGƒ‰[F{e.Message}");
+            Debug.LogError($"UDPé–‹å§‹ã‚¨ãƒ©ãƒ¼ï¼š{e.Message}");
         }
     }
 
 
     private void Update()
     {
-        // Python‚©‚ç“Í‚¢‚½À•W‚ğˆ—‚·‚é
+        // Pythonã‹ã‚‰å±Šã„ãŸåº§æ¨™ã‚’å‡¦ç†ã™ã‚‹
         UpdateDetectedObjects();
 
-        // ƒ^ƒbƒ`EƒNƒŠƒbƒN‚ğˆ—‚·‚é
+        // ã‚¿ãƒƒãƒãƒ»ã‚¯ãƒªãƒƒã‚¯ã‚’å‡¦ç†ã™ã‚‹
         UpdateTouch();
     }
 
 
     /// <summary>
-    /// Python‚©‚ç“Í‚¢‚½À•W‚Éƒ^ƒbƒ`—pPrefab‚ğ¶¬‚·‚é
+    /// Pythonã‹ã‚‰å±Šã„ãŸåº§æ¨™ã«ã‚¿ãƒƒãƒç”¨Prefabã‚’ç”Ÿæˆã™ã‚‹
     /// </summary>
     private void UpdateDetectedObjects()
     {
         ReceivedData receivedData = null;
 
-        // óMƒf[ƒ^‚ğˆÀ‘S‚Éæ‚èo‚·
+        // å—ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚’å®‰å…¨ã«å–ã‚Šå‡ºã™
         lock (dataLock)
         {
             if (latestData != null)
@@ -144,24 +144,24 @@ public class Reseiver : MonoBehaviour
             }
         }
 
-        // V‚µ‚¢ƒf[ƒ^‚ª‚È‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
+        // æ–°ã—ã„ãƒ‡ãƒ¼ã‚¿ãŒãªã‘ã‚Œã°ä½•ã‚‚ã—ãªã„
         if (receivedData == null)
         {
             return;
         }
 
-        // óM‚Å‚«‚½‚çƒ[ƒfƒBƒ“ƒO‰æ–Ê‚ğÁ‚·
+        // å—ä¿¡ã§ããŸã‚‰ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ç”»é¢ã‚’æ¶ˆã™
         if (loadingPanel != null)
         {
             loadingPanel.SetActive(false);
         }
 
-        // ‘O‰ñ¶¬‚µ‚½ƒ^ƒbƒ`”ÍˆÍ‚ğíœ‚·‚é
+        // å‰å›ç”Ÿæˆã—ãŸã‚¿ãƒƒãƒç¯„å›²ã‚’å‰Šé™¤ã™ã‚‹
         ClearGeneratedObjects();
 
         if (receivedData.objects == null)
         {
-            Debug.LogWarning("objects‚Ìƒf[ƒ^‚ª‚ ‚è‚Ü‚¹‚ñB");
+            Debug.LogWarning("objectsã®ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
             return;
         }
 
@@ -173,40 +173,40 @@ public class Reseiver : MonoBehaviour
 
 
     /// <summary>
-    /// ŒŸo‚³‚ê‚½À•W‚Öƒ^ƒbƒ`—pƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é
+    /// æ¤œå‡ºã•ã‚ŒãŸåº§æ¨™ã¸ã‚¿ãƒƒãƒç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹
     /// </summary>
     private void CreateTouchObject(ObjectData obj)
     {
         if (objectPrefab == null)
         {
-            Debug.LogError("Object Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            Debug.LogError("Object PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             return;
         }
 
-        // 4“_‚ÌÀ•W‚©‚ç’†S‚ğ‹‚ß‚é
+        // 4ç‚¹ã®åº§æ¨™ã‹ã‚‰ä¸­å¿ƒã‚’æ±‚ã‚ã‚‹
         float centerX = (obj.x1 + obj.x4) / 2f;
         float centerY = (obj.y1 + obj.y4) / 2f;
 
-        // ŒŸo”ÍˆÍ‚Ì•‚Æ‚‚³
+        // æ¤œå‡ºç¯„å›²ã®å¹…ã¨é«˜ã•
         float width = Mathf.Abs(obj.x2 - obj.x1);
         float height = Mathf.Abs(obj.y3 - obj.y1);
 
-        // ‰æ‘œÀ•W‚©‚çUnityÀ•W‚Ö•ÏŠ·
+        // ç”»åƒåº§æ¨™ã‹ã‚‰Unityåº§æ¨™ã¸å¤‰æ›
         float unityX =
             (centerX / imageWidth - 0.5f) * worldWidth;
 
-        // Python‰æ‘œ‚Í¶ã‚ªŒ´“_‚È‚Ì‚ÅYÀ•W‚ğ”½“]
+        // Pythonç”»åƒã¯å·¦ä¸ŠãŒåŸç‚¹ãªã®ã§Yåº§æ¨™ã‚’åè»¢
         float unityY =
             (0.5f - centerY / imageHeight) * worldHeight;
 
-        // ŒŸo”ÍˆÍ‚Ì‘å‚«‚³‚ğUnity—p‚É•ÏŠ·
+        // æ¤œå‡ºç¯„å›²ã®å¤§ãã•ã‚’Unityç”¨ã«å¤‰æ›
         float unityWidth =
             width / imageWidth * worldWidth;
 
         float unityHeight =
             height / imageHeight * worldHeight;
 
-        // ŒŸoÀ•W‚ÉPrefab‚ğ¶¬
+        // æ¤œå‡ºåº§æ¨™ã«Prefabã‚’ç”Ÿæˆ
         GameObject generatedObject = Instantiate(
             objectPrefab,
             new Vector3(unityX, unityY, objectZ),
@@ -215,14 +215,14 @@ public class Reseiver : MonoBehaviour
 
         generatedObject.name = obj.name;
 
-        // ŒŸo”ÍˆÍ‚É‡‚í‚¹‚ÄƒTƒCƒY•ÏX
+        // æ¤œå‡ºç¯„å›²ã«åˆã‚ã›ã¦ã‚µã‚¤ã‚ºå¤‰æ›´
         generatedObject.transform.localScale = new Vector3(
             unityWidth,
             unityHeight,
             1f
         );
 
-        // Collider‚ª‚È‚¯‚ê‚Î©“®‚Å’Ç‰Á
+        // ColliderãŒãªã‘ã‚Œã°è‡ªå‹•ã§è¿½åŠ 
         Collider targetCollider =
             generatedObject.GetComponent<Collider>();
 
@@ -234,14 +234,14 @@ public class Reseiver : MonoBehaviour
         generatedObjects.Add(generatedObject);
 
         Debug.Log(
-            $"{obj.name}‚Ìƒ^ƒbƒ`”ÍˆÍ‚ğ¶¬‚µ‚Ü‚µ‚½B" +
-            $" À•WF({unityX}, {unityY})"
+            $"{obj.name}ã®ã‚¿ãƒƒãƒç¯„å›²ã‚’ç”Ÿæˆã—ã¾ã—ãŸã€‚" +
+            $" åº§æ¨™ï¼š({unityX}, {unityY})"
         );
     }
 
 
     /// <summary>
-    /// ƒ^ƒbƒ`‚Ü‚½‚Íƒ}ƒEƒXƒNƒŠƒbƒN‚ğŒŸo‚·‚é
+    /// ã‚¿ãƒƒãƒã¾ãŸã¯ãƒã‚¦ã‚¹ã‚¯ãƒªãƒƒã‚¯ã‚’æ¤œå‡ºã™ã‚‹
     /// </summary>
     private void UpdateTouch()
     {
@@ -250,40 +250,40 @@ public class Reseiver : MonoBehaviour
             return;
         }
 
-        // ƒ^ƒbƒ`EƒNƒŠƒbƒN‚³‚ê‚½uŠÔ
+        // ã‚¿ãƒƒãƒãƒ»ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸç¬é–“
         if (!playerInput_.Player.touch.triggered)
         {
             return;
         }
 
-        // ƒ}ƒEƒX‚âƒ^ƒbƒ`“ü—Í‚ªæ“¾‚Å‚«‚È‚¢ê‡
+        // ãƒã‚¦ã‚¹ã‚„ã‚¿ãƒƒãƒå…¥åŠ›ãŒå–å¾—ã§ããªã„å ´åˆ
         if (Pointer.current == null)
         {
-            Debug.LogWarning("Pointer‚ªæ“¾‚Å‚«‚Ü‚¹‚ñB");
+            Debug.LogWarning("PointerãŒå–å¾—ã§ãã¾ã›ã‚“ã€‚");
             return;
         }
 
         if (targetCamera == null)
         {
-            Debug.LogError("Ray‚ğ”ò‚Î‚·Camera‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            Debug.LogError("Rayã‚’é£›ã°ã™CameraãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             return;
         }
 
-        // ƒ^ƒbƒ`‚µ‚½‰æ–ÊÀ•W
+        // ã‚¿ãƒƒãƒã—ãŸç”»é¢åº§æ¨™
         Vector2 screenPosition =
             Pointer.current.position.ReadValue();
 
-        // ƒJƒƒ‰‚©‚çƒ^ƒbƒ`ˆÊ’u‚ÖRay‚ğ”ò‚Î‚·
+        // ã‚«ãƒ¡ãƒ©ã‹ã‚‰ã‚¿ãƒƒãƒä½ç½®ã¸Rayã‚’é£›ã°ã™
         Ray ray =
             targetCamera.ScreenPointToRay(screenPosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             Debug.Log(
-                $"ƒ^ƒbƒ`‚µ‚½ƒIƒuƒWƒFƒNƒgF{hit.collider.gameObject.name}"
+                $"ã‚¿ãƒƒãƒã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼š{hit.collider.gameObject.name}"
             );
 
-            // Collider‚ªqƒIƒuƒWƒFƒNƒg‚É•t‚¢‚Ä‚¢‚Ä‚à’T‚¹‚é‚æ‚¤‚É‚·‚é
+            // ColliderãŒå­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ä»˜ã„ã¦ã„ã¦ã‚‚æ¢ã›ã‚‹ã‚ˆã†ã«ã™ã‚‹
             GimmickBase touchGimmick =
                 hit.collider.GetComponentInParent<GimmickBase>();
 
@@ -294,8 +294,8 @@ public class Reseiver : MonoBehaviour
             else
             {
                 Debug.LogWarning(
-                    $"{hit.collider.gameObject.name}‚É" +
-                    "GimmickBase‚ğÀ‘•‚µ‚½ƒXƒNƒŠƒvƒg‚ª‚ ‚è‚Ü‚¹‚ñB"
+                    $"{hit.collider.gameObject.name}ã«" +
+                    "GimmickBaseã‚’å®Ÿè£…ã—ãŸã‚¹ã‚¯ãƒªãƒ—ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚"
                 );
             }
         }
@@ -303,7 +303,7 @@ public class Reseiver : MonoBehaviour
 
 
     /// <summary>
-    /// ‘O‰ñ¶¬‚µ‚½ƒ^ƒbƒ`”ÍˆÍ‚ğíœ‚·‚é
+    /// å‰å›ç”Ÿæˆã—ãŸã‚¿ãƒƒãƒç¯„å›²ã‚’å‰Šé™¤ã™ã‚‹
     /// </summary>
     private void ClearGeneratedObjects()
     {
@@ -320,7 +320,7 @@ public class Reseiver : MonoBehaviour
 
 
     /// <summary>
-    /// UDPƒf[ƒ^‚ğóM‚·‚é
+    /// UDPãƒ‡ãƒ¼ã‚¿ã‚’å—ä¿¡ã™ã‚‹
     /// </summary>
     private void ReceiveData(IAsyncResult result)
     {
@@ -348,19 +348,19 @@ public class Reseiver : MonoBehaviour
                 latestData = receivedData;
             }
 
-            Debug.Log($"óM‚µ‚½JSONF{json}");
+            Debug.Log($"å—ä¿¡ã—ãŸJSONï¼š{json}");
         }
         catch (ObjectDisposedException)
         {
-            // UnityI—¹‚ÉUDP‚ª•Â‚¶‚ç‚ê‚½ê‡‚Í‰½‚à‚µ‚È‚¢
+            // Unityçµ‚äº†æ™‚ã«UDPãŒé–‰ã˜ã‚‰ã‚ŒãŸå ´åˆã¯ä½•ã‚‚ã—ãªã„
             return;
         }
         catch (Exception e)
         {
-            Debug.LogError($"óMƒGƒ‰[F{e.Message}");
+            Debug.LogError($"å—ä¿¡ã‚¨ãƒ©ãƒ¼ï¼š{e.Message}");
         }
 
-        // Ÿ‚Ìƒf[ƒ^‚ğ‘Ò‚Â
+        // æ¬¡ã®ãƒ‡ãƒ¼ã‚¿ã‚’å¾…ã¤
         if (client != null && client.Client != null)
         {
             try
@@ -369,7 +369,7 @@ public class Reseiver : MonoBehaviour
             }
             catch (ObjectDisposedException)
             {
-                // I—¹‚È‚Ì‚Å‰½‚à‚µ‚È‚¢
+                // çµ‚äº†æ™‚ãªã®ã§ä½•ã‚‚ã—ãªã„
             }
         }
     }
@@ -377,7 +377,7 @@ public class Reseiver : MonoBehaviour
 
     private void OnDestroy()
     {
-        // “ü—Í‚ğ–³Œø‰»
+        // å…¥åŠ›ã‚’ç„¡åŠ¹åŒ–
         if (playerInput_ != null)
         {
             playerInput_.Disable();
@@ -385,13 +385,13 @@ public class Reseiver : MonoBehaviour
             playerInput_ = null;
         }
 
-        // UDP‚ğ•Â‚¶‚é
+        // UDPã‚’é–‰ã˜ã‚‹
         if (client != null)
         {
             client.Close();
             client = null;
 
-            Debug.Log("UDPƒ|[ƒg‚ğ•Â‚¶‚Ü‚µ‚½B");
+            Debug.Log("UDPãƒãƒ¼ãƒˆã‚’é–‰ã˜ã¾ã—ãŸã€‚");
         }
 
         ClearGeneratedObjects();
