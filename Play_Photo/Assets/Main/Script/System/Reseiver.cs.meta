@@ -3,7 +3,15 @@ guid: 5d8f06e542168aa4f8f53254528ddb27
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - objectPrefab: {instanceID: 0}
+  - loadingPanel: {instanceID: 0}
+  - targetCamera: {instanceID: 0}
+  - pianoAudioClip: {fileID: 8300000, guid: eeada69b3353c514398a9bdbbc88e8c8, type: 3}
+  - dogAudioClip: {fileID: 8300000, guid: feba2311a85d7af4baa342cfdab33db6, type: 3}
+  - catAudioClip: {fileID: 8300000, guid: f06577b2dae719f4e9de36c5722c2d99, type: 3}
+  - carAudioClip: {fileID: 8300000, guid: a0ac4b33f5235724a8c69ca2d9e2d88d, type: 3}
+  - waterAudioClip: {fileID: 8300000, guid: 120d1d596ff2c52419a87bd037996fc2, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
