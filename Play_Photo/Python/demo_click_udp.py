@@ -23,7 +23,7 @@ from ml_detector import DetectedObject, MagicPhotoDetector
 from magic_brain import MagicBrain
 from udp_sender import send_to_unity
 
-IMAGE_PATH = "sample.jpg"
+IMAGE_PATH = "../downloaded_images/sample.jpg"
 WINDOW_NAME = "ML Detector Demo"
 
 # 現在のReseiver.csに合わせる。将来Unity側を更新したら "magic_brain" に変更可能。

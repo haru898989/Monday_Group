@@ -1079,6 +1079,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectPrefab: {fileID: 6913395825827095942, guid: 65c49cc8bf4b5ab438df73f89764cc59, type: 3}
   loadingPanel: {fileID: 940245630}
+  targetCamera: {fileID: 0}
+  imageWidth: 346
+  imageHeight: 620
+  worldWidth: 10
+  worldHeight: 10
+  objectZ: 0
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1572,8 +1578,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u30BF\u30A4\u30C8\u30EB\u3078\u623B\u308B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1149ace9ab3943a44ab634eed4b09df9, type: 2}
+  m_sharedMaterial: {fileID: 7746245413827420652, guid: 1149ace9ab3943a44ab634eed4b09df9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

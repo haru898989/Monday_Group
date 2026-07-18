@@ -16,21 +16,21 @@ public class PythonLauncher : MonoBehaviour
     {
         try
         {
-            // Play_Photo/Python ƒtƒHƒ‹ƒ_‚ÌêŠ‚ğì‚é
+            // Play_Photo/Python ï¿½tï¿½Hï¿½ï¿½ï¿½_ï¿½ÌêŠï¿½ï¿½ï¿½ï¿½ï¿½
             string pythonFolder = Path.GetFullPath(
                 Path.Combine(Application.dataPath, "..", "Python")
             );
 
-            // ‹N“®‚·‚éPythonƒtƒ@ƒCƒ‹
+            // ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Pythonï¿½tï¿½@ï¿½Cï¿½ï¿½
             string pythonFilePath = Path.Combine(
                 pythonFolder,
-                "demo_click.py"
+                "demo_click_udp.py"
             );
 
             if (!File.Exists(pythonFilePath))
             {
                 UnityEngine.Debug.LogError(
-                    $"demo_click.py‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: {pythonFilePath}"
+                    $"demo_click.pyï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½: {pythonFilePath}"
                 );
                 return;
             }
@@ -47,13 +47,13 @@ public class PythonLauncher : MonoBehaviour
             pythonProcess = Process.Start(startInfo);
 
             UnityEngine.Debug.Log(
-                $"Python‚ğ‹N“®‚µ‚Ü‚µ‚½: {pythonFilePath}"
+                $"Pythonï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½: {pythonFilePath}"
             );
         }
         catch (Exception error)
         {
             UnityEngine.Debug.LogError(
-                $"Python‹N“®ƒGƒ‰[: {error.Message}"
+                $"Pythonï¿½Nï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½[: {error.Message}"
             );
         }
     }
@@ -71,7 +71,7 @@ public class PythonLauncher : MonoBehaviour
         catch (Exception error)
         {
             UnityEngine.Debug.LogWarning(
-                $"PythonI—¹‚ÌŒx: {error.Message}"
+                $"Pythonï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½ÌŒxï¿½ï¿½: {error.Message}"
             );
         }
         finally
