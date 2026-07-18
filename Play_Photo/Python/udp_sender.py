@@ -7,19 +7,29 @@ from __future__ import annotations
 
 import json
 import socket
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 1140
 
 
-def _legacy_payload(objects: Iterable[Any]) -> dict[str, Any]:
+def _legacy_payload(
+    objects: Iterable[Any],
+    cutout_files: Sequence[str] | None = None,
+    image_width: int = 0,
+    image_height: int = 0,
+) -> dict[str, Any]:
+    object_list = list(objects)
+    cutout_list = list(cutout_files or [])
     rows: list[dict[str, Any]] = []
-    for obj in objects:
+    for index, obj in enumerate(object_list):
         x1, y1, x2, y2 = obj.box
         rows.append(
             {
                 "name": str(obj.name),
+                "cutoutFileName": (
+                    cutout_list[index] if index < len(cutout_list) else ""
+                ),
                 "x1": float(x1),
                 "y1": float(y1),
                 "x2": float(x2),
@@ -30,13 +40,21 @@ def _legacy_payload(objects: Iterable[Any]) -> dict[str, Any]:
                 "y4": float(y2),
             }
         )
-    return {"objects": rows}
+    return {
+        "imageWidth": int(image_width),
+        "imageHeight": int(image_height),
+        "objects": rows,
+    }
 
 
 def build_payload(
     objects: Iterable[Any],
     brain_result: dict[str, Any] | None = None,
     mode: str = "legacy",
+    *,
+    cutout_files: Sequence[str] | None = None,
+    image_width: int = 0,
+    image_height: int = 0,
 ) -> dict[str, Any]:
     """Unityへ送る辞書を作る。
 
@@ -46,7 +64,12 @@ def build_payload(
         将来、Unity側をMagicBrain JSON対応にした後で使用する。
     """
     if mode == "legacy":
-        return _legacy_payload(objects)
+        return _legacy_payload(
+            objects,
+            cutout_files=cutout_files,
+            image_width=image_width,
+            image_height=image_height,
+        )
     if mode == "magic_brain":
         if brain_result is None:
             raise ValueError("magic_brainモードにはbrain_resultが必要です。")
@@ -61,9 +84,19 @@ def send_to_unity(
     host: str = DEFAULT_HOST,
     port: int = DEFAULT_PORT,
     mode: str = "legacy",
+    cutout_files: Sequence[str] | None = None,
+    image_width: int = 0,
+    image_height: int = 0,
 ) -> int:
     """JSONをUDPでUnityへ送信し、送信バイト数を返す。"""
-    payload = build_payload(objects, brain_result, mode)
+    payload = build_payload(
+        objects,
+        brain_result,
+        mode,
+        cutout_files=cutout_files,
+        image_width=image_width,
+        image_height=image_height,
+    )
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False).encode("utf-8")
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:

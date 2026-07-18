@@ -21,15 +21,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cv2
 from ml_detector import DetectedObject, MagicPhotoDetector
 from magic_brain import MagicBrain
+from split_objects import create_object_cutouts
 from udp_sender import send_to_unity
 
-IMAGE_PATH = "sample.jpg"
+IMAGE_PATH = "../downloaded_images/sample.jpg"
 WINDOW_NAME = "ML Detector Demo"
+SHOW_DEBUG_WINDOW = False
 
 # 現在のReseiver.csに合わせる。将来Unity側を更新したら "magic_brain" に変更可能。
 UDP_SEND_MODE = "legacy"
 UNITY_HOST = "127.0.0.1"
 UNITY_PORT = 1140
+CUTOUT_DIR = Path(__file__).resolve().parent / "objects"
 
 
 def get_screen_size() -> tuple[int, int]:
@@ -114,6 +117,8 @@ def main() -> None:
     else:
         objects = detected_objects
 
+    cutout_files = create_object_cutouts(img, objects, CUTOUT_DIR)
+
     brain_result = MagicBrain().analyze(
         detected_objects,
         image_width=w,
@@ -131,6 +136,9 @@ def main() -> None:
             host=UNITY_HOST,
             port=UNITY_PORT,
             mode=UDP_SEND_MODE,
+            cutout_files=cutout_files,
+            image_width=w,
+            image_height=h,
         )
         print(
             f"UnityへUDP送信しました: {UNITY_HOST}:{UNITY_PORT} "
@@ -197,6 +205,10 @@ def main() -> None:
     else:
         print("なし")
     print(f"JSON保存先: {Path(output_path).resolve()}")
+
+    if not SHOW_DEBUG_WINDOW:
+        print("Unity向け解析が完了したため、Python処理を終了します。")
+        return
 
     display = draw_objects(img, objects)
 

@@ -14,6 +14,8 @@ from __future__ import annotations
 import math
 import os
 import re
+import json
+import socket
 from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -331,6 +333,11 @@ class MagicPhotoDetector:
         )
         self.model = YOLO(model_path)
 
+        # Unityへ送るUDP通信の設定
+        self.udp_ip = "127.0.0.1"
+        self.udp_port = 1140
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
         self.custom_classes = list(CUSTOM_CLASSES)
 
         self.model.set_classes(self.custom_classes)
@@ -588,9 +595,47 @@ class MagicPhotoDetector:
         self.last_debug = debug
         self.last_objects = processed
         self.last_detection_objects = processed
+
+        if processed:
+            self.send_objects_udp(processed)
+
         return processed
 
+    def send_objects_udp(self, objects: List[DetectedObject]) -> None:
+        """検出した物体の座標をUnityへUDP送信する"""
+
+        data = {
+            "objects": []
+        }
+
+        for obj in objects:
+            x1, y1, x2, y2 = obj.box
+
+            object_data = {
+                "name": obj.name,
+                "x1": x1,
+                "y1": y1,
+                "x2": x2,
+                "y2": y1,
+                "x3": x1,
+                "y3": y2,
+                "x4": x2,
+                "y4": y2
+            }
+
+            data["objects"].append(object_data)
+
+        json_str = json.dumps(data)
+
+        self.udp_socket.sendto(
+            json_str.encode("utf-8"),
+            (self.udp_ip, self.udp_port)
+        )
+
+        print(f"UDP送信: {json_str}")
+        
     def detect(self, image_path: str) -> List[DetectedObject]:
+    
         """
         画像を解析し、検出した物体を返す。
         従来用。画面サイズに合わせたい場合は demo_click.py のように
@@ -693,7 +738,7 @@ class MagicPhotoDetector:
 
 if __name__ == "__main__":
     detector = MagicPhotoDetector()
-    image_path = "sample.jpg"
+    image_path = "../downloaded_images/sample.jpg"
 
     objects = detector.detect(image_path)
 
