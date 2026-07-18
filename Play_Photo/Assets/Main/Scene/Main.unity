@@ -1087,6 +1087,7 @@ MonoBehaviour:
   objectZ: 0
   backgroundPhotoFileName: sample.jpg
   backgroundZOffset: 0.001
+  pianoAudioClip: {fileID: 8300000, guid: eeada69b3353c514398a9bdbbc88e8c8, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0

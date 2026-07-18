@@ -1,73 +1,77 @@
 using UnityEngine;
 
-// ‚±‚ÌƒXƒNƒŠƒvƒg‚ğ’Ç‰Á‚µ‚½‚Æ‚«A
-// AudioSource‚ÆParticleSystem‚à©“®“I‚É’Ç‰Á‚·‚é
+// ã“ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’è¿½åŠ ã—ãŸã¨ãã€
+// AudioSourceã¨ParticleSystemã‚‚è‡ªå‹•çš„ã«è¿½åŠ ã™ã‚‹
 [RequireComponent(typeof(AudioSource))]
 [RequireComponent(typeof(ParticleSystem))]
 public class InstrumentGimmick : MonoBehaviour, GimmickBase
 {
-    // ŠyŠí‚Ì‰¹‚ğÄ¶‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg
+    // æ¥½å™¨ã®éŸ³ã‚’å†ç”Ÿã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
     private AudioSource audioSource_;
 
-    // ‰¹•„‚Ì‚æ‚¤‚È—±‚ğo‚·ƒp[ƒeƒBƒNƒ‹
+    // éŸ³ç¬¦ã®ã‚ˆã†ãªç²’ã‚’å‡ºã™ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«
     private ParticleSystem noteEffect_;
 
-    // ‰¹•„‰æ‘œ‚ğİ’è‚µ‚½ƒ}ƒeƒŠƒAƒ‹
-    // İ’è‚µ‚È‚¯‚ê‚ÎA•’Ê‚ÌŠÛ‚¢—±‚ª•\¦‚³‚ê‚é
+    // éŸ³ç¬¦ç”»åƒã‚’è¨­å®šã—ãŸãƒãƒ†ãƒªã‚¢ãƒ«
+    // è¨­å®šã—ãªã‘ã‚Œã°ã€æ™®é€šã®ä¸¸ã„ç²’ãŒè¡¨ç¤ºã•ã‚Œã‚‹
     [SerializeField]
     private Material noteMaterial;
 
-    // ƒIƒuƒWƒFƒNƒg‚ª“Ç‚İ‚Ü‚ê‚½‚Æ‚«‚ÉÀs
+    // åˆ‡ã‚ŠæŠœãç”»åƒã‚ˆã‚Šæ‰‹å‰ã¸è¡¨ç¤ºã™ã‚‹
+    [SerializeField]
+    private int particleSortingOrder = 200;
+
+    // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒèª­ã¿è¾¼ã¾ã‚ŒãŸã¨ãã«å®Ÿè¡Œ
     private void Awake()
     {
-        // “¯‚¶ƒIƒuƒWƒFƒNƒg‚ÌAudioSource‚ğæ“¾
+        // åŒã˜ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®AudioSourceã‚’å–å¾—
         audioSource_ = GetComponent<AudioSource>();
 
-        // “¯‚¶ƒIƒuƒWƒFƒNƒg‚ÌParticleSystem‚ğæ“¾
+        // åŒã˜ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ParticleSystemã‚’å–å¾—
         noteEffect_ = GetComponent<ParticleSystem>();
 
-        // ƒQ[ƒ€ŠJn‚ÉŸè‚É‰¹‚ğ–Â‚ç‚³‚È‚¢
+        // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã«å‹æ‰‹ã«éŸ³ã‚’é³´ã‚‰ã•ãªã„
         audioSource_.playOnAwake = false;
 
-        // ƒp[ƒeƒBƒNƒ‹‚Ìİ’è
+        // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®è¨­å®š
         SetupParticle();
 
-        // ƒQ[ƒ€ŠJn‚ÉŸè‚É—±‚ğo‚³‚È‚¢
+        // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã«å‹æ‰‹ã«ç²’ã‚’å‡ºã•ãªã„
         noteEffect_.Stop(
             true,
             ParticleSystemStopBehavior.StopEmittingAndClear
         );
     }
 
-    // ƒp[ƒeƒBƒNƒ‹‚ÌŒ©‚½–Ú‚â“®‚«‚ğİ’è‚·‚é
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®è¦‹ãŸç›®ã‚„å‹•ãã‚’è¨­å®šã™ã‚‹
     private void SetupParticle()
     {
-        // Particle System‚ÌŠî–{İ’è
+        // Particle Systemã®åŸºæœ¬è¨­å®š
         ParticleSystem.MainModule main = noteEffect_.main;
 
-        // ŒJ‚è•Ô‚µÄ¶‚µ‚È‚¢
+        // ç¹°ã‚Šè¿”ã—å†ç”Ÿã—ãªã„
         main.loop = false;
 
-        // —±‚ª•\¦‚³‚ê‚éŠÔ
+        // ç²’ãŒè¡¨ç¤ºã•ã‚Œã‚‹æ™‚é–“
         main.startLifetime = 1.5f;
 
-        // —±‚ª”ò‚Ô‘¬‚³
+        // ç²’ãŒé£›ã¶é€Ÿã•
         main.startSpeed = 2.0f;
 
-        // —±‚Ì‘å‚«‚³
+        // ç²’ã®å¤§ãã•
         main.startSize = 0.3f;
 
-        // ƒJƒ‰ƒtƒ‹‚ÈF‚É‚·‚é
+        // ã‚«ãƒ©ãƒ•ãƒ«ãªè‰²ã«ã™ã‚‹
         main.startColor = new ParticleSystem.MinMaxGradient(
             Color.cyan,
             Color.magenta
         );
 
-        // ’Êí‚Í—±‚ğo‚µ‘±‚¯‚È‚¢
+        // é€šå¸¸æ™‚ã¯ç²’ã‚’å‡ºã—ç¶šã‘ãªã„
         ParticleSystem.EmissionModule emission = noteEffect_.emission;
         emission.rateOverTime = 0f;
 
-        // ƒ^ƒbƒ`‚³‚ê‚½uŠÔ‚É12ŒÂ‚Ì—±‚ğo‚·
+        // ã‚¿ãƒƒãƒã•ã‚ŒãŸç¬é–“ã«12å€‹ã®ç²’ã‚’å‡ºã™
         ParticleSystem.Burst[] bursts =
         {
             new ParticleSystem.Burst(0f, 12)
@@ -75,47 +79,68 @@ public class InstrumentGimmick : MonoBehaviour, GimmickBase
 
         emission.SetBursts(bursts);
 
-        // ã•ûŒü‚ÖL‚ª‚é‚æ‚¤‚É‚·‚é
+        // ä¸Šæ–¹å‘ã¸åºƒãŒã‚‹ã‚ˆã†ã«ã™ã‚‹
         ParticleSystem.ShapeModule shape = noteEffect_.shape;
         shape.shapeType = ParticleSystemShapeType.Cone;
         shape.angle = 25f;
         shape.radius = 0.2f;
 
-        // ‰¹•„—p‚Ìƒ}ƒeƒŠƒAƒ‹‚ªİ’è‚³‚ê‚Ä‚¢‚ê‚Îg—p‚·‚é
-        if (noteMaterial != null)
-        {
-            ParticleSystemRenderer particleRenderer =
-                GetComponent<ParticleSystemRenderer>();
+        ParticleSystemRenderer particleRenderer =
+            GetComponent<ParticleSystemRenderer>();
 
-            particleRenderer.material = noteMaterial;
+        if (particleRenderer != null)
+        {
+            // äººç‰©ã‚’å«ã‚€ã™ã¹ã¦ã®åˆ‡ã‚ŠæŠœãç”»åƒã‚ˆã‚Šå¾Œã«æç”»ã™ã‚‹
+            particleRenderer.sortingOrder =
+                particleSortingOrder;
+
+            // éŸ³ç¬¦ç”¨ã®ãƒãƒ†ãƒªã‚¢ãƒ«ãŒè¨­å®šã•ã‚Œã¦ã„ã‚Œã°ä½¿ç”¨ã™ã‚‹
+            if (noteMaterial != null)
+            {
+                particleRenderer.material = noteMaterial;
+            }
         }
     }
 
-    // ŠyŠí‚ªƒ^ƒbƒ`‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+    // æ¥½å™¨ãŒã‚¿ãƒƒãƒã•ã‚ŒãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
     public void ActivateMagic()
     {
-        Debug.Log("ŠyŠí‚ÌƒMƒ~ƒbƒN”­“®I");
+        Debug.Log("æ¥½å™¨ã®ã‚®ãƒŸãƒƒã‚¯ç™ºå‹•ï¼");
 
-        // AudioClip‚ªİ’è‚³‚ê‚Ä‚¢‚éê‡
+        // AudioClipãŒè¨­å®šã•ã‚Œã¦ã„ã‚‹å ´åˆ
         if (audioSource_.clip != null)
         {
-            // ŠyŠí‚Ì‰¹‚ğÄ¶
+            // æ¥½å™¨ã®éŸ³ã‚’å†ç”Ÿ
             audioSource_.Play();
         }
         else
         {
             Debug.LogWarning(
-                "Audio Source‚ÌAudio Clip‚ÉŠyŠí‚Ì‰¹‚ğİ’è‚µ‚Ä‚­‚¾‚³‚¢B"
+                "Audio Sourceã®Audio Clipã«æ¥½å™¨ã®éŸ³ã‚’è¨­å®šã—ã¦ãã ã•ã„ã€‚"
             );
         }
 
-        // ˜A‘±ƒ^ƒbƒ`‚Å‚àÅ‰‚©‚çƒGƒtƒFƒNƒg‚ğo‚µ’¼‚·
+        // é€£ç¶šã‚¿ãƒƒãƒã§ã‚‚æœ€åˆã‹ã‚‰ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’å‡ºã—ç›´ã™
         noteEffect_.Stop(
             true,
             ParticleSystemStopBehavior.StopEmittingAndClear
         );
 
-        // ‰¹•„ƒGƒtƒFƒNƒg‚ğÄ¶
+        // éŸ³ç¬¦ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’å†ç”Ÿ
         noteEffect_.Play();
+    }
+
+
+    private AudioClip audioClips;
+
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource_ == null)
+        {
+            audioSource_ =
+                GetComponent<AudioSource>();
+        }
+
+        audioSource_.clip = clip;
     }
 }

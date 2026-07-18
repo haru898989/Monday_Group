@@ -77,6 +77,8 @@ public class Reseiver : MonoBehaviour
     private readonly List<UnityEngine.Object> generatedResources =
         new List<UnityEngine.Object>();
 
+    [SerializeField]
+    private AudioClip pianoAudioClip;
 
     // Pythonから送られてくる物体情報
     [Serializable]
@@ -345,6 +347,11 @@ public class Reseiver : MonoBehaviour
 
                 humanGimmick.SetTargetRenderer(cutoutRenderer);
                 break;
+            //case "piano":
+            //    InstrumentGimmick InstGimmick =
+            //        GetOrAddComponent<InstrumentGimmick>(target);
+            //    InstGimmick.SetAudioClip(pianoAudioClip);
+            //    break;
         }
     }
 
