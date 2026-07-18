@@ -1,12 +1,9 @@
 using UnityEngine;
 
-public class DogGimmick : MonoBehaviour, GimmickBase
+public class WaterGimmick : MonoBehaviour, GimmickBase
 {
     private AudioSource audioSource;
 
-    /// <summary>
-    /// 犬の鳴き声を設定する
-    /// </summary>
     public void SetAudioClip(AudioClip clip)
     {
         audioSource = GetComponent<AudioSource>();
@@ -25,35 +22,22 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         if (clip == null)
         {
             Debug.LogError(
-                "Reseiverから渡された犬のAudioClipがnullです。"
+                "Reseiverから渡された水のAudioClipがnullです。"
             );
             return;
         }
 
         audioSource.clip = clip;
 
-        Debug.Log(
-            $"犬の音声を設定しました：{clip.name}"
-        );
+        Debug.Log($"水の音声を設定しました：{clip.name}");
     }
 
-    /// <summary>
-    /// 犬をタッチしたときに呼ばれる
-    /// </summary>
     public void ActivateMagic()
     {
-        if (audioSource == null)
+        if (audioSource == null || audioSource.clip == null)
         {
             Debug.LogWarning(
-                "犬にAudioSourceがありません。"
-            );
-            return;
-        }
-
-        if (audioSource.clip == null)
-        {
-            Debug.LogWarning(
-                "犬の鳴き声が設定されていません。"
+                "水の音声が設定されていません。"
             );
             return;
         }
@@ -61,8 +45,6 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         audioSource.Stop();
         audioSource.Play();
 
-        Debug.Log(
-            $"犬が鳴きました：{audioSource.clip.name}"
-        );
+        Debug.Log($"水の音を再生しました：{audioSource.clip.name}");
     }
 }
