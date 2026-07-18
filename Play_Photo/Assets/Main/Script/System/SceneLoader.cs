@@ -15,21 +15,21 @@ public class SceneLoader : MonoBehaviour
 
         Instance = this;
 
-        // ƒV[ƒ“‚ğˆÚ“®‚µ‚Ä‚àA‚±‚ÌƒIƒuƒWƒFƒNƒg‚ğíœ‚µ‚È‚¢
+        // ã‚·ãƒ¼ãƒ³ã‚’ç§»å‹•ã—ã¦ã‚‚ã€ã“ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‰Šé™¤ã—ãªã„
         DontDestroyOnLoad(gameObject);
     }
 
 
 
     /// <summary>
-    /// ƒ{ƒ^ƒ“‚©‚çƒV[ƒ“–¼‚ğó‚¯æ‚Á‚Ä‘JˆÚ‚·‚é
+    /// ãƒœã‚¿ãƒ³ã‹ã‚‰ã‚·ãƒ¼ãƒ³åã‚’å—ã‘å–ã£ã¦é·ç§»ã™ã‚‹
     /// </summary>
     /// <param name="sceneName"></param>
     public void LoadScene(string sceneName)
     {
         if (string.IsNullOrEmpty(sceneName))
         {
-            Debug.LogWarning("ƒV[ƒ“–¼‚ª‘¶İ‚µ‚Ü‚¹‚ñ");
+            Debug.LogWarning("ã‚·ãƒ¼ãƒ³åãŒå­˜åœ¨ã—ã¾ã›ã‚“");
             return;
         }
 

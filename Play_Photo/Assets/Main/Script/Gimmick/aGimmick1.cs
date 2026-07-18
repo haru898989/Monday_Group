@@ -6,6 +6,6 @@ public class aGimmick1 : MonoBehaviour, GimmickBase
 {
     public void ActivateMagic()
     {
-        Debug.Log("ÉMÉ~");
+        Debug.Log("„ÇÆ„Éü");
     }
 }

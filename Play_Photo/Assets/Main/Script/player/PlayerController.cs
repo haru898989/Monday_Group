@@ -5,44 +5,44 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    // “ü—Íî•ñ‚ğŠÇ—‚·‚éPlayerInputƒNƒ‰ƒX
+    // å…¥åŠ›æƒ…å ±ã‚’ç®¡ç†ã™ã‚‹PlayerInputã‚¯ãƒ©ã‚¹
     private PlayerInput playerInput_;
 
-    // ƒQ[ƒ€ŠJn‚É1‰ñ‚¾‚¯Às‚³‚ê‚é
+    // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã«1å›ã ã‘å®Ÿè¡Œã•ã‚Œã‚‹
     void Start()
     {
-        // PlayerInput‚ğ¶¬‚·‚é
+        // PlayerInputã‚’ç”Ÿæˆã™ã‚‹
         playerInput_ = new PlayerInput();
 
-        // “ü—Í‚ğ—LŒø‰»‚·‚é
+        // å…¥åŠ›ã‚’æœ‰åŠ¹åŒ–ã™ã‚‹
         playerInput_.Enable();
     }
 
-    // –ˆƒtƒŒ[ƒ€Às‚³‚ê‚é
+    // æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å®Ÿè¡Œã•ã‚Œã‚‹
     void Update()
     {
-        // ƒ^ƒbƒ`iƒNƒŠƒbƒNj‚ªs‚í‚ê‚½uŠÔ‚ğ”»’è‚·‚é
+        // ã‚¿ãƒƒãƒï¼ˆã‚¯ãƒªãƒƒã‚¯ï¼‰ãŒè¡Œã‚ã‚ŒãŸç¬é–“ã‚’åˆ¤å®šã™ã‚‹
         if (playerInput_.Player.touch.triggered)
         {
-            // ƒ^ƒbƒ`‚µ‚½‰æ–Êã‚ÌÀ•W‚ğæ“¾‚·‚é
+            // ã‚¿ãƒƒãƒã—ãŸç”»é¢ä¸Šã®åº§æ¨™ã‚’å–å¾—ã™ã‚‹
             Vector2 screenPosition = Pointer.current.position.ReadValue();
 
-            // ‰æ–ÊÀ•W‚©‚çƒJƒƒ‰‚ğ’Ê‚µ‚ÄƒŒƒC‚ğ”ò‚Î‚·
+            // ç”»é¢åº§æ¨™ã‹ã‚‰ã‚«ãƒ¡ãƒ©ã‚’é€šã—ã¦ãƒ¬ã‚¤ã‚’é£›ã°ã™
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
 
-            // ƒŒƒC‚ª“–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚Ìî•ñ‚ğŠi”[‚·‚é•Ï”
+            // ãƒ¬ã‚¤ãŒå½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æƒ…å ±ã‚’æ ¼ç´ã™ã‚‹å¤‰æ•°
             RaycastHit hit;
 
-            // ƒŒƒC‚ªƒIƒuƒWƒFƒNƒg‚É“–‚½‚Á‚½‚©”»’è‚·‚é
+            // ãƒ¬ã‚¤ãŒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å½“ãŸã£ãŸã‹åˆ¤å®šã™ã‚‹
             if (Physics.Raycast(ray, out hit))
             {
-                // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÉGimmickBase‚ª•t‚¢‚Ä‚¢‚é‚©æ“¾‚·‚é
+                // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«GimmickBaseãŒä»˜ã„ã¦ã„ã‚‹ã‹å–å¾—ã™ã‚‹
                 GimmickBase touchGimmick = hit.collider.GetComponent<GimmickBase>();
 
-                // GimmickBase‚ªæ“¾‚Å‚«‚½ê‡
+                // GimmickBaseãŒå–å¾—ã§ããŸå ´åˆ
                 if (touchGimmick != null)
                 {
-                    // ƒMƒ~ƒbƒN‚ğ”­“®‚·‚é
+                    // ã‚®ãƒŸãƒƒã‚¯ã‚’ç™ºå‹•ã™ã‚‹
                     touchGimmick.ActivateMagic();
                 }
             }

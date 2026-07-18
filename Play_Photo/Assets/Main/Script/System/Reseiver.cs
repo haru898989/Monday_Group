@@ -301,18 +301,13 @@ public class Reseiver : MonoBehaviour
         Renderer cutoutRenderer =
             CreateCutoutChild(generatedObject, obj);
 
-        if (cutoutRenderer != null && IsPerson(obj.name))
+        if (cutoutRenderer != null)
         {
-            HumanGimmick1 humanGimmick =
-                generatedObject.GetComponent<HumanGimmick1>();
-
-            if (humanGimmick == null)
-            {
-                humanGimmick =
-                    generatedObject.AddComponent<HumanGimmick1>();
-            }
-
-            humanGimmick.SetTargetRenderer(cutoutRenderer);
+            AttachGimmick(
+                generatedObject,
+                cutoutRenderer,
+                obj.name
+            );
         }
 
         generatedObjects.Add(generatedObject);
@@ -321,6 +316,53 @@ public class Reseiver : MonoBehaviour
             $"{obj.name}のタッチ範囲を生成しました。" +
             $" 座標：({unityX}, {unityY})"
         );
+    }
+
+
+    /// <summary>
+    /// 認識した物体名に対応するギミックを動的な当たり判定へ追加する
+    /// </summary>
+    private void AttachGimmick(
+        GameObject target,
+        Renderer cutoutRenderer,
+        string objectName
+    )
+    {
+        if (target == null || string.IsNullOrWhiteSpace(objectName))
+        {
+            return;
+        }
+
+        string normalizedName =
+            objectName.Trim().ToLowerInvariant();
+
+        switch (normalizedName)
+        {
+            case "person":
+            case "human":
+                HumanGimmick1 humanGimmick =
+                    GetOrAddComponent<HumanGimmick1>(target);
+
+                humanGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+        }
+    }
+
+
+    /// <summary>
+    /// Componentが未登録の場合だけ追加して返す
+    /// </summary>
+    private T GetOrAddComponent<T>(GameObject target)
+        where T : Component
+    {
+        T component = target.GetComponent<T>();
+
+        if (component == null)
+        {
+            component = target.AddComponent<T>();
+        }
+
+        return component;
     }
 
 
