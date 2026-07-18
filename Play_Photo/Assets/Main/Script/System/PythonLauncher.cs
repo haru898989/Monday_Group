@@ -1,68 +1,432 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public class PythonLauncher : MonoBehaviour
 {
+    [SerializeField]
+    private string pythonExecutablePath = "";
+
+    [SerializeField]
+    private string pythonScriptName = "demo_click_udp.py";
+
+    [SerializeField]
+    private float startupCheckSeconds = 1.5f;
+
     private Process pythonProcess;
 
-    void Start()
+
+    private class PythonCommand
     {
-        StartPython();
+        public string executable;
+        public string argumentPrefix;
+
+        public PythonCommand(
+            string executablePath,
+            string prefix = ""
+        )
+        {
+            executable = executablePath;
+            argumentPrefix = prefix;
+        }
     }
 
-    private void StartPython()
+
+    private void Start()
     {
-        try
+        StartCoroutine(StartPython());
+    }
+
+
+    private IEnumerator StartPython()
+    {
+        string pythonFolder = Path.GetFullPath(
+            Path.Combine(
+                Application.dataPath,
+                "..",
+                "Python"
+            )
+        );
+
+        string pythonFilePath = Path.Combine(
+            pythonFolder,
+            pythonScriptName
+        );
+
+        if (!File.Exists(pythonFilePath))
         {
-            // Play_Photo/Python ÔøΩtÔøΩHÔøΩÔøΩÔøΩ_ÔøΩÃèÍèäÔøΩÔøΩÔøΩÔøΩÔøΩ
-            string pythonFolder = Path.GetFullPath(
-                Path.Combine(Application.dataPath, "..", "Python")
+            UnityEngine.Debug.LogError(
+                "PythonÉXÉNÉäÉvÉgÇ™å©Ç¬Ç©ÇËÇ‹ÇπÇÒ: "
+                + pythonFilePath
             );
+            yield break;
+        }
 
-            // ÔøΩNÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩPythonÔøΩtÔøΩ@ÔøΩCÔøΩÔøΩ
-            string pythonFilePath = Path.Combine(
-                pythonFolder,
-                "demo_click_udp.py"
-            );
+        List<string> errors = new List<string>();
 
-            if (!File.Exists(pythonFilePath))
+        foreach (
+            PythonCommand command
+            in BuildPythonCandidates(pythonFolder)
+        )
+        {
+            Process candidateProcess = null;
+            StringBuilder processError = new StringBuilder();
+
+            try
             {
-                UnityEngine.Debug.LogError(
-                    $"demo_click.pyÔøΩÔøΩÔøΩÔøΩÔøΩ¬ÇÔøΩÔøΩÔøΩ‹ÇÔøΩÔøΩÔøΩ: {pythonFilePath}"
+                string arguments =
+                    string.IsNullOrWhiteSpace(
+                        command.argumentPrefix
+                    )
+                        ? $"\"{pythonFilePath}\""
+                        : command.argumentPrefix
+                            + " \""
+                            + pythonFilePath
+                            + "\"";
+
+                ProcessStartInfo startInfo =
+                    new ProcessStartInfo
+                    {
+                        FileName = command.executable,
+                        Arguments = arguments,
+                        WorkingDirectory = pythonFolder,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+
+                candidateProcess = new Process
+                {
+                    StartInfo = startInfo,
+                    EnableRaisingEvents = true
+                };
+
+                candidateProcess.ErrorDataReceived +=
+                    (sender, eventArgs) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(
+                                eventArgs.Data
+                            ))
+                        {
+                            lock (processError)
+                            {
+                                processError.AppendLine(
+                                    eventArgs.Data
+                                );
+                            }
+                        }
+                    };
+
+                if (!candidateProcess.Start())
+                {
+                    throw new InvalidOperationException(
+                        "ÉvÉçÉZÉXÇäJénÇ≈Ç´Ç‹ÇπÇÒÇ≈ÇµÇΩÅB"
+                    );
+                }
+
+                candidateProcess.BeginOutputReadLine();
+                candidateProcess.BeginErrorReadLine();
+                pythonProcess = candidateProcess;
+            }
+            catch (Exception error)
+            {
+                errors.Add(
+                    command.executable
+                    + ": "
+                    + error.Message
                 );
-                return;
+
+                candidateProcess?.Dispose();
+                candidateProcess = null;
+                pythonProcess = null;
+                continue;
             }
 
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = "python",
-                Arguments = $"\"{pythonFilePath}\"",
-                WorkingDirectory = pythonFolder,
-                UseShellExecute = false,
-                CreateNoWindow = false
-            };
+            float elapsedTime = 0f;
+            float checkTime =
+                Mathf.Max(startupCheckSeconds, 0.2f);
 
-            pythonProcess = Process.Start(startInfo);
+            while (
+                elapsedTime < checkTime &&
+                !candidateProcess.HasExited
+            )
+            {
+                elapsedTime += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            if (candidateProcess.HasExited)
+            {
+                candidateProcess.WaitForExit();
+
+                if (candidateProcess.ExitCode != 0)
+                {
+                    string errorText;
+                    lock (processError)
+                    {
+                        errorText =
+                            processError.ToString().Trim();
+                    }
+
+                    errors.Add(
+                        command.executable
+                        + ": èIóπÉRÅ[Éh "
+                        + candidateProcess.ExitCode
+                        + (string.IsNullOrWhiteSpace(errorText)
+                            ? ""
+                            : " / " + errorText)
+                    );
+
+                    candidateProcess.Dispose();
+                    pythonProcess = null;
+                    continue;
+                }
+
+                UnityEngine.Debug.Log(
+                    "PythonâêÕÇ™äÆóπÇµÇ‹ÇµÇΩ: "
+                    + command.executable
+                );
+
+                candidateProcess.Dispose();
+                pythonProcess = null;
+                yield break;
+            }
 
             UnityEngine.Debug.Log(
-                $"PythonÔøΩÔøΩÔøΩNÔøΩÔøΩÔøΩÔøΩÔøΩ‹ÇÔøΩÔøΩÔøΩ: {pythonFilePath}"
+                "PythonÇãNìÆÇµÇ‹ÇµÇΩ: "
+                + command.executable
+                + " "
+                + pythonFilePath
             );
+            yield break;
+        }
+
+        UnityEngine.Debug.LogError(
+            "PythonÇãNìÆÇ≈Ç´Ç‹ÇπÇÒÇ≈ÇµÇΩÅB"
+            + " InspectorÇÃPython Executable PathÅA"
+            + "MAGIC_PHOTO_PYTHONä¬ã´ïœêîÅA"
+            + "Ç‹ÇΩÇÕÉvÉçÉWÉFÉNÉgÇÃ.venvÇämîFÇµÇƒÇ≠ÇæÇ≥Ç¢ÅB\n"
+            + string.Join("\n", errors)
+        );
+    }
+
+
+    private List<PythonCommand> BuildPythonCandidates(
+        string pythonFolder
+    )
+    {
+        List<PythonCommand> candidates =
+            new List<PythonCommand>();
+
+        HashSet<string> registered =
+            new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase
+            );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            pythonExecutablePath
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            Environment.GetEnvironmentVariable(
+                "MAGIC_PHOTO_PYTHON"
+            )
+        );
+
+        string virtualEnvironment =
+            Environment.GetEnvironmentVariable(
+                "VIRTUAL_ENV"
+            );
+
+        if (!string.IsNullOrWhiteSpace(virtualEnvironment))
+        {
+            AddPythonCandidate(
+                candidates,
+                registered,
+                Path.Combine(
+                    virtualEnvironment,
+                    "Scripts",
+                    "python.exe"
+                )
+            );
+        }
+
+        string projectFolder = Path.GetFullPath(
+            Path.Combine(pythonFolder, "..")
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            Path.Combine(
+                projectFolder,
+                ".venv",
+                "Scripts",
+                "python.exe"
+            )
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            Path.Combine(
+                pythonFolder,
+                ".venv",
+                "Scripts",
+                "python.exe"
+            )
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            Path.Combine(
+                projectFolder,
+                "venv",
+                "Scripts",
+                "python.exe"
+            )
+        );
+
+        AddInstalledPythonCandidates(
+            candidates,
+            registered
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            "py",
+            "-3"
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            "python"
+        );
+
+        AddPythonCandidate(
+            candidates,
+            registered,
+            "python3"
+        );
+
+        return candidates;
+    }
+
+
+    private void AddInstalledPythonCandidates(
+        List<PythonCommand> candidates,
+        HashSet<string> registered
+    )
+    {
+        string localApplicationData =
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData
+            );
+
+        if (string.IsNullOrWhiteSpace(localApplicationData))
+        {
+            return;
+        }
+
+        string pythonProgramsFolder = Path.Combine(
+            localApplicationData,
+            "Programs",
+            "Python"
+        );
+
+        if (!Directory.Exists(pythonProgramsFolder))
+        {
+            return;
+        }
+
+        try
+        {
+            string[] installFolders =
+                Directory.GetDirectories(
+                    pythonProgramsFolder,
+                    "Python*"
+                );
+
+            Array.Sort(
+                installFolders,
+                StringComparer.OrdinalIgnoreCase
+            );
+            Array.Reverse(installFolders);
+
+            foreach (string installFolder in installFolders)
+            {
+                AddPythonCandidate(
+                    candidates,
+                    registered,
+                    Path.Combine(
+                        installFolder,
+                        "python.exe"
+                    )
+                );
+            }
         }
         catch (Exception error)
         {
-            UnityEngine.Debug.LogError(
-                $"PythonÔøΩNÔøΩÔøΩÔøΩGÔøΩÔøΩÔøΩ[: {error.Message}"
+            UnityEngine.Debug.LogWarning(
+                "ÉCÉìÉXÉgÅ[ÉãçœÇ›PythonÇÃåüçıÇ…é∏îsÇµÇ‹ÇµÇΩ: "
+                + error.Message
             );
         }
     }
+
+
+    private void AddPythonCandidate(
+        List<PythonCommand> candidates,
+        HashSet<string> registered,
+        string executable,
+        string argumentPrefix = ""
+    )
+    {
+        if (string.IsNullOrWhiteSpace(executable))
+        {
+            return;
+        }
+
+        string normalizedExecutable =
+            executable.Trim().Trim('"');
+
+        string key =
+            normalizedExecutable
+            + "|"
+            + argumentPrefix;
+
+        if (!registered.Add(key))
+        {
+            return;
+        }
+
+        candidates.Add(
+            new PythonCommand(
+                normalizedExecutable,
+                argumentPrefix
+            )
+        );
+    }
+
 
     private void StopPython()
     {
         try
         {
-            if (pythonProcess != null && !pythonProcess.HasExited)
+            if (pythonProcess != null &&
+                !pythonProcess.HasExited)
             {
                 pythonProcess.Kill();
                 pythonProcess.WaitForExit();
@@ -71,7 +435,8 @@ public class PythonLauncher : MonoBehaviour
         catch (Exception error)
         {
             UnityEngine.Debug.LogWarning(
-                $"PythonÔøΩIÔøΩÔøΩÔøΩÔøΩÔøΩÃåxÔøΩÔøΩ: {error.Message}"
+                "PythonèIóπéûÇÃåxçê: "
+                + error.Message
             );
         }
         finally
@@ -81,12 +446,14 @@ public class PythonLauncher : MonoBehaviour
         }
     }
 
-    void OnDestroy()
+
+    private void OnDestroy()
     {
         StopPython();
     }
 
-    void OnApplicationQuit()
+
+    private void OnApplicationQuit()
     {
         StopPython();
     }

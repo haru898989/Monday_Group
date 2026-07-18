@@ -101,7 +101,8 @@ CATEGORY_MAP: dict[str, str] = {
 CONFIDENCE_THRESHOLDS: dict[str, object] = {
     "default": 0.12,
     "by_name": {
-        "person": 0.20,
+        # 遮蔽物や激しい動きがある人物も切り抜き対象として残す。
+        "person": 0.15,
         "face": 0.25,
         "hand": 0.20,
         "mouse": 0.12,

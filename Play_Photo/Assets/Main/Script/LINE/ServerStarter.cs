@@ -39,6 +39,15 @@ public class ServerStarter : MonoBehaviour
         // 前回利用した人の画像を削除する
         DeleteOldImages(imageFolderPath);
 
+        // 前回生成した人物切り抜き画像も削除する
+        DeleteOldCutoutImages(
+            Path.Combine(
+                projectPath,
+                "Python",
+                "objects"
+            )
+        );
+
         // Python/dist/Line_Server.exe
         string lineServerPath = Path.Combine(
             projectPath,
@@ -487,6 +496,51 @@ public class ServerStarter : MonoBehaviour
         {
             UnityEngine.Debug.LogError(
                 "前回の画像を削除できませんでした: "
+                + exception.Message
+            );
+        }
+    }
+
+    /// <summary>
+    /// Python/objects内に残っている前回の切り抜きPNGを削除する
+    /// </summary>
+    private void DeleteOldCutoutImages(string folderPath)
+    {
+        try
+        {
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+
+                UnityEngine.Debug.Log(
+                    "人物切り抜きフォルダーを作成しました: "
+                    + folderPath
+                );
+
+                return;
+            }
+
+            string[] files =
+                Directory.GetFiles(folderPath, "*.png");
+
+            foreach (string filePath in files)
+            {
+                File.Delete(filePath);
+
+                UnityEngine.Debug.Log(
+                    "前回の人物切り抜きを削除しました: "
+                    + filePath
+                );
+            }
+
+            UnityEngine.Debug.Log(
+                "人物切り抜きフォルダーの初期化が完了しました"
+            );
+        }
+        catch (System.Exception exception)
+        {
+            UnityEngine.Debug.LogError(
+                "前回の人物切り抜きを削除できませんでした: "
                 + exception.Message
             );
         }

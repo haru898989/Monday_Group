@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -685,7 +685,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &410570702
 AudioSource:
   m_ObjectHideFlags: 0
@@ -900,7 +900,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &425338819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1085,6 +1085,8 @@ MonoBehaviour:
   worldWidth: 10
   worldHeight: 10
   objectZ: 0
+  backgroundPhotoFileName: sample.jpg
+  backgroundZOffset: 0.001
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1097,6 +1099,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4182f71b59769d498029d6b3aedae5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pythonExecutablePath: 
+  pythonScriptName: demo_click_udp.py
+  startupCheckSeconds: 1.5
 --- !u!1 &711541609
 GameObject:
   m_ObjectHideFlags: 0
@@ -1116,7 +1121,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &711541610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1578,8 +1583,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u30BF\u30A4\u30C8\u30EB\u3078\u623B\u308B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 1149ace9ab3943a44ab634eed4b09df9, type: 2}
-  m_sharedMaterial: {fileID: 7746245413827420652, guid: 1149ace9ab3943a44ab634eed4b09df9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1674,7 +1679,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1126861909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6707,7 +6712,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1224357292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6825,7 +6830,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1353489796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6945,7 +6950,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1481792020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7166,7 +7171,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1660887222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7381,7 +7386,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1878805590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12539,7 +12544,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1966510069
 MonoBehaviour:
   m_ObjectHideFlags: 0

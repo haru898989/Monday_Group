@@ -1,0 +1,380 @@
+{
+  "schema_version": "1.0",
+  "image": {
+    "path": "../downloaded_images/sample.jpg",
+    "width": 485,
+    "height": 859,
+    "coordinate_space": "analysis_image"
+  },
+  "scene": {
+    "primary": "entertainment_scene",
+    "scores": {
+      "indoor": 0.0,
+      "outdoor": 0.0572,
+      "home": 0.0,
+      "office": 0.0,
+      "restaurant": 0.0,
+      "classroom": 0.0,
+      "park": 0.2989,
+      "nature": 0.0,
+      "food_scene": 0.0,
+      "animal_scene": 0.0,
+      "transportation_scene": 0.0,
+      "entertainment_scene": 0.8801,
+      "night_scene": 0.0,
+      "unknown": 0.0
+    }
+  },
+  "main_objects": [
+    {
+      "object_id": 1,
+      "name": "toy",
+      "importance": 0.8515
+    },
+    {
+      "object_id": 2,
+      "name": "person",
+      "importance": 0.7882
+    },
+    {
+      "object_id": 3,
+      "name": "wall",
+      "importance": 0.5869
+    }
+  ],
+  "objects": [
+    {
+      "object_id": 1,
+      "canonical_name": "toy",
+      "original_name": "toy",
+      "aliases": [
+        "toy"
+      ],
+      "category": "entertainment",
+      "confidence": 0.911827,
+      "box": [
+        203,
+        136,
+        482,
+        537
+      ],
+      "center": [
+        342.5,
+        336.5
+      ],
+      "normalized_center": [
+        0.706186,
+        0.391735
+      ],
+      "normalized_box": [
+        0.418557,
+        0.158324,
+        0.993814,
+        0.625146
+      ],
+      "width": 279,
+      "height": 401,
+      "area_ratio": 0.2685429,
+      "horizontal_position": "right",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.8515,
+      "importance_score": 0.8515
+    },
+    {
+      "object_id": 2,
+      "canonical_name": "person",
+      "original_name": "person",
+      "aliases": [
+        "person"
+      ],
+      "category": "human",
+      "confidence": 0.516356,
+      "box": [
+        52,
+        181,
+        310,
+        611
+      ],
+      "center": [
+        181,
+        396
+      ],
+      "normalized_center": [
+        0.373196,
+        0.461001
+      ],
+      "normalized_box": [
+        0.107216,
+        0.21071,
+        0.639175,
+        0.711292
+      ],
+      "width": 258,
+      "height": 430,
+      "area_ratio": 0.26628902,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.7882,
+      "importance_score": 0.7882
+    },
+    {
+      "object_id": 3,
+      "canonical_name": "wall",
+      "original_name": "wall",
+      "aliases": [
+        "wall"
+      ],
+      "category": "structure",
+      "confidence": 0.163526,
+      "box": [
+        1,
+        77,
+        472,
+        646
+      ],
+      "center": [
+        236.5,
+        361.5
+      ],
+      "normalized_center": [
+        0.487629,
+        0.420838
+      ],
+      "normalized_box": [
+        0.002062,
+        0.089639,
+        0.973196,
+        0.752037
+      ],
+      "width": 471,
+      "height": 569,
+      "area_ratio": 0.64327737,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.5869,
+      "importance_score": 0.5869
+    },
+    {
+      "object_id": 4,
+      "canonical_name": "ball",
+      "original_name": "ball",
+      "aliases": [
+        "ball"
+      ],
+      "category": "entertainment",
+      "confidence": 0.157073,
+      "box": [
+        320,
+        322,
+        349,
+        347
+      ],
+      "center": [
+        334.5,
+        334.5
+      ],
+      "normalized_center": [
+        0.689691,
+        0.389406
+      ],
+      "normalized_box": [
+        0.659794,
+        0.374854,
+        0.719588,
+        0.403958
+      ],
+      "width": 29,
+      "height": 25,
+      "area_ratio": 0.00174022,
+      "horizontal_position": "right",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.3936,
+      "importance_score": 0.3936
+    }
+  ],
+  "relations": [
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "using_candidate",
+      "score": 0.7896
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "using_candidate",
+      "score": 0.5664
+    },
+    {
+      "subject_id": 4,
+      "object_id": 1,
+      "type": "inside",
+      "score": 0.8446
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "inside",
+      "score": 0.8226
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "inside",
+      "score": 0.8197
+    },
+    {
+      "subject_id": 4,
+      "object_id": 3,
+      "type": "inside",
+      "score": 0.7901
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "contains",
+      "score": 0.8446
+    },
+    {
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "contains",
+      "score": 0.8226
+    },
+    {
+      "subject_id": 3,
+      "object_id": 1,
+      "type": "contains",
+      "score": 0.8197
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "contains",
+      "score": 0.7901
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "overlap",
+      "score": 0.8465
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8446
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "overlap",
+      "score": 0.8226
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.7901
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "overlap",
+      "score": 0.6134
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "near",
+      "score": 0.9215
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "near",
+      "score": 0.8465
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8446
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "near",
+      "score": 0.8226
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.7901
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.683
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.671
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "left_of",
+      "score": 0.5459
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.671
+    },
+    {
+      "subject_id": 4,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.5459
+    }
+  ],
+  "summary": {
+    "object_count": 4,
+    "has_person": true,
+    "categories": [
+      "entertainment",
+      "human",
+      "structure"
+    ]
+  },
+  "debug": {
+    "removed_duplicates": [],
+    "removed_low_confidence": [
+      {
+        "original_name": "hand",
+        "canonical_name": "hand",
+        "confidence": 0.120738,
+        "box": [
+          51,
+          416,
+          76,
+          453
+        ],
+        "threshold": 0.2,
+        "reason": "low_confidence"
+      }
+    ],
+    "removed_invalid": [],
+    "warnings": []
+  }
+}
