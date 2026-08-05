@@ -80,6 +80,18 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip pianoAudioClip;
 
+    [SerializeField]
+    private AudioClip dogAudioClip;
+
+    [SerializeField]
+    private AudioClip catAudioClip;
+
+    [SerializeField]
+    private AudioClip carAudioClip;
+
+    [SerializeField]
+    private AudioClip waterAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -347,11 +359,42 @@ public class Reseiver : MonoBehaviour
 
                 humanGimmick.SetTargetRenderer(cutoutRenderer);
                 break;
-            //case "piano":
-            //    InstrumentGimmick InstGimmick =
-            //        GetOrAddComponent<InstrumentGimmick>(target);
-            //    InstGimmick.SetAudioClip(pianoAudioClip);
-            //    break;
+
+            case "cat":
+                CatGimmick catGimmick =
+                    GetOrAddComponent<CatGimmick>(target);
+
+                catGimmick.SetAudioClip(catAudioClip);
+                break;
+
+            case "dog":
+                DogGimmick dogGimmick =
+                    GetOrAddComponent<DogGimmick>(target);
+
+                dogGimmick.SetAudioClip(dogAudioClip);
+                break;
+
+            case "piano":
+                InstrumentGimmick InstGimmick =
+                    GetOrAddComponent<InstrumentGimmick>(target);
+                InstGimmick.SetAudioClip(pianoAudioClip);
+                break;
+
+            case "car":
+                CarGimmick carGimmick =
+                    GetOrAddComponent<CarGimmick>(target);
+
+                carGimmick.SetAudioClip(carAudioClip);
+                break;
+
+            case "water":
+            case "river":
+            case "lake":
+                WaterGimmick waterGimmick =
+                    GetOrAddComponent<WaterGimmick>(target);
+
+                waterGimmick.SetAudioClip(waterAudioClip);
+                break;
         }
     }
 

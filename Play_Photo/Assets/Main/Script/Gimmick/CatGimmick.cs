@@ -1,11 +1,11 @@
 using UnityEngine;
 
-public class DogGimmick : MonoBehaviour, GimmickBase
+public class CatGimmick : MonoBehaviour, GimmickBase
 {
     private AudioSource audioSource;
 
     /// <summary>
-    /// 犬の鳴き声を設定する
+    /// 猫の鳴き声を設定する
     /// </summary>
     public void SetAudioClip(AudioClip clip)
     {
@@ -25,7 +25,7 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         if (clip == null)
         {
             Debug.LogError(
-                "Reseiverから渡された犬のAudioClipがnullです。"
+                "Reseiverから渡された猫のAudioClipがnullです。"
             );
             return;
         }
@@ -33,19 +33,19 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         audioSource.clip = clip;
 
         Debug.Log(
-            $"犬の音声を設定しました：{clip.name}"
+            $"猫の音声を設定しました：{clip.name}"
         );
     }
 
     /// <summary>
-    /// 犬をタッチしたときに呼ばれる
+    /// 猫をタッチしたときに呼ばれる
     /// </summary>
     public void ActivateMagic()
     {
         if (audioSource == null)
         {
             Debug.LogWarning(
-                "犬にAudioSourceがありません。"
+                "猫にAudioSourceがありません。"
             );
             return;
         }
@@ -53,7 +53,7 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         if (audioSource.clip == null)
         {
             Debug.LogWarning(
-                "犬の鳴き声が設定されていません。"
+                "猫の鳴き声が設定されていません。"
             );
             return;
         }
@@ -62,7 +62,7 @@ public class DogGimmick : MonoBehaviour, GimmickBase
         audioSource.Play();
 
         Debug.Log(
-            $"犬が鳴きました：{audioSource.clip.name}"
+            $"猫が鳴きました：{audioSource.clip.name}"
         );
     }
 }
