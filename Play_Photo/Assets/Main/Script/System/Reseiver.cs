@@ -92,6 +92,15 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip waterAudioClip;
 
+    [SerializeField]
+    private AudioClip balloonAudioClip;
+
+    [SerializeField]
+    private AudioClip computerAudioClip;
+
+    [SerializeField]
+    private AudioClip treasureChestAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -394,6 +403,34 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<WaterGimmick>(target);
 
                 waterGimmick.SetAudioClip(waterAudioClip);
+                break;
+
+            case "balloon":
+                BalloonGimmick balloonGimmick =
+                    GetOrAddComponent<BalloonGimmick>(target);
+
+                balloonGimmick.SetTargetRenderer(cutoutRenderer);
+                balloonGimmick.SetAudioClip(balloonAudioClip);
+                break;
+
+            case "computer":
+            case "laptop":
+            case "pc":
+                ComputerGimmick computerGimmick =
+                    GetOrAddComponent<ComputerGimmick>(target);
+
+                computerGimmick.SetTargetRenderer(cutoutRenderer);
+                computerGimmick.SetAudioClip(computerAudioClip);
+                break;
+
+            case "treasure box":
+            case "treasure_chest":
+            case "chest":
+                TreasureChestGimmick chestGimmick =
+                    GetOrAddComponent<TreasureChestGimmick>(target);
+
+                chestGimmick.SetTargetRenderer(cutoutRenderer);
+                chestGimmick.SetAudioClip(treasureChestAudioClip);
                 break;
         }
     }
