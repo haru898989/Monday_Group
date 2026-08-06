@@ -135,10 +135,7 @@ public class Reseiver : MonoBehaviour
     private void Start()
     {
         // 最初はローディング画面を表示
-        if (loadingPanel != null)
-        {
-            loadingPanel.SetActive(true);
-        }
+        SetLoadingVisible(true);
 
         // カメラが設定されていなければMain Cameraを使う
         if (targetCamera == null)
@@ -206,12 +203,6 @@ public class Reseiver : MonoBehaviour
             return;
         }
 
-        // 受信できたらローディング画面を消す
-        if (loadingPanel != null)
-        {
-            loadingPanel.SetActive(false);
-        }
-
         float receivedImageWidth =
             receivedData.imageWidth > 0f
                 ? receivedData.imageWidth
@@ -221,17 +212,6 @@ public class Reseiver : MonoBehaviour
             receivedData.imageHeight > 0f
                 ? receivedData.imageHeight
                 : imageHeight;
-
-        UpdateDisplayWorldSize(
-            receivedImageWidth,
-            receivedImageHeight
-        );
-
-        // Pythonの解析完了時点の写真で背景を更新する
-        RefreshPhotoBackground(
-            receivedImageWidth,
-            receivedImageHeight
-        );
 
         // 前回生成したタッチ範囲を削除する
         ClearGeneratedObjects();
@@ -331,6 +311,9 @@ public class Reseiver : MonoBehaviour
                 cutoutRenderer,
                 obj.name
             );
+
+            // 当たり判定の子要素に切り抜き画像が生成されてからローディングを閉じる
+            SetLoadingVisible(false);
         }
 
         generatedObjects.Add(generatedObject);
@@ -339,6 +322,17 @@ public class Reseiver : MonoBehaviour
             $"{obj.name}のタッチ範囲を生成しました。" +
             $" 座標：({unityX}, {unityY})"
         );
+    }
+
+
+    private void SetLoadingVisible(bool isVisible)
+    {
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(isVisible);
+        }
+
+        DualDisplayManager.SetPlayLoadingVisible(isVisible);
     }
 
 

@@ -2,84 +2,86 @@
   "schema_version": "1.0",
   "image": {
     "path": "../downloaded_images/sample.jpg",
-    "width": 485,
-    "height": 859,
+    "width": 483,
+    "height": 860,
     "coordinate_space": "analysis_image"
   },
   "scene": {
-    "primary": "entertainment_scene",
+    "primary": "indoor",
     "scores": {
-      "indoor": 0.0,
-      "outdoor": 0.0572,
-      "home": 0.0,
-      "office": 0.0,
+      "indoor": 0.5977,
+      "outdoor": 0.0,
+      "home": 0.2609,
+      "office": 0.5148,
       "restaurant": 0.0,
-      "classroom": 0.0,
-      "park": 0.2989,
+      "classroom": 0.181,
+      "park": 0.1462,
       "nature": 0.0,
       "food_scene": 0.0,
       "animal_scene": 0.0,
       "transportation_scene": 0.0,
-      "entertainment_scene": 0.8801,
-      "night_scene": 0.0,
+      "entertainment_scene": 0.373,
+      "night_scene": 0.0488,
       "unknown": 0.0
     }
   },
   "main_objects": [
     {
-      "object_id": 1,
-      "name": "toy",
-      "importance": 0.8515
-    },
-    {
       "object_id": 2,
       "name": "person",
-      "importance": 0.7882
+      "importance": 0.8233
     },
     {
-      "object_id": 3,
-      "name": "wall",
-      "importance": 0.5869
+      "object_id": 5,
+      "name": "mirror",
+      "importance": 0.659
+    },
+    {
+      "object_id": 1,
+      "name": "phone",
+      "importance": 0.6118
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "toy",
-      "original_name": "toy",
+      "canonical_name": "phone",
+      "original_name": "smartphone",
       "aliases": [
-        "toy"
+        "phone",
+        "smartphone",
+        "cell phone"
       ],
-      "category": "entertainment",
-      "confidence": 0.911827,
+      "category": "electronics",
+      "confidence": 0.665046,
       "box": [
-        203,
-        136,
-        482,
-        537
+        293,
+        227,
+        364,
+        333
       ],
       "center": [
-        342.5,
-        336.5
+        328.5,
+        280
       ],
       "normalized_center": [
-        0.706186,
-        0.391735
+        0.680124,
+        0.325581
       ],
       "normalized_box": [
-        0.418557,
-        0.158324,
-        0.993814,
-        0.625146
+        0.606625,
+        0.263953,
+        0.753623,
+        0.387209
       ],
-      "width": 279,
-      "height": 401,
-      "area_ratio": 0.2685429,
+      "width": 71,
+      "height": 106,
+      "area_ratio": 0.01811835,
       "horizontal_position": "right",
-      "vertical_position": "middle",
+      "vertical_position": "top",
       "geometry_valid": true,
-      "importance": 0.8515,
-      "importance_score": 0.8515
+      "importance": 0.6118,
+      "importance_score": 0.6118
     },
     {
       "object_id": 2,
@@ -89,111 +91,267 @@
         "person"
       ],
       "category": "human",
-      "confidence": 0.516356,
+      "confidence": 0.516951,
       "box": [
-        52,
-        181,
-        310,
-        611
+        103,
+        116,
+        467,
+        860
       ],
       "center": [
-        181,
-        396
+        285,
+        488
       ],
       "normalized_center": [
-        0.373196,
-        0.461001
+        0.590062,
+        0.567442
       ],
       "normalized_box": [
-        0.107216,
-        0.21071,
-        0.639175,
-        0.711292
+        0.213251,
+        0.134884,
+        0.966874,
+        1.0
       ],
-      "width": 258,
-      "height": 430,
-      "area_ratio": 0.26628902,
+      "width": 364,
+      "height": 744,
+      "area_ratio": 0.65197169,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.7882,
-      "importance_score": 0.7882
+      "importance": 0.8233,
+      "importance_score": 0.8233
     },
     {
       "object_id": 3,
-      "canonical_name": "wall",
-      "original_name": "wall",
+      "canonical_name": "phone",
+      "original_name": "smartphone",
       "aliases": [
-        "wall"
+        "phone",
+        "smartphone",
+        "cell phone"
       ],
-      "category": "structure",
-      "confidence": 0.163526,
+      "category": "electronics",
+      "confidence": 0.470717,
       "box": [
-        1,
-        77,
-        472,
-        646
-      ],
-      "center": [
-        236.5,
-        361.5
-      ],
-      "normalized_center": [
-        0.487629,
-        0.420838
-      ],
-      "normalized_box": [
-        0.002062,
-        0.089639,
-        0.973196,
-        0.752037
-      ],
-      "width": 471,
-      "height": 569,
-      "area_ratio": 0.64327737,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.5869,
-      "importance_score": 0.5869
-    },
-    {
-      "object_id": 4,
-      "canonical_name": "ball",
-      "original_name": "ball",
-      "aliases": [
-        "ball"
-      ],
-      "category": "entertainment",
-      "confidence": 0.157073,
-      "box": [
-        320,
-        322,
-        349,
-        347
+        306,
+        228,
+        363,
+        296
       ],
       "center": [
         334.5,
-        334.5
+        262
       ],
       "normalized_center": [
-        0.689691,
-        0.389406
+        0.692547,
+        0.304651
       ],
       "normalized_box": [
-        0.659794,
-        0.374854,
-        0.719588,
-        0.403958
+        0.63354,
+        0.265116,
+        0.751553,
+        0.344186
       ],
-      "width": 29,
-      "height": 25,
-      "area_ratio": 0.00174022,
+      "width": 57,
+      "height": 68,
+      "area_ratio": 0.00933121,
       "horizontal_position": "right",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.5256,
+      "importance_score": 0.5256
+    },
+    {
+      "object_id": 4,
+      "canonical_name": "microphone",
+      "original_name": "microphone",
+      "aliases": [
+        "microphone"
+      ],
+      "category": "entertainment",
+      "confidence": 0.366116,
+      "box": [
+        293,
+        226,
+        364,
+        333
+      ],
+      "center": [
+        328.5,
+        279.5
+      ],
+      "normalized_center": [
+        0.680124,
+        0.325
+      ],
+      "normalized_box": [
+        0.606625,
+        0.262791,
+        0.753623,
+        0.387209
+      ],
+      "width": 71,
+      "height": 107,
+      "area_ratio": 0.01828928,
+      "horizontal_position": "right",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.5314,
+      "importance_score": 0.5314
+    },
+    {
+      "object_id": 5,
+      "canonical_name": "mirror",
+      "original_name": "mirror",
+      "aliases": [
+        "mirror"
+      ],
+      "category": "indoor_fixture",
+      "confidence": 0.282969,
+      "box": [
+        129,
+        0,
+        482,
+        727
+      ],
+      "center": [
+        305.5,
+        363.5
+      ],
+      "normalized_center": [
+        0.632505,
+        0.422674
+      ],
+      "normalized_box": [
+        0.267081,
+        0.0,
+        0.99793,
+        0.845349
+      ],
+      "width": 353,
+      "height": 727,
+      "area_ratio": 0.61782224,
+      "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.3936,
-      "importance_score": 0.3936
+      "importance": 0.659,
+      "importance_score": 0.659
+    },
+    {
+      "object_id": 6,
+      "canonical_name": "display",
+      "original_name": "television",
+      "aliases": [
+        "display",
+        "television"
+      ],
+      "category": "electronics",
+      "confidence": 0.18507,
+      "box": [
+        72,
+        0,
+        212,
+        47
+      ],
+      "center": [
+        142,
+        23.5
+      ],
+      "normalized_center": [
+        0.293996,
+        0.027326
+      ],
+      "normalized_box": [
+        0.149068,
+        0.0,
+        0.438923,
+        0.054651
+      ],
+      "width": 140,
+      "height": 47,
+      "area_ratio": 0.01584092,
+      "horizontal_position": "left",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.3132,
+      "importance_score": 0.3132
+    },
+    {
+      "object_id": 7,
+      "canonical_name": "phone",
+      "original_name": "cell phone",
+      "aliases": [
+        "phone",
+        "cell phone"
+      ],
+      "category": "electronics",
+      "confidence": 0.142705,
+      "box": [
+        331,
+        224,
+        359,
+        255
+      ],
+      "center": [
+        345,
+        239.5
+      ],
+      "normalized_center": [
+        0.714286,
+        0.278488
+      ],
+      "normalized_box": [
+        0.6853,
+        0.260465,
+        0.743271,
+        0.296512
+      ],
+      "width": 28,
+      "height": 31,
+      "area_ratio": 0.00208965,
+      "horizontal_position": "right",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.3892,
+      "importance_score": 0.3892
+    },
+    {
+      "object_id": 8,
+      "canonical_name": "lamp",
+      "original_name": "lamp",
+      "aliases": [
+        "lamp"
+      ],
+      "category": "light",
+      "confidence": 0.138051,
+      "box": [
+        0,
+        241,
+        73,
+        326
+      ],
+      "center": [
+        36.5,
+        283.5
+      ],
+      "normalized_center": [
+        0.075569,
+        0.329651
+      ],
+      "normalized_box": [
+        0.0,
+        0.280233,
+        0.151139,
+        0.37907
+      ],
+      "width": 73,
+      "height": 85,
+      "area_ratio": 0.01493813,
+      "horizontal_position": "left",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.2759,
+      "importance_score": 0.2759
     }
   ],
   "relations": [
@@ -201,174 +359,510 @@
       "subject_id": 2,
       "object_id": 1,
       "type": "using_candidate",
-      "score": 0.7896
+      "score": 0.8966
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "using_candidate",
+      "score": 0.8733
     },
     {
       "subject_id": 2,
       "object_id": 4,
       "type": "using_candidate",
-      "score": 0.5664
-    },
-    {
-      "subject_id": 4,
-      "object_id": 1,
-      "type": "inside",
-      "score": 0.8446
+      "score": 0.8588
     },
     {
       "subject_id": 2,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.8226
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.8197
-    },
-    {
-      "subject_id": 4,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.7901
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.8446
-    },
-    {
-      "subject_id": 3,
-      "object_id": 2,
-      "type": "contains",
-      "score": 0.8226
-    },
-    {
-      "subject_id": 3,
-      "object_id": 1,
-      "type": "contains",
-      "score": 0.8197
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.7901
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "overlap",
-      "score": 0.8465
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8446
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "overlap",
-      "score": 0.8226
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.7901
+      "object_id": 7,
+      "type": "using_candidate",
+      "score": 0.8179
     },
     {
       "subject_id": 1,
       "object_id": 2,
+      "type": "in_front_of",
+      "score": 0.7861
+    },
+    {
+      "subject_id": 4,
+      "object_id": 2,
+      "type": "in_front_of",
+      "score": 0.7632
+    },
+    {
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "in_front_of",
+      "score": 0.7625
+    },
+    {
+      "subject_id": 7,
+      "object_id": 2,
+      "type": "in_front_of",
+      "score": 0.7171
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "inside",
+      "score": 0.8966
+    },
+    {
+      "subject_id": 3,
+      "object_id": 1,
+      "type": "inside",
+      "score": 0.8899
+    },
+    {
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "inside",
+      "score": 0.8733
+    },
+    {
+      "subject_id": 4,
+      "object_id": 2,
+      "type": "inside",
+      "score": 0.8588
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "inside",
+      "score": 0.8585
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "inside",
+      "score": 0.8538
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "inside",
+      "score": 0.8412
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "inside",
+      "score": 0.8305
+    },
+    {
+      "subject_id": 7,
+      "object_id": 2,
+      "type": "inside",
+      "score": 0.8179
+    },
+    {
+      "subject_id": 7,
+      "object_id": 5,
+      "type": "inside",
+      "score": 0.8002
+    },
+    {
+      "subject_id": 7,
+      "object_id": 4,
+      "type": "inside",
+      "score": 0.7588
+    },
+    {
+      "subject_id": 7,
+      "object_id": 1,
+      "type": "inside",
+      "score": 0.7544
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "contains",
+      "score": 0.8966
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "contains",
+      "score": 0.8899
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "contains",
+      "score": 0.8733
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "contains",
+      "score": 0.8588
+    },
+    {
+      "subject_id": 5,
+      "object_id": 1,
+      "type": "contains",
+      "score": 0.8585
+    },
+    {
+      "subject_id": 4,
+      "object_id": 3,
+      "type": "contains",
+      "score": 0.8538
+    },
+    {
+      "subject_id": 5,
+      "object_id": 3,
+      "type": "contains",
+      "score": 0.8412
+    },
+    {
+      "subject_id": 5,
+      "object_id": 4,
+      "type": "contains",
+      "score": 0.8305
+    },
+    {
+      "subject_id": 2,
+      "object_id": 7,
+      "type": "contains",
+      "score": 0.8179
+    },
+    {
+      "subject_id": 5,
+      "object_id": 7,
+      "type": "contains",
+      "score": 0.8002
+    },
+    {
+      "subject_id": 4,
+      "object_id": 7,
+      "type": "contains",
+      "score": 0.7588
+    },
+    {
+      "subject_id": 1,
+      "object_id": 7,
+      "type": "contains",
+      "score": 0.7544
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
       "type": "overlap",
-      "score": 0.6134
+      "score": 0.8966
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "overlap",
+      "score": 0.8899
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8734
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "overlap",
+      "score": 0.8733
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8588
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8585
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8538
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8456
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8412
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8305
+    },
+    {
+      "subject_id": 2,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.8179
+    },
+    {
+      "subject_id": 5,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.8002
+    },
+    {
+      "subject_id": 4,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.7588
+    },
+    {
+      "subject_id": 1,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.7544
+    },
+    {
+      "subject_id": 3,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.718
+    },
+    {
+      "subject_id": 5,
+      "object_id": 6,
+      "type": "overlap",
+      "score": 0.5019
     },
     {
       "subject_id": 2,
       "object_id": 1,
       "type": "near",
-      "score": 0.9215
+      "score": 0.8966
     },
     {
       "subject_id": 1,
       "object_id": 3,
       "type": "near",
-      "score": 0.8465
+      "score": 0.8899
     },
     {
       "subject_id": 1,
       "object_id": 4,
       "type": "near",
-      "score": 0.8446
+      "score": 0.8734
     },
     {
       "subject_id": 2,
       "object_id": 3,
       "type": "near",
-      "score": 0.8226
+      "score": 0.8733
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8588
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8585
     },
     {
       "subject_id": 3,
       "object_id": 4,
       "type": "near",
-      "score": 0.7901
+      "score": 0.8538
     },
     {
       "subject_id": 2,
-      "object_id": 4,
+      "object_id": 5,
       "type": "near",
-      "score": 0.683
+      "score": 0.8456
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8412
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8305
+    },
+    {
+      "subject_id": 1,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.827
     },
     {
       "subject_id": 2,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.8179
+    },
+    {
+      "subject_id": 3,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.8148
+    },
+    {
+      "subject_id": 5,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.8072
+    },
+    {
+      "subject_id": 4,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.8071
+    },
+    {
+      "subject_id": 5,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.8002
+    },
+    {
+      "subject_id": 2,
+      "object_id": 8,
+      "type": "near",
+      "score": 0.402
+    },
+    {
+      "subject_id": 8,
       "object_id": 1,
       "type": "left_of",
-      "score": 0.671
+      "score": 0.8258
     },
     {
-      "subject_id": 2,
-      "object_id": 4,
+      "subject_id": 8,
+      "object_id": 2,
       "type": "left_of",
-      "score": 0.5459
+      "score": 0.8168
+    },
+    {
+      "subject_id": 6,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.6669
     },
     {
       "subject_id": 1,
-      "object_id": 2,
+      "object_id": 8,
       "type": "right_of",
-      "score": 0.671
+      "score": 0.8258
     },
     {
-      "subject_id": 4,
-      "object_id": 2,
+      "subject_id": 2,
+      "object_id": 8,
       "type": "right_of",
-      "score": 0.5459
+      "score": 0.8168
+    },
+    {
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "right_of",
+      "score": 0.6669
+    },
+    {
+      "subject_id": 6,
+      "object_id": 2,
+      "type": "above",
+      "score": 0.8273
+    },
+    {
+      "subject_id": 2,
+      "object_id": 6,
+      "type": "below",
+      "score": 0.8273
     }
   ],
   "summary": {
-    "object_count": 4,
+    "object_count": 8,
     "has_person": true,
     "categories": [
+      "electronics",
       "entertainment",
       "human",
-      "structure"
+      "indoor_fixture",
+      "light"
     ]
   },
   "debug": {
-    "removed_duplicates": [],
+    "removed_duplicates": [
+      {
+        "original_name": "cell phone",
+        "canonical_name": "phone",
+        "confidence": 0.638832,
+        "box": [
+          293,
+          227,
+          364,
+          332
+        ],
+        "kept_original_name": "smartphone",
+        "kept_canonical_name": "phone",
+        "iou": 0.990566,
+        "reason": "duplicate"
+      },
+      {
+        "original_name": "cell phone",
+        "canonical_name": "phone",
+        "confidence": 0.180145,
+        "box": [
+          312,
+          226,
+          361,
+          287
+        ],
+        "kept_original_name": "smartphone",
+        "kept_canonical_name": "phone",
+        "iou": 0.727479,
+        "reason": "duplicate"
+      },
+      {
+        "original_name": "mirror",
+        "canonical_name": "mirror",
+        "confidence": 0.13046,
+        "box": [
+          32,
+          2,
+          478,
+          859
+        ],
+        "kept_original_name": "mirror",
+        "kept_canonical_name": "mirror",
+        "iou": 0.655797,
+        "reason": "duplicate"
+      }
+    ],
     "removed_low_confidence": [
       {
         "original_name": "hand",
         "canonical_name": "hand",
-        "confidence": 0.120738,
+        "confidence": 0.129191,
         "box": [
-          51,
-          416,
-          76,
-          453
+          292,
+          228,
+          365,
+          329
         ],
         "threshold": 0.2,
         "reason": "low_confidence"

@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4182f71b59769d498029d6b3aedae5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pythonExecutablePath: 
+  pythonExecutablePath: py
   pythonScriptName: demo_click_udp.py
   startupCheckSeconds: 1.5
 --- !u!1 &711541609
