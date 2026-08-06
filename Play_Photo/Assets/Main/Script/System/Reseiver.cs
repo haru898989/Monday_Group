@@ -451,6 +451,44 @@ public class Reseiver : MonoBehaviour
                 GetOrAddComponent<ToyGimmick>(target);
                 break;
 
+            case "fish":
+                FishGlowGimmick fishGimmick =
+                    GetOrAddComponent<FishGlowGimmick>(target);
+
+                fishGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "flower":
+            case "plant":
+            case "rose":
+            case "sunflower":
+            case "daisy":
+                FlowerGimmick flowerGimmick =
+                    GetOrAddComponent<FlowerGimmick>(target);
+
+                flowerGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "cell phone":
+            case "mobile phone":
+            case "smartphone":
+            case "phone":
+                PhoneGimmick phoneGimmick =
+                    GetOrAddComponent<PhoneGimmick>(target);
+
+                phoneGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "ball":
+            case "sports ball":
+            case "soccer ball":
+            case "football":
+            case "basketball":
+            case "baseball":
+            case "tennis ball":
+                GetOrAddComponent<BallGimmick>(target);
+                break;
+
 
         }
     }
