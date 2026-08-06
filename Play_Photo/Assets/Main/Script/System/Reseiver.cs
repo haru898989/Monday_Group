@@ -432,6 +432,26 @@ public class Reseiver : MonoBehaviour
                 chestGimmick.SetTargetRenderer(cutoutRenderer);
                 chestGimmick.SetAudioClip(treasureChestAudioClip);
                 break;
+
+            case "tree":
+                TreeGimmick treeGimmick =
+                    GetOrAddComponent<TreeGimmick>(target);
+
+                treeGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+                break;
+
+            case "airplane":
+            case "plane":
+                GetOrAddComponent<AirplaneGimmick>(target);
+                break;
+
+            case "toy":
+                GetOrAddComponent<ToyGimmick>(target);
+                break;
+
+
         }
     }
 
@@ -1031,27 +1051,67 @@ public class Reseiver : MonoBehaviour
         Ray ray =
             targetCamera.ScreenPointToRay(screenPosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            Debug.Log(
-                $"タッチしたオブジェクト：{hit.collider.gameObject.name}"
-            );
+        // タッチ位置に重なっているすべてのColliderを取得
+        RaycastHit[] hits = Physics.RaycastAll(ray);
 
-            // Colliderが子オブジェクトに付いていても探せるようにする
-            GimmickBase touchGimmick =
+        if (hits.Length == 0)
+        {
+            return;
+        }
+
+        GimmickBase selectedGimmick = null;
+        Collider selectedCollider = null;
+
+        // 最初は非常に大きな値にしておく
+        float smallestArea = float.MaxValue;
+
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider == null)
+            {
+                continue;
+            }
+
+            // Colliderの親からギミックを探す
+            GimmickBase gimmick =
                 hit.collider.GetComponentInParent<GimmickBase>();
 
-            if (touchGimmick != null)
+            // ギミックが付いていない物体は候補にしない
+            if (gimmick == null)
             {
-                touchGimmick.ActivateMagic();
+                continue;
             }
-            else
+
+            Bounds bounds = hit.collider.bounds;
+
+            // 当たり判定の縦横面積を計算
+            float area =
+                Mathf.Abs(bounds.size.x * bounds.size.y);
+
+            // 一番小さい当たり判定を優先
+            if (area < smallestArea)
             {
-                Debug.LogWarning(
-                    $"{hit.collider.gameObject.name}に" +
-                    "GimmickBaseを実装したスクリプトがありません。"
-                );
+                smallestArea = area;
+                selectedGimmick = gimmick;
+                selectedCollider = hit.collider;
             }
+        }
+
+        // 選ばれた一番手前相当の物体を実行
+        if (selectedGimmick != null)
+        {
+            Debug.Log(
+                $"優先してタッチしたオブジェクト：" +
+                $"{selectedCollider.gameObject.name}"
+            );
+
+            selectedGimmick.ActivateMagic();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "タッチ位置に実行可能なギミックがありません。"
+            );
         }
     }
 
