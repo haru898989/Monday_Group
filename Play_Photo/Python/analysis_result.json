@@ -2,21 +2,21 @@
   "schema_version": "1.0",
   "image": {
     "path": "../downloaded_images/sample.jpg",
-    "width": 588,
-    "height": 393,
+    "width": 550,
+    "height": 412,
     "coordinate_space": "analysis_image"
   },
   "scene": {
-    "primary": "indoor",
+    "primary": "outdoor",
     "scores": {
-      "indoor": 0.9136,
-      "outdoor": 0.2135,
-      "home": 0.7323,
-      "office": 0.5324,
-      "restaurant": 0.2926,
-      "classroom": 0.4576,
-      "park": 0.0755,
-      "nature": 0.1069,
+      "indoor": 0.0,
+      "outdoor": 0.8029,
+      "home": 0.0,
+      "office": 0.0,
+      "restaurant": 0.0,
+      "classroom": 0.0,
+      "park": 0.5893,
+      "nature": 0.7711,
       "food_scene": 0.0,
       "animal_scene": 0.0,
       "transportation_scene": 0.0,
@@ -27,465 +27,408 @@
   },
   "main_objects": [
     {
-      "object_id": 4,
-      "name": "wall",
-      "importance": 0.6672
-    },
-    {
       "object_id": 1,
-      "name": "clock",
-      "importance": 0.6406
+      "name": "sky",
+      "importance": 0.8108
     },
     {
-      "object_id": 3,
-      "name": "desk",
-      "importance": 0.5321
+      "object_id": 5,
+      "name": "cloud",
+      "importance": 0.5677
+    },
+    {
+      "object_id": 6,
+      "name": "cloud",
+      "importance": 0.403
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "clock",
-      "original_name": "clock",
+      "canonical_name": "sky",
+      "original_name": "sky",
       "aliases": [
-        "clock"
+        "sky"
       ],
-      "category": "indoor_fixture",
-      "confidence": 0.891905,
-      "box": [
-        296,
-        55,
-        396,
-        155
-      ],
-      "center": [
-        346,
-        105
-      ],
-      "normalized_center": [
-        0.588435,
-        0.267176
-      ],
-      "normalized_box": [
-        0.503401,
-        0.139949,
-        0.673469,
-        0.394402
-      ],
-      "width": 100,
-      "height": 100,
-      "area_ratio": 0.04327431,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.6406,
-      "importance_score": 0.6406
-    },
-    {
-      "object_id": 2,
-      "canonical_name": "chair",
-      "original_name": "chair",
-      "aliases": [
-        "chair"
-      ],
-      "category": "furniture",
-      "confidence": 0.548981,
+      "category": "nature",
+      "confidence": 0.718379,
       "box": [
         0,
-        160,
-        61,
-        393
+        0,
+        549,
+        391
       ],
       "center": [
-        30.5,
-        276.5
+        274.5,
+        195.5
       ],
       "normalized_center": [
-        0.051871,
-        0.703562
+        0.499091,
+        0.474515
       ],
       "normalized_box": [
         0.0,
-        0.407125,
-        0.103741,
-        1.0
+        0.0,
+        0.998182,
+        0.949029
       ],
-      "width": 61,
-      "height": 233,
-      "area_ratio": 0.06150577,
-      "horizontal_position": "left",
-      "vertical_position": "bottom",
+      "width": 549,
+      "height": 391,
+      "area_ratio": 0.94730362,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.4797,
-      "importance_score": 0.4797
+      "importance": 0.8108,
+      "importance_score": 0.8108
+    },
+    {
+      "object_id": 2,
+      "canonical_name": "cloud",
+      "original_name": "cloud",
+      "aliases": [
+        "cloud"
+      ],
+      "category": "nature",
+      "confidence": 0.328927,
+      "box": [
+        474,
+        212,
+        550,
+        249
+      ],
+      "center": [
+        512,
+        230.5
+      ],
+      "normalized_center": [
+        0.930909,
+        0.559466
+      ],
+      "normalized_box": [
+        0.861818,
+        0.514563,
+        1.0,
+        0.604369
+      ],
+      "width": 76,
+      "height": 37,
+      "area_ratio": 0.01240953,
+      "horizontal_position": "right",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.3801,
+      "importance_score": 0.3801
     },
     {
       "object_id": 3,
-      "canonical_name": "desk",
-      "original_name": "desk",
+      "canonical_name": "cloud",
+      "original_name": "cloud",
       "aliases": [
-        "desk"
-      ],
-      "category": "furniture",
-      "confidence": 0.389651,
-      "box": [
-        199,
-        300,
-        495,
-        393
-      ],
-      "center": [
-        347,
-        346.5
-      ],
-      "normalized_center": [
-        0.590136,
-        0.881679
-      ],
-      "normalized_box": [
-        0.338435,
-        0.763359,
-        0.841837,
-        1.0
-      ],
-      "width": 296,
-      "height": 93,
-      "area_ratio": 0.11912551,
-      "horizontal_position": "center",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.5321,
-      "importance_score": 0.5321
-    },
-    {
-      "object_id": 4,
-      "canonical_name": "wall",
-      "original_name": "wall",
-      "aliases": [
-        "wall"
-      ],
-      "category": "structure",
-      "confidence": 0.363742,
-      "box": [
-        58,
-        1,
-        588,
-        320
-      ],
-      "center": [
-        323,
-        160.5
-      ],
-      "normalized_center": [
-        0.54932,
-        0.408397
-      ],
-      "normalized_box": [
-        0.098639,
-        0.002545,
-        1.0,
-        0.814249
-      ],
-      "width": 530,
-      "height": 319,
-      "area_ratio": 0.73163871,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.6672,
-      "importance_score": 0.6672
-    },
-    {
-      "object_id": 5,
-      "canonical_name": "shelf",
-      "original_name": "shelf",
-      "aliases": [
-        "shelf"
-      ],
-      "category": "furniture",
-      "confidence": 0.265737,
-      "box": [
-        199,
-        300,
-        497,
-        393
-      ],
-      "center": [
-        348,
-        346.5
-      ],
-      "normalized_center": [
-        0.591837,
-        0.881679
-      ],
-      "normalized_box": [
-        0.338435,
-        0.763359,
-        0.845238,
-        1.0
-      ],
-      "width": 298,
-      "height": 93,
-      "area_ratio": 0.11993041,
-      "horizontal_position": "center",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.4949,
-      "importance_score": 0.4949
-    },
-    {
-      "object_id": 6,
-      "canonical_name": "flower",
-      "original_name": "flower",
-      "aliases": [
-        "flower"
+        "cloud"
       ],
       "category": "nature",
-      "confidence": 0.132808,
+      "confidence": 0.235874,
       "box": [
-        222,
-        135,
-        299,
+        0,
+        213,
+        108,
         259
       ],
       "center": [
-        260.5,
-        197
+        54,
+        236
       ],
       "normalized_center": [
-        0.443027,
-        0.501272
+        0.098182,
+        0.572816
       ],
       "normalized_box": [
-        0.377551,
-        0.343511,
-        0.508503,
-        0.659033
+        0.0,
+        0.51699,
+        0.196364,
+        0.628641
       ],
-      "width": 77,
-      "height": 124,
-      "area_ratio": 0.04131831,
+      "width": 108,
+      "height": 46,
+      "area_ratio": 0.0219241,
+      "horizontal_position": "left",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.3656,
+      "importance_score": 0.3656
+    },
+    {
+      "object_id": 4,
+      "canonical_name": "cloud",
+      "original_name": "cloud",
+      "aliases": [
+        "cloud"
+      ],
+      "category": "nature",
+      "confidence": 0.197789,
+      "box": [
+        355,
+        288,
+        409,
+        311
+      ],
+      "center": [
+        382,
+        299.5
+      ],
+      "normalized_center": [
+        0.694545,
+        0.726942
+      ],
+      "normalized_box": [
+        0.645455,
+        0.699029,
+        0.743636,
+        0.754854
+      ],
+      "width": 54,
+      "height": 23,
+      "area_ratio": 0.00548102,
+      "horizontal_position": "right",
+      "vertical_position": "bottom",
+      "geometry_valid": true,
+      "importance": 0.3494,
+      "importance_score": 0.3494
+    },
+    {
+      "object_id": 5,
+      "canonical_name": "cloud",
+      "original_name": "cloud",
+      "aliases": [
+        "cloud"
+      ],
+      "category": "nature",
+      "confidence": 0.195569,
+      "box": [
+        206,
+        110,
+        465,
+        227
+      ],
+      "center": [
+        335.5,
+        168.5
+      ],
+      "normalized_center": [
+        0.61,
+        0.408981
+      ],
+      "normalized_box": [
+        0.374545,
+        0.26699,
+        0.845455,
+        0.550971
+      ],
+      "width": 259,
+      "height": 117,
+      "area_ratio": 0.13372904,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.4802,
-      "importance_score": 0.4802
+      "importance": 0.5677,
+      "importance_score": 0.5677
+    },
+    {
+      "object_id": 6,
+      "canonical_name": "cloud",
+      "original_name": "cloud",
+      "aliases": [
+        "cloud"
+      ],
+      "category": "nature",
+      "confidence": 0.158673,
+      "box": [
+        185,
+        260,
+        304,
+        294
+      ],
+      "center": [
+        244.5,
+        277
+      ],
+      "normalized_center": [
+        0.444545,
+        0.67233
+      ],
+      "normalized_box": [
+        0.336364,
+        0.631068,
+        0.552727,
+        0.713592
+      ],
+      "width": 119,
+      "height": 34,
+      "area_ratio": 0.01785525,
+      "horizontal_position": "center",
+      "vertical_position": "bottom",
+      "geometry_valid": true,
+      "importance": 0.403,
+      "importance_score": 0.403
     }
   ],
   "relations": [
     {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "inside",
-      "score": 0.8924
-    },
-    {
-      "subject_id": 6,
-      "object_id": 4,
-      "type": "inside",
-      "score": 0.8049
-    },
-    {
-      "subject_id": 4,
-      "object_id": 1,
-      "type": "contains",
-      "score": 0.8924
-    },
-    {
-      "subject_id": 4,
-      "object_id": 6,
-      "type": "contains",
-      "score": 0.8049
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8924
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8304
-    },
-    {
-      "subject_id": 4,
-      "object_id": 6,
-      "type": "overlap",
-      "score": 0.8049
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.2554
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.239
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8924
-    },
-    {
       "subject_id": 2,
-      "object_id": 4,
-      "type": "near",
+      "object_id": 1,
+      "type": "inside",
       "score": 0.8617
     },
     {
       "subject_id": 3,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8441
-    },
-    {
-      "subject_id": 1,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.836
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8304
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8277
-    },
-    {
-      "subject_id": 4,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.8049
-    },
-    {
-      "subject_id": 2,
       "object_id": 1,
-      "type": "left_of",
-      "score": 0.9249
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "left_of",
-      "score": 0.8656
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "left_of",
-      "score": 0.8579
-    },
-    {
-      "subject_id": 2,
-      "object_id": 5,
-      "type": "left_of",
-      "score": 0.8455
-    },
-    {
-      "subject_id": 1,
-      "object_id": 2,
-      "type": "right_of",
-      "score": 0.9249
-    },
-    {
-      "subject_id": 3,
-      "object_id": 2,
-      "type": "right_of",
-      "score": 0.8656
+      "type": "inside",
+      "score": 0.8529
     },
     {
       "subject_id": 4,
-      "object_id": 2,
-      "type": "right_of",
-      "score": 0.8579
-    },
-    {
-      "subject_id": 5,
-      "object_id": 2,
-      "type": "right_of",
-      "score": 0.8455
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "above",
-      "score": 0.8974
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.8717
-    },
-    {
-      "subject_id": 4,
-      "object_id": 3,
-      "type": "above",
-      "score": 0.804
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.7876
-    },
-    {
-      "subject_id": 1,
-      "object_id": 6,
-      "type": "above",
-      "score": 0.4372
-    },
-    {
-      "subject_id": 3,
       "object_id": 1,
-      "type": "below",
-      "score": 0.8974
+      "type": "inside",
+      "score": 0.8442
     },
     {
       "subject_id": 5,
       "object_id": 1,
-      "type": "below",
-      "score": 0.8717
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.804
-    },
-    {
-      "subject_id": 5,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.7876
+      "type": "inside",
+      "score": 0.8437
     },
     {
       "subject_id": 6,
       "object_id": 1,
-      "type": "below",
-      "score": 0.4372
+      "type": "inside",
+      "score": 0.8344
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "contains",
+      "score": 0.8617
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "contains",
+      "score": 0.8529
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "contains",
+      "score": 0.8442
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "contains",
+      "score": 0.8437
+    },
+    {
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "contains",
+      "score": 0.8344
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "overlap",
+      "score": 0.8617
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "overlap",
+      "score": 0.8529
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8442
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8437
+    },
+    {
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "overlap",
+      "score": 0.8344
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "near",
+      "score": 0.8715
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "near",
+      "score": 0.8529
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8442
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8437
+    },
+    {
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.8344
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.6348
+    },
+    {
+      "subject_id": 5,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.1392
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.1096
+    },
+    {
+      "subject_id": 4,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.1031
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.0836
     }
   ],
   "summary": {
     "object_count": 6,
     "has_person": false,
     "categories": [
-      "furniture",
-      "indoor_fixture",
-      "nature",
-      "structure"
+      "nature"
     ]
   },
   "debug": {

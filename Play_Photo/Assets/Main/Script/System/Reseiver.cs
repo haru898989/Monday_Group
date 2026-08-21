@@ -537,6 +537,36 @@ public class Reseiver : MonoBehaviour
                 clockGimmick.SetAudioClip(clockAudioClip);
 
                 break;
+
+            case "moon":
+                MoonGimmick moonGimmick =
+                    GetOrAddComponent<MoonGimmick>(target);
+
+                moonGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "cloud":
+            case "clouds":
+                CloudGimmick cloudGimmick =
+                    GetOrAddComponent<CloudGimmick>(target);
+
+                cloudGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "soda":
+            case "soft drink":
+            case "cola":
+            case "coke":
+            case "carbonated drink":
+            case "beer":
+            case "drink":
+            case "cup":
+                CarbonatedDrinkGimmick drinkGimmick =
+                    GetOrAddComponent<CarbonatedDrinkGimmick>(target);
+
+                drinkGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+                
         }
     }
 
