@@ -63,6 +63,17 @@ public class Reseiver : MonoBehaviour
     private Texture2D backgroundTexture;
     private Material backgroundMaterial;
 
+    // 写真の大きさへ自動で追従する額縁
+    [SerializeField]
+    private Sprite photoFrameSprite;
+
+    // カメラから見て写真より少し手前へ配置する
+    [SerializeField]
+    private float frameZOffset = -0.0005f;
+
+    private GameObject photoFrame;
+    private SpriteRenderer photoFrameRenderer;
+
     // 受信データ
     private ReceivedData latestData;
 
@@ -100,6 +111,9 @@ public class Reseiver : MonoBehaviour
 
     [SerializeField]
     private AudioClip treasureChestAudioClip;
+
+    [SerializeField]
+    private AudioClip clockAudioClip;
 
     // Pythonから送られてくる物体情報
     [Serializable]
@@ -212,6 +226,13 @@ public class Reseiver : MonoBehaviour
             receivedData.imageHeight > 0f
                 ? receivedData.imageHeight
                 : imageHeight;
+
+        // 受信した画像サイズに写真と額縁を追従させる
+        UpdateDisplayWorldSize(
+            receivedImageWidth,
+            receivedImageHeight
+        );
+        UpdatePhotoDisplayTransforms();
 
         // 前回生成したタッチ範囲を削除する
         ClearGeneratedObjects();
@@ -483,7 +504,39 @@ public class Reseiver : MonoBehaviour
                 GetOrAddComponent<BallGimmick>(target);
                 break;
 
+            case "wall":
+                WallGimmick wallGimmick =
+                    GetOrAddComponent<WallGimmick>(target);
 
+                wallGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "bridge":
+                BridgeGimmick bridgeGimmick =
+                    GetOrAddComponent<BridgeGimmick>(target);
+
+                bridgeGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+                break;
+
+            case "clock":
+
+                if (clockAudioClip == null)
+                {
+                    Debug.LogError("ReseiverのclockAudioClipがNULLです！");
+                }
+                else
+                {
+                    Debug.Log("Reseiverの時計音声：" + clockAudioClip.name);
+                }
+
+                ClockGimmick clockGimmick =
+                    GetOrAddComponent<ClockGimmick>(target);
+
+                clockGimmick.SetAudioClip(clockAudioClip);
+
+                break;
         }
     }
 
@@ -609,6 +662,101 @@ public class Reseiver : MonoBehaviour
 
 
     /// <summary>
+    /// 写真と額縁を、元画像の縦横比に合わせた大きさへ更新する
+    /// </summary>
+    private void UpdatePhotoDisplayTransforms()
+    {
+        if (photoBackground == null)
+        {
+            if (photoFrame != null)
+            {
+                photoFrame.SetActive(false);
+            }
+
+            return;
+        }
+
+        photoBackground.transform.localScale = new Vector3(
+            displayWorldWidth,
+            displayWorldHeight,
+            1f
+        );
+
+        RefreshPhotoFrame();
+    }
+
+
+    /// <summary>
+    /// 9スライス額縁を生成し、中央の透明部分を写真サイズへ合わせる
+    /// </summary>
+    private void RefreshPhotoFrame()
+    {
+        if (photoFrameSprite == null)
+        {
+            if (photoFrame != null)
+            {
+                photoFrame.SetActive(false);
+            }
+
+            return;
+        }
+
+        if (photoFrame == null)
+        {
+            photoFrame = new GameObject("RuntimePhotoFrame");
+            photoFrameRenderer =
+                photoFrame.AddComponent<SpriteRenderer>();
+        }
+
+        if (photoFrameRenderer == null)
+        {
+            photoFrameRenderer =
+                photoFrame.GetComponent<SpriteRenderer>();
+        }
+
+        photoFrame.SetActive(true);
+        photoFrame.transform.position = new Vector3(
+            0f,
+            0f,
+            objectZ + frameZOffset
+        );
+        photoFrame.transform.rotation = Quaternion.identity;
+        photoFrame.transform.localScale = Vector3.one;
+
+        photoFrameRenderer.sprite = photoFrameSprite;
+        photoFrameRenderer.drawMode = SpriteDrawMode.Sliced;
+        photoFrameRenderer.color = Color.white;
+
+        // Sprite Editorで設定した枠幅をワールド座標へ変換する
+        Vector4 spriteBorder = photoFrameSprite.border;
+        float pixelsPerUnit = Mathf.Max(
+            photoFrameSprite.pixelsPerUnit,
+            0.0001f
+        );
+
+        float horizontalBorderWorldSize =
+            (spriteBorder.x + spriteBorder.z) /
+            pixelsPerUnit;
+
+        float verticalBorderWorldSize =
+            (spriteBorder.y + spriteBorder.w) /
+            pixelsPerUnit;
+
+        // 透明な中央部分が写真と同じ大きさになるよう外寸を決める
+        photoFrameRenderer.size = new Vector2(
+            displayWorldWidth + horizontalBorderWorldSize,
+            displayWorldHeight + verticalBorderWorldSize
+        );
+
+        // 背景(-100)より上、認識物体(0以上)より下に描画する
+        photoFrameRenderer.sortingOrder = -10;
+        photoFrameRenderer.shadowCastingMode =
+            ShadowCastingMode.Off;
+        photoFrameRenderer.receiveShadows = false;
+    }
+
+
+    /// <summary>
     /// downloaded_imagesの写真を実行画面の背景へ表示する
     /// </summary>
     private void RefreshPhotoBackground(
@@ -726,11 +874,7 @@ public class Reseiver : MonoBehaviour
             objectZ + backgroundZOffset
         );
         photoBackground.transform.rotation = Quaternion.identity;
-        photoBackground.transform.localScale = new Vector3(
-            displayWorldWidth,
-            displayWorldHeight,
-            1f
-        );
+        UpdatePhotoDisplayTransforms();
 
         Renderer backgroundRenderer =
             photoBackground.GetComponent<Renderer>();
@@ -1104,23 +1248,31 @@ public class Reseiver : MonoBehaviour
                 continue;
             }
 
-            // Colliderの親からギミックを探す
+            // Colliderの親からギミックを取得
             GimmickBase gimmick =
                 hit.collider.GetComponentInParent<GimmickBase>();
 
-            // ギミックが付いていない物体は候補にしない
             if (gimmick == null)
+            {
+                continue;
+            }
+
+            // ★追加
+            // タップした場所が切り抜き画像の透明部分なら
+            // このオブジェクトは候補から除外する
+            if (!IsVisiblePixelHit(hit.collider.gameObject, hit))
             {
                 continue;
             }
 
             Bounds bounds = hit.collider.bounds;
 
-            // 当たり判定の縦横面積を計算
+            // Colliderの面積
             float area =
                 Mathf.Abs(bounds.size.x * bounds.size.y);
 
-            // 一番小さい当たり判定を優先
+            // 実際に画像が存在する物体の中で
+            // 一番小さい当たり判定を優先する
             if (area < smallestArea)
             {
                 smallestArea = area;
@@ -1145,6 +1297,98 @@ public class Reseiver : MonoBehaviour
                 "タッチ位置に実行可能なギミックがありません。"
             );
         }
+    }
+
+    /// <summary>
+    /// タップ位置が切り抜き画像の
+    /// 実際に表示されている部分か判定する
+    /// </summary>
+    private bool IsVisiblePixelHit(
+        GameObject targetObject,
+        RaycastHit hit
+    )
+    {
+        if (targetObject == null)
+        {
+            return false;
+        }
+
+        // Cutout_〇〇 という名前のRendererを探す
+        Renderer[] renderers =
+            targetObject.GetComponentsInChildren<Renderer>(true);
+
+        Renderer cutoutRenderer = null;
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer.gameObject.name.StartsWith("Cutout_"))
+            {
+                cutoutRenderer = renderer;
+                break;
+            }
+        }
+
+        // 切り抜き画像がない場合は
+        // 従来通りCollider全体を有効とする
+        if (cutoutRenderer == null)
+        {
+            return true;
+        }
+
+        Material material = cutoutRenderer.sharedMaterial;
+
+        if (material == null)
+        {
+            return true;
+        }
+
+        Texture2D texture =
+            material.mainTexture as Texture2D;
+
+        if (texture == null)
+        {
+            return true;
+        }
+
+        // タップしたワールド座標を
+        // オブジェクトのローカル座標へ変換
+        Vector3 localPoint =
+            targetObject.transform.InverseTransformPoint(
+                hit.point
+            );
+
+        // Quad / Cubeの中心が0で、
+        // 左端=-0.5、右端=0.5なので
+        // 0～1のUV座標へ変換
+        float u = localPoint.x + 0.5f;
+        float v = localPoint.y + 0.5f;
+
+        // 画像範囲外
+        if (u < 0f || u > 1f ||
+            v < 0f || v > 1f)
+        {
+            return false;
+        }
+
+        Color pixel;
+
+        try
+        {
+            // タップした位置の画像ピクセルを取得
+            pixel = texture.GetPixelBilinear(u, v);
+        }
+        catch (UnityException)
+        {
+            // TextureがReadableでなかった場合など
+            // タッチ不能になるのを避ける
+            return true;
+        }
+
+        // alphaがほぼ透明なら
+        // この物体を触っていないと判断
+        const float alphaThreshold = 0.1f;
+
+        return pixel.a > alphaThreshold;
     }
 
 
@@ -1268,6 +1512,13 @@ public class Reseiver : MonoBehaviour
         {
             Destroy(backgroundTexture);
             backgroundTexture = null;
+        }
+
+        if (photoFrame != null)
+        {
+            Destroy(photoFrame);
+            photoFrame = null;
+            photoFrameRenderer = null;
         }
     }
 }

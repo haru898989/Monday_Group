@@ -2,872 +2,495 @@
   "schema_version": "1.0",
   "image": {
     "path": "../downloaded_images/sample.jpg",
-    "width": 483,
-    "height": 860,
+    "width": 588,
+    "height": 393,
     "coordinate_space": "analysis_image"
   },
   "scene": {
     "primary": "indoor",
     "scores": {
-      "indoor": 0.5977,
-      "outdoor": 0.0,
-      "home": 0.2609,
-      "office": 0.5148,
-      "restaurant": 0.0,
-      "classroom": 0.181,
-      "park": 0.1462,
-      "nature": 0.0,
+      "indoor": 0.9136,
+      "outdoor": 0.2135,
+      "home": 0.7323,
+      "office": 0.5324,
+      "restaurant": 0.2926,
+      "classroom": 0.4576,
+      "park": 0.0755,
+      "nature": 0.1069,
       "food_scene": 0.0,
       "animal_scene": 0.0,
       "transportation_scene": 0.0,
-      "entertainment_scene": 0.373,
-      "night_scene": 0.0488,
+      "entertainment_scene": 0.0,
+      "night_scene": 0.0,
       "unknown": 0.0
     }
   },
   "main_objects": [
     {
-      "object_id": 2,
-      "name": "person",
-      "importance": 0.8233
-    },
-    {
-      "object_id": 5,
-      "name": "mirror",
-      "importance": 0.659
+      "object_id": 4,
+      "name": "wall",
+      "importance": 0.6672
     },
     {
       "object_id": 1,
-      "name": "phone",
-      "importance": 0.6118
+      "name": "clock",
+      "importance": 0.6406
+    },
+    {
+      "object_id": 3,
+      "name": "desk",
+      "importance": 0.5321
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "phone",
-      "original_name": "smartphone",
+      "canonical_name": "clock",
+      "original_name": "clock",
       "aliases": [
-        "phone",
-        "smartphone",
-        "cell phone"
+        "clock"
       ],
-      "category": "electronics",
-      "confidence": 0.665046,
+      "category": "indoor_fixture",
+      "confidence": 0.891905,
       "box": [
-        293,
-        227,
-        364,
-        333
+        296,
+        55,
+        396,
+        155
       ],
       "center": [
-        328.5,
-        280
+        346,
+        105
       ],
       "normalized_center": [
-        0.680124,
-        0.325581
+        0.588435,
+        0.267176
       ],
       "normalized_box": [
-        0.606625,
-        0.263953,
-        0.753623,
-        0.387209
+        0.503401,
+        0.139949,
+        0.673469,
+        0.394402
       ],
-      "width": 71,
-      "height": 106,
-      "area_ratio": 0.01811835,
-      "horizontal_position": "right",
+      "width": 100,
+      "height": 100,
+      "area_ratio": 0.04327431,
+      "horizontal_position": "center",
       "vertical_position": "top",
       "geometry_valid": true,
-      "importance": 0.6118,
-      "importance_score": 0.6118
+      "importance": 0.6406,
+      "importance_score": 0.6406
     },
     {
       "object_id": 2,
-      "canonical_name": "person",
-      "original_name": "person",
+      "canonical_name": "chair",
+      "original_name": "chair",
       "aliases": [
-        "person"
+        "chair"
       ],
-      "category": "human",
-      "confidence": 0.516951,
+      "category": "furniture",
+      "confidence": 0.548981,
       "box": [
-        103,
-        116,
-        467,
-        860
+        0,
+        160,
+        61,
+        393
       ],
       "center": [
-        285,
-        488
+        30.5,
+        276.5
       ],
       "normalized_center": [
-        0.590062,
-        0.567442
+        0.051871,
+        0.703562
       ],
       "normalized_box": [
-        0.213251,
-        0.134884,
-        0.966874,
+        0.0,
+        0.407125,
+        0.103741,
         1.0
       ],
-      "width": 364,
-      "height": 744,
-      "area_ratio": 0.65197169,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
+      "width": 61,
+      "height": 233,
+      "area_ratio": 0.06150577,
+      "horizontal_position": "left",
+      "vertical_position": "bottom",
       "geometry_valid": true,
-      "importance": 0.8233,
-      "importance_score": 0.8233
+      "importance": 0.4797,
+      "importance_score": 0.4797
     },
     {
       "object_id": 3,
-      "canonical_name": "phone",
-      "original_name": "smartphone",
+      "canonical_name": "desk",
+      "original_name": "desk",
       "aliases": [
-        "phone",
-        "smartphone",
-        "cell phone"
+        "desk"
       ],
-      "category": "electronics",
-      "confidence": 0.470717,
+      "category": "furniture",
+      "confidence": 0.389651,
       "box": [
-        306,
-        228,
-        363,
-        296
+        199,
+        300,
+        495,
+        393
       ],
       "center": [
-        334.5,
-        262
+        347,
+        346.5
       ],
       "normalized_center": [
-        0.692547,
-        0.304651
+        0.590136,
+        0.881679
       ],
       "normalized_box": [
-        0.63354,
-        0.265116,
-        0.751553,
-        0.344186
+        0.338435,
+        0.763359,
+        0.841837,
+        1.0
       ],
-      "width": 57,
-      "height": 68,
-      "area_ratio": 0.00933121,
-      "horizontal_position": "right",
-      "vertical_position": "top",
+      "width": 296,
+      "height": 93,
+      "area_ratio": 0.11912551,
+      "horizontal_position": "center",
+      "vertical_position": "bottom",
       "geometry_valid": true,
-      "importance": 0.5256,
-      "importance_score": 0.5256
+      "importance": 0.5321,
+      "importance_score": 0.5321
     },
     {
       "object_id": 4,
-      "canonical_name": "microphone",
-      "original_name": "microphone",
+      "canonical_name": "wall",
+      "original_name": "wall",
       "aliases": [
-        "microphone"
+        "wall"
       ],
-      "category": "entertainment",
-      "confidence": 0.366116,
+      "category": "structure",
+      "confidence": 0.363742,
       "box": [
-        293,
-        226,
-        364,
-        333
+        58,
+        1,
+        588,
+        320
       ],
       "center": [
-        328.5,
-        279.5
+        323,
+        160.5
       ],
       "normalized_center": [
-        0.680124,
-        0.325
+        0.54932,
+        0.408397
       ],
       "normalized_box": [
-        0.606625,
-        0.262791,
-        0.753623,
-        0.387209
+        0.098639,
+        0.002545,
+        1.0,
+        0.814249
       ],
-      "width": 71,
-      "height": 107,
-      "area_ratio": 0.01828928,
-      "horizontal_position": "right",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.5314,
-      "importance_score": 0.5314
-    },
-    {
-      "object_id": 5,
-      "canonical_name": "mirror",
-      "original_name": "mirror",
-      "aliases": [
-        "mirror"
-      ],
-      "category": "indoor_fixture",
-      "confidence": 0.282969,
-      "box": [
-        129,
-        0,
-        482,
-        727
-      ],
-      "center": [
-        305.5,
-        363.5
-      ],
-      "normalized_center": [
-        0.632505,
-        0.422674
-      ],
-      "normalized_box": [
-        0.267081,
-        0.0,
-        0.99793,
-        0.845349
-      ],
-      "width": 353,
-      "height": 727,
-      "area_ratio": 0.61782224,
+      "width": 530,
+      "height": 319,
+      "area_ratio": 0.73163871,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.659,
-      "importance_score": 0.659
+      "importance": 0.6672,
+      "importance_score": 0.6672
+    },
+    {
+      "object_id": 5,
+      "canonical_name": "shelf",
+      "original_name": "shelf",
+      "aliases": [
+        "shelf"
+      ],
+      "category": "furniture",
+      "confidence": 0.265737,
+      "box": [
+        199,
+        300,
+        497,
+        393
+      ],
+      "center": [
+        348,
+        346.5
+      ],
+      "normalized_center": [
+        0.591837,
+        0.881679
+      ],
+      "normalized_box": [
+        0.338435,
+        0.763359,
+        0.845238,
+        1.0
+      ],
+      "width": 298,
+      "height": 93,
+      "area_ratio": 0.11993041,
+      "horizontal_position": "center",
+      "vertical_position": "bottom",
+      "geometry_valid": true,
+      "importance": 0.4949,
+      "importance_score": 0.4949
     },
     {
       "object_id": 6,
-      "canonical_name": "display",
-      "original_name": "television",
+      "canonical_name": "flower",
+      "original_name": "flower",
       "aliases": [
-        "display",
-        "television"
+        "flower"
       ],
-      "category": "electronics",
-      "confidence": 0.18507,
+      "category": "nature",
+      "confidence": 0.132808,
       "box": [
-        72,
-        0,
-        212,
-        47
+        222,
+        135,
+        299,
+        259
       ],
       "center": [
-        142,
-        23.5
+        260.5,
+        197
       ],
       "normalized_center": [
-        0.293996,
-        0.027326
+        0.443027,
+        0.501272
       ],
       "normalized_box": [
-        0.149068,
-        0.0,
-        0.438923,
-        0.054651
+        0.377551,
+        0.343511,
+        0.508503,
+        0.659033
       ],
-      "width": 140,
-      "height": 47,
-      "area_ratio": 0.01584092,
-      "horizontal_position": "left",
-      "vertical_position": "top",
+      "width": 77,
+      "height": 124,
+      "area_ratio": 0.04131831,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.3132,
-      "importance_score": 0.3132
-    },
-    {
-      "object_id": 7,
-      "canonical_name": "phone",
-      "original_name": "cell phone",
-      "aliases": [
-        "phone",
-        "cell phone"
-      ],
-      "category": "electronics",
-      "confidence": 0.142705,
-      "box": [
-        331,
-        224,
-        359,
-        255
-      ],
-      "center": [
-        345,
-        239.5
-      ],
-      "normalized_center": [
-        0.714286,
-        0.278488
-      ],
-      "normalized_box": [
-        0.6853,
-        0.260465,
-        0.743271,
-        0.296512
-      ],
-      "width": 28,
-      "height": 31,
-      "area_ratio": 0.00208965,
-      "horizontal_position": "right",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3892,
-      "importance_score": 0.3892
-    },
-    {
-      "object_id": 8,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.138051,
-      "box": [
-        0,
-        241,
-        73,
-        326
-      ],
-      "center": [
-        36.5,
-        283.5
-      ],
-      "normalized_center": [
-        0.075569,
-        0.329651
-      ],
-      "normalized_box": [
-        0.0,
-        0.280233,
-        0.151139,
-        0.37907
-      ],
-      "width": 73,
-      "height": 85,
-      "area_ratio": 0.01493813,
-      "horizontal_position": "left",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.2759,
-      "importance_score": 0.2759
+      "importance": 0.4802,
+      "importance_score": 0.4802
     }
   ],
   "relations": [
     {
-      "subject_id": 2,
-      "object_id": 1,
-      "type": "using_candidate",
-      "score": 0.8966
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "using_candidate",
-      "score": 0.8733
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "using_candidate",
-      "score": 0.8588
-    },
-    {
-      "subject_id": 2,
-      "object_id": 7,
-      "type": "using_candidate",
-      "score": 0.8179
-    },
-    {
-      "subject_id": 1,
-      "object_id": 2,
-      "type": "in_front_of",
-      "score": 0.7861
-    },
-    {
-      "subject_id": 4,
-      "object_id": 2,
-      "type": "in_front_of",
-      "score": 0.7632
-    },
-    {
-      "subject_id": 3,
-      "object_id": 2,
-      "type": "in_front_of",
-      "score": 0.7625
-    },
-    {
-      "subject_id": 7,
-      "object_id": 2,
-      "type": "in_front_of",
-      "score": 0.7171
-    },
-    {
-      "subject_id": 1,
-      "object_id": 2,
-      "type": "inside",
-      "score": 0.8966
-    },
-    {
-      "subject_id": 3,
-      "object_id": 1,
-      "type": "inside",
-      "score": 0.8899
-    },
-    {
-      "subject_id": 3,
-      "object_id": 2,
-      "type": "inside",
-      "score": 0.8733
-    },
-    {
-      "subject_id": 4,
-      "object_id": 2,
-      "type": "inside",
-      "score": 0.8588
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8585
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "inside",
-      "score": 0.8538
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8412
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8305
-    },
-    {
-      "subject_id": 7,
-      "object_id": 2,
-      "type": "inside",
-      "score": 0.8179
-    },
-    {
-      "subject_id": 7,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8002
-    },
-    {
-      "subject_id": 7,
-      "object_id": 4,
-      "type": "inside",
-      "score": 0.7588
-    },
-    {
-      "subject_id": 7,
-      "object_id": 1,
-      "type": "inside",
-      "score": 0.7544
-    },
-    {
-      "subject_id": 2,
-      "object_id": 1,
-      "type": "contains",
-      "score": 0.8966
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "contains",
-      "score": 0.8899
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "contains",
-      "score": 0.8733
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.8588
-    },
-    {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "contains",
-      "score": 0.8585
-    },
-    {
-      "subject_id": 4,
-      "object_id": 3,
-      "type": "contains",
-      "score": 0.8538
-    },
-    {
-      "subject_id": 5,
-      "object_id": 3,
-      "type": "contains",
-      "score": 0.8412
-    },
-    {
-      "subject_id": 5,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.8305
-    },
-    {
-      "subject_id": 2,
-      "object_id": 7,
-      "type": "contains",
-      "score": 0.8179
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "contains",
-      "score": 0.8002
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "contains",
-      "score": 0.7588
-    },
-    {
-      "subject_id": 1,
-      "object_id": 7,
-      "type": "contains",
-      "score": 0.7544
-    },
-    {
-      "subject_id": 1,
-      "object_id": 2,
-      "type": "overlap",
-      "score": 0.8966
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "overlap",
-      "score": 0.8899
-    },
-    {
       "subject_id": 1,
       "object_id": 4,
-      "type": "overlap",
-      "score": 0.8734
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "overlap",
-      "score": 0.8733
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8588
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8585
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8538
-    },
-    {
-      "subject_id": 2,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8456
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8412
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8305
-    },
-    {
-      "subject_id": 2,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.8179
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.8002
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.7588
-    },
-    {
-      "subject_id": 1,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.7544
-    },
-    {
-      "subject_id": 3,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.718
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "overlap",
-      "score": 0.5019
-    },
-    {
-      "subject_id": 2,
-      "object_id": 1,
-      "type": "near",
-      "score": 0.8966
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "near",
-      "score": 0.8899
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8734
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "near",
-      "score": 0.8733
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8588
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8585
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8538
-    },
-    {
-      "subject_id": 2,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8456
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8412
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8305
-    },
-    {
-      "subject_id": 1,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.827
-    },
-    {
-      "subject_id": 2,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8179
-    },
-    {
-      "subject_id": 3,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8148
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.8072
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8071
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8002
-    },
-    {
-      "subject_id": 2,
-      "object_id": 8,
-      "type": "near",
-      "score": 0.402
-    },
-    {
-      "subject_id": 8,
-      "object_id": 1,
-      "type": "left_of",
-      "score": 0.8258
-    },
-    {
-      "subject_id": 8,
-      "object_id": 2,
-      "type": "left_of",
-      "score": 0.8168
+      "type": "inside",
+      "score": 0.8924
     },
     {
       "subject_id": 6,
+      "object_id": 4,
+      "type": "inside",
+      "score": 0.8049
+    },
+    {
+      "subject_id": 4,
       "object_id": 1,
-      "type": "left_of",
-      "score": 0.6669
+      "type": "contains",
+      "score": 0.8924
+    },
+    {
+      "subject_id": 4,
+      "object_id": 6,
+      "type": "contains",
+      "score": 0.8049
     },
     {
       "subject_id": 1,
-      "object_id": 8,
-      "type": "right_of",
-      "score": 0.8258
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8924
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8304
+    },
+    {
+      "subject_id": 4,
+      "object_id": 6,
+      "type": "overlap",
+      "score": 0.8049
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.2554
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.239
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8924
     },
     {
       "subject_id": 2,
-      "object_id": 8,
-      "type": "right_of",
-      "score": 0.8168
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8617
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8441
     },
     {
       "subject_id": 1,
       "object_id": 6,
-      "type": "right_of",
-      "score": 0.6669
+      "type": "near",
+      "score": 0.836
     },
     {
-      "subject_id": 6,
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8304
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8277
+    },
+    {
+      "subject_id": 4,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.8049
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.9249
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "left_of",
+      "score": 0.8656
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "left_of",
+      "score": 0.8579
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "left_of",
+      "score": 0.8455
+    },
+    {
+      "subject_id": 1,
       "object_id": 2,
+      "type": "right_of",
+      "score": 0.9249
+    },
+    {
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.8656
+    },
+    {
+      "subject_id": 4,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.8579
+    },
+    {
+      "subject_id": 5,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.8455
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
       "type": "above",
-      "score": 0.8273
+      "score": 0.8974
     },
     {
-      "subject_id": 2,
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.8717
+    },
+    {
+      "subject_id": 4,
+      "object_id": 3,
+      "type": "above",
+      "score": 0.804
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.7876
+    },
+    {
+      "subject_id": 1,
       "object_id": 6,
+      "type": "above",
+      "score": 0.4372
+    },
+    {
+      "subject_id": 3,
+      "object_id": 1,
       "type": "below",
-      "score": 0.8273
+      "score": 0.8974
+    },
+    {
+      "subject_id": 5,
+      "object_id": 1,
+      "type": "below",
+      "score": 0.8717
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.804
+    },
+    {
+      "subject_id": 5,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.7876
+    },
+    {
+      "subject_id": 6,
+      "object_id": 1,
+      "type": "below",
+      "score": 0.4372
     }
   ],
   "summary": {
-    "object_count": 8,
-    "has_person": true,
+    "object_count": 6,
+    "has_person": false,
     "categories": [
-      "electronics",
-      "entertainment",
-      "human",
+      "furniture",
       "indoor_fixture",
-      "light"
+      "nature",
+      "structure"
     ]
   },
   "debug": {
-    "removed_duplicates": [
-      {
-        "original_name": "cell phone",
-        "canonical_name": "phone",
-        "confidence": 0.638832,
-        "box": [
-          293,
-          227,
-          364,
-          332
-        ],
-        "kept_original_name": "smartphone",
-        "kept_canonical_name": "phone",
-        "iou": 0.990566,
-        "reason": "duplicate"
-      },
-      {
-        "original_name": "cell phone",
-        "canonical_name": "phone",
-        "confidence": 0.180145,
-        "box": [
-          312,
-          226,
-          361,
-          287
-        ],
-        "kept_original_name": "smartphone",
-        "kept_canonical_name": "phone",
-        "iou": 0.727479,
-        "reason": "duplicate"
-      },
-      {
-        "original_name": "mirror",
-        "canonical_name": "mirror",
-        "confidence": 0.13046,
-        "box": [
-          32,
-          2,
-          478,
-          859
-        ],
-        "kept_original_name": "mirror",
-        "kept_canonical_name": "mirror",
-        "iou": 0.655797,
-        "reason": "duplicate"
-      }
-    ],
-    "removed_low_confidence": [
-      {
-        "original_name": "hand",
-        "canonical_name": "hand",
-        "confidence": 0.129191,
-        "box": [
-          292,
-          228,
-          365,
-          329
-        ],
-        "threshold": 0.2,
-        "reason": "low_confidence"
-      }
-    ],
+    "removed_duplicates": [],
+    "removed_low_confidence": [],
     "removed_invalid": [],
     "warnings": []
   }
