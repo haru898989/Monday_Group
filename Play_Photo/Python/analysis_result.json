@@ -2,276 +2,275 @@
   "schema_version": "1.0",
   "image": {
     "path": "../downloaded_images/sample.jpg",
-    "width": 394,
+    "width": 602,
     "height": 700,
     "coordinate_space": "analysis_image"
   },
   "scene": {
     "primary": "indoor",
     "scores": {
-      "indoor": 0.7681,
+      "indoor": 0.4282,
       "outdoor": 0.0,
-      "home": 0.4664,
-      "office": 0.6101,
-      "restaurant": 0.3185,
-      "classroom": 0.3237,
-      "park": 0.1953,
+      "home": 0.2141,
+      "office": 0.0,
+      "restaurant": 0.0,
+      "classroom": 0.0,
+      "park": 0.1809,
       "nature": 0.0,
       "food_scene": 0.0,
       "animal_scene": 0.0,
       "transportation_scene": 0.0,
-      "entertainment_scene": 0.3748,
-      "night_scene": 0.1852,
-      "unknown": 0.0
+      "entertainment_scene": 0.0,
+      "night_scene": 0.0,
+      "unknown": 0.0483
     }
   },
   "main_objects": [
     {
-      "object_id": 5,
-      "name": "person",
-      "importance": 0.7952
-    },
-    {
-      "object_id": 1,
-      "name": "phone",
-      "importance": 0.6995
-    },
-    {
       "object_id": 2,
-      "name": "table",
-      "importance": 0.6754
+      "name": "person",
+      "importance": 0.7898
+    },
+    {
+      "object_id": 3,
+      "name": "mirror",
+      "importance": 0.6956
+    },
+    {
+      "object_id": 4,
+      "name": "face",
+      "importance": 0.6929
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "phone",
-      "original_name": "cell phone",
-      "aliases": [
-        "phone",
-        "cell phone"
-      ],
-      "category": "electronics",
-      "confidence": 0.694688,
-      "box": [
-        16,
-        269,
-        152,
-        444
-      ],
-      "center": [
-        84,
-        356.5
-      ],
-      "normalized_center": [
-        0.213198,
-        0.509286
-      ],
-      "normalized_box": [
-        0.040609,
-        0.384286,
-        0.385787,
-        0.634286
-      ],
-      "width": 136,
-      "height": 175,
-      "area_ratio": 0.08629442,
-      "horizontal_position": "left",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.6995,
-      "importance_score": 0.6995
-    },
-    {
-      "object_id": 2,
-      "canonical_name": "table",
-      "original_name": "table",
-      "aliases": [
-        "table"
-      ],
-      "category": "furniture",
-      "confidence": 0.530905,
-      "box": [
-        0,
-        562,
-        393,
-        699
-      ],
-      "center": [
-        196.5,
-        630.5
-      ],
-      "normalized_center": [
-        0.498731,
-        0.900714
-      ],
-      "normalized_box": [
-        0.0,
-        0.802857,
-        0.997462,
-        0.998571
-      ],
-      "width": 393,
-      "height": 137,
-      "area_ratio": 0.19521755,
-      "horizontal_position": "center",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.6754,
-      "importance_score": 0.6754
-    },
-    {
-      "object_id": 3,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.423975,
-      "box": [
-        34,
-        79,
-        75,
-        133
-      ],
-      "center": [
-        54.5,
-        106
-      ],
-      "normalized_center": [
-        0.138325,
-        0.151429
-      ],
-      "normalized_box": [
-        0.086294,
-        0.112857,
-        0.190355,
-        0.19
-      ],
-      "width": 41,
-      "height": 54,
-      "area_ratio": 0.00802756,
-      "horizontal_position": "left",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.4177,
-      "importance_score": 0.4177
-    },
-    {
-      "object_id": 4,
       "canonical_name": "person",
       "original_name": "person",
       "aliases": [
         "person"
       ],
       "category": "human",
-      "confidence": 0.365269,
+      "confidence": 0.551684,
       "box": [
-        91,
-        232,
-        177,
-        339
+        365,
+        551,
+        440,
+        631
       ],
       "center": [
-        134,
-        285.5
+        402.5,
+        591
       ],
       "normalized_center": [
-        0.340102,
-        0.407857
+        0.668605,
+        0.844286
       ],
       "normalized_box": [
-        0.230964,
-        0.331429,
-        0.449239,
-        0.484286
+        0.606312,
+        0.787143,
+        0.730897,
+        0.901429
       ],
-      "width": 86,
-      "height": 107,
-      "area_ratio": 0.03336476,
+      "width": 75,
+      "height": 80,
+      "area_ratio": 0.01423825,
+      "horizontal_position": "right",
+      "vertical_position": "bottom",
+      "geometry_valid": true,
+      "importance": 0.5112,
+      "importance_score": 0.5112
+    },
+    {
+      "object_id": 2,
+      "canonical_name": "person",
+      "original_name": "human",
+      "aliases": [
+        "person",
+        "human"
+      ],
+      "category": "human",
+      "confidence": 0.510683,
+      "box": [
+        128,
+        91,
+        475,
+        438
+      ],
+      "center": [
+        301.5,
+        264.5
+      ],
+      "normalized_center": [
+        0.500831,
+        0.377857
+      ],
+      "normalized_box": [
+        0.212625,
+        0.13,
+        0.789037,
+        0.625714
+      ],
+      "width": 347,
+      "height": 347,
+      "area_ratio": 0.28573564,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.6095,
-      "importance_score": 0.6095
+      "importance": 0.7898,
+      "importance_score": 0.7898
+    },
+    {
+      "object_id": 3,
+      "canonical_name": "mirror",
+      "original_name": "mirror",
+      "aliases": [
+        "mirror"
+      ],
+      "category": "indoor_fixture",
+      "confidence": 0.475833,
+      "box": [
+        123,
+        82,
+        482,
+        441
+      ],
+      "center": [
+        302.5,
+        261.5
+      ],
+      "normalized_center": [
+        0.502492,
+        0.373571
+      ],
+      "normalized_box": [
+        0.204319,
+        0.117143,
+        0.800664,
+        0.63
+      ],
+      "width": 359,
+      "height": 359,
+      "area_ratio": 0.30584006,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.6956,
+      "importance_score": 0.6956
+    },
+    {
+      "object_id": 4,
+      "canonical_name": "face",
+      "original_name": "face",
+      "aliases": [
+        "face"
+      ],
+      "category": "human",
+      "confidence": 0.39006,
+      "box": [
+        143,
+        96,
+        458,
+        391
+      ],
+      "center": [
+        300.5,
+        243.5
+      ],
+      "normalized_center": [
+        0.499169,
+        0.347857
+      ],
+      "normalized_box": [
+        0.237542,
+        0.137143,
+        0.760797,
+        0.558571
+      ],
+      "width": 315,
+      "height": 295,
+      "area_ratio": 0.22051495,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.6929,
+      "importance_score": 0.6929
     },
     {
       "object_id": 5,
       "canonical_name": "person",
       "original_name": "person",
       "aliases": [
-        "person",
-        "man"
+        "person"
       ],
       "category": "human",
-      "confidence": 0.351528,
+      "confidence": 0.279294,
       "box": [
-        12,
-        49,
-        393,
-        698
+        159,
+        551,
+        238,
+        632
       ],
       "center": [
-        202.5,
-        373.5
+        198.5,
+        591.5
       ],
       "normalized_center": [
-        0.513959,
-        0.533571
+        0.329734,
+        0.845
       ],
       "normalized_box": [
-        0.030457,
-        0.07,
-        0.997462,
-        0.997143
+        0.26412,
+        0.787143,
+        0.395349,
+        0.902857
       ],
-      "width": 381,
-      "height": 649,
-      "area_ratio": 0.89655185,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
+      "width": 79,
+      "height": 81,
+      "area_ratio": 0.0151851,
+      "horizontal_position": "left",
+      "vertical_position": "bottom",
       "geometry_valid": true,
-      "importance": 0.7952,
-      "importance_score": 0.7952
+      "importance": 0.4307,
+      "importance_score": 0.4307
     },
     {
       "object_id": 6,
-      "canonical_name": "balloon",
-      "original_name": "balloon",
+      "canonical_name": "face",
+      "original_name": "face",
       "aliases": [
-        "balloon"
+        "face"
       ],
-      "category": "entertainment",
-      "confidence": 0.328701,
+      "category": "human",
+      "confidence": 0.255458,
       "box": [
-        119,
-        81,
-        158,
-        127
+        261,
+        550,
+        339,
+        624
       ],
       "center": [
-        138.5,
-        104
+        300,
+        587
       ],
       "normalized_center": [
-        0.351523,
-        0.148571
+        0.498339,
+        0.838571
       ],
       "normalized_box": [
-        0.30203,
-        0.115714,
-        0.401015,
-        0.181429
+        0.433555,
+        0.785714,
+        0.563123,
+        0.891429
       ],
-      "width": 39,
-      "height": 46,
-      "area_ratio": 0.00650471,
+      "width": 78,
+      "height": 74,
+      "area_ratio": 0.0136972,
       "horizontal_position": "center",
-      "vertical_position": "top",
+      "vertical_position": "bottom",
       "geometry_valid": true,
-      "importance": 0.4528,
-      "importance_score": 0.4528
+      "importance": 0.3996,
+      "importance_score": 0.3996
     },
     {
       "object_id": 7,
@@ -281,1285 +280,368 @@
         "person"
       ],
       "category": "human",
-      "confidence": 0.328228,
+      "confidence": 0.209839,
       "box": [
-        166,
-        238,
-        215,
-        312
+        262,
+        550,
+        340,
+        626
       ],
       "center": [
-        190.5,
-        275
+        301,
+        588
       ],
       "normalized_center": [
-        0.483503,
-        0.392857
+        0.5,
+        0.84
       ],
       "normalized_box": [
-        0.42132,
-        0.34,
-        0.545685,
-        0.445714
+        0.435216,
+        0.785714,
+        0.564784,
+        0.894286
       ],
-      "width": 49,
-      "height": 74,
-      "area_ratio": 0.01314721,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.5819,
-      "importance_score": 0.5819
-    },
-    {
-      "object_id": 8,
-      "canonical_name": "hand",
-      "original_name": "hand",
-      "aliases": [
-        "hand"
-      ],
-      "category": "human",
-      "confidence": 0.325348,
-      "box": [
-        97,
-        614,
-        277,
-        700
-      ],
-      "center": [
-        187,
-        657
-      ],
-      "normalized_center": [
-        0.474619,
-        0.938571
-      ],
-      "normalized_box": [
-        0.246193,
-        0.877143,
-        0.703046,
-        1.0
-      ],
-      "width": 180,
-      "height": 86,
-      "area_ratio": 0.05612763,
+      "width": 78,
+      "height": 76,
+      "area_ratio": 0.01406739,
       "horizontal_position": "center",
       "vertical_position": "bottom",
       "geometry_valid": true,
-      "importance": 0.4427,
-      "importance_score": 0.4427
-    },
-    {
-      "object_id": 9,
-      "canonical_name": "person",
-      "original_name": "person",
-      "aliases": [
-        "person"
-      ],
-      "category": "human",
-      "confidence": 0.319818,
-      "box": [
-        188,
-        240,
-        256,
-        310
-      ],
-      "center": [
-        222,
-        275
-      ],
-      "normalized_center": [
-        0.563452,
-        0.392857
-      ],
-      "normalized_box": [
-        0.477157,
-        0.342857,
-        0.649746,
-        0.442857
-      ],
-      "width": 68,
-      "height": 70,
-      "area_ratio": 0.01725888,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.5842,
-      "importance_score": 0.5842
-    },
-    {
-      "object_id": 10,
-      "canonical_name": "person",
-      "original_name": "person",
-      "aliases": [
-        "person"
-      ],
-      "category": "human",
-      "confidence": 0.245982,
-      "box": [
-        67,
-        255,
-        86,
-        271
-      ],
-      "center": [
-        76.5,
-        263
-      ],
-      "normalized_center": [
-        0.194162,
-        0.375714
-      ],
-      "normalized_box": [
-        0.170051,
-        0.364286,
-        0.218274,
-        0.387143
-      ],
-      "width": 19,
-      "height": 16,
-      "area_ratio": 0.00110225,
-      "horizontal_position": "left",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.449,
-      "importance_score": 0.449
-    },
-    {
-      "object_id": 11,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.240097,
-      "box": [
-        115,
-        0,
-        175,
-        58
-      ],
-      "center": [
-        145,
-        29
-      ],
-      "normalized_center": [
-        0.36802,
-        0.041429
-      ],
-      "normalized_box": [
-        0.291878,
-        0.0,
-        0.444162,
-        0.082857
-      ],
-      "width": 60,
-      "height": 58,
-      "area_ratio": 0.01261784,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3824,
-      "importance_score": 0.3824
-    },
-    {
-      "object_id": 12,
-      "canonical_name": "balloon",
-      "original_name": "balloon",
-      "aliases": [
-        "balloon"
-      ],
-      "category": "entertainment",
-      "confidence": 0.216265,
-      "box": [
-        117,
-        0,
-        175,
-        58
-      ],
-      "center": [
-        146,
-        29
-      ],
-      "normalized_center": [
-        0.370558,
-        0.041429
-      ],
-      "normalized_box": [
-        0.296954,
-        0.0,
-        0.444162,
-        0.082857
-      ],
-      "width": 58,
-      "height": 58,
-      "area_ratio": 0.01219724,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.4088,
-      "importance_score": 0.4088
-    },
-    {
-      "object_id": 13,
-      "canonical_name": "hand",
-      "original_name": "hand",
-      "aliases": [
-        "hand"
-      ],
-      "category": "human",
-      "confidence": 0.20844,
-      "box": [
-        40,
-        340,
-        154,
-        486
-      ],
-      "center": [
-        97,
-        413
-      ],
-      "normalized_center": [
-        0.246193,
-        0.59
-      ],
-      "normalized_box": [
-        0.101523,
-        0.485714,
-        0.390863,
-        0.694286
-      ],
-      "width": 114,
-      "height": 146,
-      "area_ratio": 0.06034808,
-      "horizontal_position": "left",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.4562,
-      "importance_score": 0.4562
-    },
-    {
-      "object_id": 14,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.201573,
-      "box": [
-        38,
-        153,
-        67,
-        193
-      ],
-      "center": [
-        52.5,
-        173
-      ],
-      "normalized_center": [
-        0.133249,
-        0.247143
-      ],
-      "normalized_box": [
-        0.096447,
-        0.218571,
-        0.170051,
-        0.275714
-      ],
-      "width": 29,
-      "height": 40,
-      "area_ratio": 0.00420595,
-      "horizontal_position": "left",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3532,
-      "importance_score": 0.3532
-    },
-    {
-      "object_id": 15,
-      "canonical_name": "balloon",
-      "original_name": "balloon",
-      "aliases": [
-        "balloon"
-      ],
-      "category": "entertainment",
-      "confidence": 0.170841,
-      "box": [
-        38,
-        154,
-        66,
-        193
-      ],
-      "center": [
-        52,
-        173.5
-      ],
-      "normalized_center": [
-        0.13198,
-        0.247857
-      ],
-      "normalized_box": [
-        0.096447,
-        0.22,
-        0.167513,
-        0.275714
-      ],
-      "width": 28,
-      "height": 39,
-      "area_ratio": 0.00395939,
-      "horizontal_position": "left",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3772,
-      "importance_score": 0.3772
-    },
-    {
-      "object_id": 16,
-      "canonical_name": "balloon",
-      "original_name": "balloon",
-      "aliases": [
-        "balloon"
-      ],
-      "category": "entertainment",
-      "confidence": 0.149947,
-      "box": [
-        34,
-        87,
-        75,
-        132
-      ],
-      "center": [
-        54.5,
-        109.5
-      ],
-      "normalized_center": [
-        0.138325,
-        0.156429
-      ],
-      "normalized_box": [
-        0.086294,
-        0.124286,
-        0.190355,
-        0.188571
-      ],
-      "width": 41,
-      "height": 45,
-      "area_ratio": 0.00668963,
-      "horizontal_position": "left",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3666,
-      "importance_score": 0.3666
-    },
-    {
-      "object_id": 17,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.136745,
-      "box": [
-        155,
-        46,
-        203,
-        148
-      ],
-      "center": [
-        179,
-        97
-      ],
-      "normalized_center": [
-        0.454315,
-        0.138571
-      ],
-      "normalized_box": [
-        0.393401,
-        0.065714,
-        0.515228,
-        0.211429
-      ],
-      "width": 48,
-      "height": 102,
-      "area_ratio": 0.01775199,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.395,
-      "importance_score": 0.395
-    },
-    {
-      "object_id": 18,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.132235,
-      "box": [
-        195,
-        156,
-        219,
-        188
-      ],
-      "center": [
-        207,
-        172
-      ],
-      "normalized_center": [
-        0.525381,
-        0.245714
-      ],
-      "normalized_box": [
-        0.494924,
-        0.222857,
-        0.555838,
-        0.268571
-      ],
-      "width": 24,
-      "height": 32,
-      "area_ratio": 0.00278463,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3717,
-      "importance_score": 0.3717
-    },
-    {
-      "object_id": 19,
-      "canonical_name": "lamp",
-      "original_name": "lamp",
-      "aliases": [
-        "lamp"
-      ],
-      "category": "light",
-      "confidence": 0.123474,
-      "box": [
-        119,
-        80,
-        159,
-        127
-      ],
-      "center": [
-        139,
-        103.5
-      ],
-      "normalized_center": [
-        0.352792,
-        0.147857
-      ],
-      "normalized_box": [
-        0.30203,
-        0.114286,
-        0.403553,
-        0.181429
-      ],
-      "width": 40,
-      "height": 47,
-      "area_ratio": 0.00681653,
-      "horizontal_position": "center",
-      "vertical_position": "top",
-      "geometry_valid": true,
-      "importance": 0.3577,
-      "importance_score": 0.3577
+      "importance": 0.4383,
+      "importance_score": 0.4383
     }
   ],
   "relations": [
     {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "holding_candidate",
-      "score": 0.8989
-    },
-    {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "using_candidate",
-      "score": 0.8735
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "using_candidate",
-      "score": 0.835
-    },
-    {
-      "subject_id": 5,
-      "object_id": 15,
-      "type": "using_candidate",
-      "score": 0.8113
-    },
-    {
-      "subject_id": 5,
-      "object_id": 16,
-      "type": "using_candidate",
-      "score": 0.8074
-    },
-    {
       "subject_id": 4,
-      "object_id": 1,
-      "type": "using_candidate",
-      "score": 0.7118
-    },
-    {
-      "subject_id": 10,
-      "object_id": 1,
-      "type": "using_candidate",
-      "score": 0.6537
-    },
-    {
-      "subject_id": 5,
-      "object_id": 12,
-      "type": "using_candidate",
-      "score": 0.65
-    },
-    {
-      "subject_id": 13,
-      "object_id": 5,
+      "object_id": 2,
       "type": "in_front_of",
-      "score": 0.8749
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.8736
+      "score": 0.8527
     },
     {
       "subject_id": 2,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.772
-    },
-    {
-      "subject_id": 8,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.7509
-    },
-    {
-      "subject_id": 14,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.7264
-    },
-    {
-      "subject_id": 15,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.7235
-    },
-    {
-      "subject_id": 18,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.7181
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.7079
-    },
-    {
-      "subject_id": 6,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.701
-    },
-    {
-      "subject_id": 16,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.6844
-    },
-    {
-      "subject_id": 19,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.6813
-    },
-    {
-      "subject_id": 17,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.6638
-    },
-    {
-      "subject_id": 11,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.1444
-    },
-    {
-      "subject_id": 12,
-      "object_id": 5,
-      "type": "in_front_of",
-      "score": 0.1422
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
+      "object_id": 3,
       "type": "inside",
-      "score": 0.8735
+      "score": 0.8732
     },
     {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8465
-    },
-    {
-      "subject_id": 8,
+      "subject_id": 4,
       "object_id": 2,
       "type": "inside",
-      "score": 0.8452
+      "score": 0.8616
     },
     {
       "subject_id": 4,
-      "object_id": 5,
+      "object_id": 3,
       "type": "inside",
-      "score": 0.8396
+      "score": 0.8577
     },
     {
-      "subject_id": 6,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.835
-    },
-    {
-      "subject_id": 7,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8349
-    },
-    {
-      "subject_id": 9,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8338
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "contains",
+      "score": 0.8732
     },
     {
       "subject_id": 2,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8298
-    },
-    {
-      "subject_id": 10,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8235
-    },
-    {
-      "subject_id": 13,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8177
-    },
-    {
-      "subject_id": 8,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8171
-    },
-    {
-      "subject_id": 14,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8165
-    },
-    {
-      "subject_id": 16,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.813
-    },
-    {
-      "subject_id": 15,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8113
-    },
-    {
-      "subject_id": 16,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8074
-    },
-    {
-      "subject_id": 18,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8039
-    },
-    {
-      "subject_id": 19,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.8021
-    },
-    {
-      "subject_id": 15,
-      "object_id": 14,
-      "type": "inside",
-      "score": 0.7964
-    },
-    {
-      "subject_id": 17,
-      "object_id": 5,
-      "type": "inside",
-      "score": 0.7828
-    },
-    {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "contains",
-      "score": 0.8735
-    },
-    {
-      "subject_id": 5,
-      "object_id": 3,
-      "type": "contains",
-      "score": 0.8465
-    },
-    {
-      "subject_id": 2,
-      "object_id": 8,
-      "type": "contains",
-      "score": 0.8452
-    },
-    {
-      "subject_id": 5,
       "object_id": 4,
       "type": "contains",
-      "score": 0.8396
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "contains",
-      "score": 0.835
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "contains",
-      "score": 0.8349
-    },
-    {
-      "subject_id": 5,
-      "object_id": 9,
-      "type": "contains",
-      "score": 0.8338
-    },
-    {
-      "subject_id": 5,
-      "object_id": 2,
-      "type": "contains",
-      "score": 0.8298
-    },
-    {
-      "subject_id": 5,
-      "object_id": 10,
-      "type": "contains",
-      "score": 0.8235
-    },
-    {
-      "subject_id": 5,
-      "object_id": 13,
-      "type": "contains",
-      "score": 0.8177
-    },
-    {
-      "subject_id": 5,
-      "object_id": 8,
-      "type": "contains",
-      "score": 0.8171
-    },
-    {
-      "subject_id": 5,
-      "object_id": 14,
-      "type": "contains",
-      "score": 0.8165
+      "score": 0.8616
     },
     {
       "subject_id": 3,
-      "object_id": 16,
+      "object_id": 4,
       "type": "contains",
-      "score": 0.813
-    },
-    {
-      "subject_id": 5,
-      "object_id": 15,
-      "type": "contains",
-      "score": 0.8113
-    },
-    {
-      "subject_id": 5,
-      "object_id": 16,
-      "type": "contains",
-      "score": 0.8074
-    },
-    {
-      "subject_id": 5,
-      "object_id": 18,
-      "type": "contains",
-      "score": 0.8039
-    },
-    {
-      "subject_id": 5,
-      "object_id": 19,
-      "type": "contains",
-      "score": 0.8021
-    },
-    {
-      "subject_id": 14,
-      "object_id": 15,
-      "type": "contains",
-      "score": 0.7964
-    },
-    {
-      "subject_id": 5,
-      "object_id": 17,
-      "type": "contains",
-      "score": 0.7828
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8735
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8465
+      "score": 0.8577
     },
     {
       "subject_id": 2,
-      "object_id": 8,
+      "object_id": 3,
       "type": "overlap",
-      "score": 0.8452
-    },
-    {
-      "subject_id": 1,
-      "object_id": 13,
-      "type": "overlap",
-      "score": 0.8451
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8396
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "overlap",
-      "score": 0.835
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.8349
-    },
-    {
-      "subject_id": 5,
-      "object_id": 9,
-      "type": "overlap",
-      "score": 0.8338
+      "score": 0.8732
     },
     {
       "subject_id": 2,
-      "object_id": 5,
-      "type": "overlap",
-      "score": 0.8298
-    },
-    {
-      "subject_id": 5,
-      "object_id": 10,
-      "type": "overlap",
-      "score": 0.8235
-    },
-    {
-      "subject_id": 5,
-      "object_id": 13,
-      "type": "overlap",
-      "score": 0.8177
-    },
-    {
-      "subject_id": 5,
-      "object_id": 8,
-      "type": "overlap",
-      "score": 0.8171
-    },
-    {
-      "subject_id": 5,
-      "object_id": 14,
-      "type": "overlap",
-      "score": 0.8165
-    },
-    {
-      "subject_id": 3,
-      "object_id": 16,
-      "type": "overlap",
-      "score": 0.813
-    },
-    {
-      "subject_id": 5,
-      "object_id": 15,
-      "type": "overlap",
-      "score": 0.8113
-    },
-    {
-      "subject_id": 5,
-      "object_id": 16,
-      "type": "overlap",
-      "score": 0.8074
-    },
-    {
-      "subject_id": 5,
-      "object_id": 18,
-      "type": "overlap",
-      "score": 0.8039
-    },
-    {
-      "subject_id": 5,
-      "object_id": 19,
-      "type": "overlap",
-      "score": 0.8021
-    },
-    {
-      "subject_id": 14,
-      "object_id": 15,
-      "type": "overlap",
-      "score": 0.7964
-    },
-    {
-      "subject_id": 5,
-      "object_id": 17,
-      "type": "overlap",
-      "score": 0.7828
-    },
-    {
-      "subject_id": 7,
-      "object_id": 9,
-      "type": "overlap",
-      "score": 0.7045
-    },
-    {
-      "subject_id": 1,
       "object_id": 4,
       "type": "overlap",
-      "score": 0.474
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.2549
-    },
-    {
-      "subject_id": 5,
-      "object_id": 11,
-      "type": "overlap",
-      "score": 0.189
-    },
-    {
-      "subject_id": 5,
-      "object_id": 12,
-      "type": "overlap",
-      "score": 0.1853
-    },
-    {
-      "subject_id": 4,
-      "object_id": 1,
-      "type": "near",
-      "score": 0.8759
-    },
-    {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "near",
-      "score": 0.8735
-    },
-    {
-      "subject_id": 5,
-      "object_id": 2,
-      "type": "near",
-      "score": 0.858
-    },
-    {
-      "subject_id": 2,
-      "object_id": 8,
-      "type": "near",
-      "score": 0.8539
-    },
-    {
-      "subject_id": 10,
-      "object_id": 1,
-      "type": "near",
-      "score": 0.8533
-    },
-    {
-      "subject_id": 5,
-      "object_id": 3,
-      "type": "near",
-      "score": 0.8465
-    },
-    {
-      "subject_id": 1,
-      "object_id": 13,
-      "type": "near",
-      "score": 0.8451
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "near",
-      "score": 0.8396
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8366
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.835
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.8349
-    },
-    {
-      "subject_id": 5,
-      "object_id": 8,
-      "type": "near",
-      "score": 0.8345
-    },
-    {
-      "subject_id": 5,
-      "object_id": 9,
-      "type": "near",
-      "score": 0.8338
-    },
-    {
-      "subject_id": 7,
-      "object_id": 9,
-      "type": "near",
-      "score": 0.831
-    },
-    {
-      "subject_id": 5,
-      "object_id": 10,
-      "type": "near",
-      "score": 0.8235
-    },
-    {
-      "subject_id": 5,
-      "object_id": 11,
-      "type": "near",
-      "score": 0.8226
-    },
-    {
-      "subject_id": 5,
-      "object_id": 12,
-      "type": "near",
-      "score": 0.8189
-    },
-    {
-      "subject_id": 5,
-      "object_id": 13,
-      "type": "near",
-      "score": 0.8177
-    },
-    {
-      "subject_id": 5,
-      "object_id": 14,
-      "type": "near",
-      "score": 0.8165
+      "score": 0.8616
     },
     {
       "subject_id": 3,
-      "object_id": 16,
-      "type": "near",
-      "score": 0.813
-    },
-    {
-      "subject_id": 5,
-      "object_id": 15,
-      "type": "near",
-      "score": 0.8113
-    },
-    {
-      "subject_id": 5,
-      "object_id": 16,
-      "type": "near",
-      "score": 0.8074
-    },
-    {
-      "subject_id": 5,
-      "object_id": 17,
-      "type": "near",
-      "score": 0.8048
-    },
-    {
-      "subject_id": 5,
-      "object_id": 18,
-      "type": "near",
-      "score": 0.8039
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8577
     },
     {
       "subject_id": 6,
-      "object_id": 17,
+      "object_id": 7,
+      "type": "overlap",
+      "score": 0.8079
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
       "type": "near",
-      "score": 0.803
+      "score": 0.8732
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8616
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8577
+    },
+    {
+      "subject_id": 7,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.8079
     },
     {
       "subject_id": 5,
-      "object_id": 19,
+      "object_id": 6,
       "type": "near",
-      "score": 0.8021
+      "score": 0.4771
     },
     {
-      "subject_id": 14,
-      "object_id": 15,
+      "subject_id": 1,
+      "object_id": 7,
       "type": "near",
-      "score": 0.7964
+      "score": 0.4658
     },
     {
-      "subject_id": 4,
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "near",
+      "score": 0.4651
+    },
+    {
+      "subject_id": 5,
+      "object_id": 7,
+      "type": "near",
+      "score": 0.456
+    },
+    {
+      "subject_id": 5,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.6064
+    },
+    {
+      "subject_id": 6,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.3493
+    },
+    {
+      "subject_id": 7,
+      "object_id": 1,
+      "type": "left_of",
+      "score": 0.338
+    },
+    {
+      "subject_id": 5,
+      "object_id": 6,
+      "type": "left_of",
+      "score": 0.3197
+    },
+    {
+      "subject_id": 5,
       "object_id": 7,
       "type": "left_of",
-      "score": 0.3017
+      "score": 0.3159
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "right_of",
+      "score": 0.6064
+    },
+    {
+      "subject_id": 1,
+      "object_id": 6,
+      "type": "right_of",
+      "score": 0.3493
+    },
+    {
+      "subject_id": 1,
+      "object_id": 7,
+      "type": "right_of",
+      "score": 0.338
+    },
+    {
+      "subject_id": 6,
+      "object_id": 5,
+      "type": "right_of",
+      "score": 0.3197
+    },
+    {
+      "subject_id": 7,
+      "object_id": 5,
+      "type": "right_of",
+      "score": 0.3159
+    },
+    {
+      "subject_id": 4,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.8606
+    },
+    {
+      "subject_id": 3,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.8342
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.8323
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.8282
+    },
+    {
+      "subject_id": 4,
+      "object_id": 6,
+      "type": "above",
+      "score": 0.815
+    },
+    {
+      "subject_id": 4,
+      "object_id": 7,
+      "type": "above",
+      "score": 0.8097
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.7983
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.7951
+    },
+    {
+      "subject_id": 3,
+      "object_id": 6,
+      "type": "above",
+      "score": 0.7847
+    },
+    {
+      "subject_id": 2,
+      "object_id": 6,
+      "type": "above",
+      "score": 0.7814
+    },
+    {
+      "subject_id": 3,
+      "object_id": 7,
+      "type": "above",
+      "score": 0.7786
+    },
+    {
+      "subject_id": 2,
+      "object_id": 7,
+      "type": "above",
+      "score": 0.7751
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.8606
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "below",
+      "score": 0.8342
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "below",
+      "score": 0.8323
+    },
+    {
+      "subject_id": 5,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.8282
+    },
+    {
+      "subject_id": 6,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.815
     },
     {
       "subject_id": 7,
       "object_id": 4,
-      "type": "right_of",
-      "score": 0.3017
-    },
-    {
-      "subject_id": 11,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.8108
-    },
-    {
-      "subject_id": 12,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.8071
-    },
-    {
-      "subject_id": 10,
-      "object_id": 1,
-      "type": "above",
-      "score": 0.3037
+      "type": "below",
+      "score": 0.8097
     },
     {
       "subject_id": 5,
-      "object_id": 11,
+      "object_id": 3,
       "type": "below",
-      "score": 0.8108
+      "score": 0.7983
     },
     {
       "subject_id": 5,
-      "object_id": 12,
+      "object_id": 2,
       "type": "below",
-      "score": 0.8071
+      "score": 0.7951
     },
     {
-      "subject_id": 1,
-      "object_id": 10,
+      "subject_id": 6,
+      "object_id": 3,
       "type": "below",
-      "score": 0.3037
+      "score": 0.7847
+    },
+    {
+      "subject_id": 6,
+      "object_id": 2,
+      "type": "below",
+      "score": 0.7814
+    },
+    {
+      "subject_id": 7,
+      "object_id": 3,
+      "type": "below",
+      "score": 0.7786
+    },
+    {
+      "subject_id": 7,
+      "object_id": 2,
+      "type": "below",
+      "score": 0.7751
     }
   ],
   "summary": {
-    "object_count": 19,
+    "object_count": 7,
     "has_person": true,
     "categories": [
-      "electronics",
-      "entertainment",
-      "furniture",
       "human",
-      "light"
+      "indoor_fixture"
     ]
   },
   "debug": {
-    "removed_duplicates": [
-      {
-        "original_name": "man",
-        "canonical_name": "person",
-        "confidence": 0.247896,
-        "box": [
-          13,
-          41,
-          393,
-          699
-        ],
-        "kept_original_name": "person",
-        "kept_canonical_name": "person",
-        "iou": 0.983769,
-        "reason": "duplicate"
-      }
-    ],
-    "removed_low_confidence": [
-      {
-        "original_name": "human",
-        "canonical_name": "person",
-        "confidence": 0.141983,
-        "box": [
-          94,
-          551,
-          393,
-          700
-        ],
-        "threshold": 0.15,
-        "reason": "low_confidence"
-      },
-      {
-        "original_name": "face",
-        "canonical_name": "face",
-        "confidence": 0.132042,
-        "box": [
-          263,
-          131,
-          392,
-          357
-        ],
-        "threshold": 0.25,
-        "reason": "low_confidence"
-      },
-      {
-        "original_name": "person",
-        "canonical_name": "person",
-        "confidence": 0.127175,
-        "box": [
-          95,
-          550,
-          393,
-          700
-        ],
-        "threshold": 0.15,
-        "reason": "low_confidence"
-      }
-    ],
+    "removed_duplicates": [],
+    "removed_low_confidence": [],
     "removed_invalid": [],
     "warnings": []
   }
