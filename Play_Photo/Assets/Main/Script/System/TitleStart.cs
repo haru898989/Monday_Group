@@ -2,14 +2,16 @@ using UnityEngine;
 
 public class TitleStart : MonoBehaviour
 {
+    [SerializeField] private DoorController doorController;
+
     public void StartLoadingLINE()
     {
-        if (SceneLoader.Instance == null)
+        if (doorController == null)
         {
-            Debug.LogError("SceneLoaderが見つかりません。");
+            Debug.LogError("DoorControllerが設定されていません。");
             return;
         }
 
-        SceneLoader.Instance.LoadScene("LoadingLINE");
+        doorController.StartEntranceAnimation();
     }
 }
