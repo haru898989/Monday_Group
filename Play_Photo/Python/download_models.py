@@ -29,8 +29,9 @@ DEEPLAB_FILE = TORCH_HOME / "hub" / "checkpoints" / "deeplabv3_resnet50_coco-cd0
 YOLO_FILE = PROJECT_ROOT / "yolov8s-world.pt"
 
 ONEFORMER_REPO = "shi-labs/oneformer_ade20k_swin_large"
-ONEFORMER_REQUIRED_FILES = (
-    "ade20k_panoptic.json",
+ONEFORMER_CLASS_INFO_REPO = "shi-labs/oneformer_demo"
+ONEFORMER_CLASS_INFO_FILE = "ade20k_panoptic.json"
+ONEFORMER_MODEL_FILES = (
     "config.json",
     "merges.txt",
     "preprocessor_config.json",
@@ -39,6 +40,7 @@ ONEFORMER_REQUIRED_FILES = (
     "tokenizer_config.json",
     "vocab.json",
 )
+ONEFORMER_REQUIRED_FILES = (ONEFORMER_CLASS_INFO_FILE, *ONEFORMER_MODEL_FILES)
 
 
 def dependency_error(package: str, _error: ModuleNotFoundError) -> RuntimeError:
@@ -66,17 +68,36 @@ def download_oneformer() -> None:
         return
 
     try:
-        from huggingface_hub import snapshot_download
+        from huggingface_hub import hf_hub_download, snapshot_download
     except ModuleNotFoundError as error:
         raise dependency_error("huggingface-hub", error)
 
-    print(f"[download] OneFormer ({ONEFORMER_REPO})")
     ONEFORMER_DIR.mkdir(parents=True, exist_ok=True)
-    snapshot_download(
-        repo_id=ONEFORMER_REPO,
-        local_dir=ONEFORMER_DIR,
-        allow_patterns=list(ONEFORMER_REQUIRED_FILES),
-    )
+
+    # The model repository contains the weights, tokenizer, and processor
+    # configuration, but not ade20k_panoptic.json.  Transformers' OneFormer
+    # implementation obtains that class metadata from the oneformer_demo
+    # dataset repository, so download it separately from the same source.
+    missing_model_files = [name for name in ONEFORMER_MODEL_FILES if name in missing]
+    if missing_model_files:
+        print(f"[download] OneFormer model ({ONEFORMER_REPO})")
+        snapshot_download(
+            repo_id=ONEFORMER_REPO,
+            local_dir=ONEFORMER_DIR,
+            allow_patterns=list(ONEFORMER_MODEL_FILES),
+        )
+
+    if ONEFORMER_CLASS_INFO_FILE in missing:
+        print(
+            "[download] OneFormer ADE20K class metadata "
+            f"({ONEFORMER_CLASS_INFO_REPO})"
+        )
+        hf_hub_download(
+            repo_id=ONEFORMER_CLASS_INFO_REPO,
+            filename=ONEFORMER_CLASS_INFO_FILE,
+            repo_type="dataset",
+            local_dir=ONEFORMER_DIR,
+        )
 
     still_missing = [name for name in ONEFORMER_REQUIRED_FILES if not (ONEFORMER_DIR / name).is_file()]
     if still_missing:
