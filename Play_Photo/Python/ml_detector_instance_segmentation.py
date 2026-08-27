@@ -7,16 +7,19 @@ import json
 import re
 import time
 
+import cv2
 import numpy as np
 
 from ml_detector_complete import (
     DetectedObject,
     MagicPhotoDetector,
+    category_name_for,
     imwrite_unicode,
 )
 from object_segmentation import (
     DeepLabBoxObjectSegmenter,
     ObjectMaskResult,
+    rebuild_mask_result,
 )
 from semantic_segmentation_multi import SemanticSegmenterMulti
 
@@ -33,13 +36,31 @@ INSTANCE_CANONICAL_NAMES = {
     "bird": "animal",
     "horse": "animal",
     "rabbit": "animal",
+    "wildlife": "animal",
+    "large animal": "animal",
+    "bear": "animal",
+    "fish": "animal",
+    "cow": "animal",
+    "sheep": "animal",
+    "elephant": "animal",
+    "giraffe": "animal",
+    "zebra": "animal",
+    "water": "water",
+    "sea": "water",
+    "ocean": "water",
+    "river": "water",
+    "lake": "water",
+    "pond": "water",
+    "pool": "water",
+    "waterfall": "water",
 }
 
 INSTANCE_SYNONYM_GROUPS = [
-    {"person", "human", "man", "woman", "child"},
+    {"person", "human", "man", "woman", "boy", "girl", "child", "adult", "people"},
     {"vehicle", "car", "truck", "van", "bus"},
-    {"monitor", "television", "tv"},
-    {"phone", "cell phone"},
+    {"monitor", "television", "tv", "display", "screen"},
+    {"phone", "cell phone", "smartphone"},
+    {"water", "sea", "ocean", "river", "lake", "pond", "pool", "waterfall"},
     {
         "building",
         "apartment building",
@@ -47,7 +68,28 @@ INSTANCE_SYNONYM_GROUPS = [
         "warehouse",
         "house",
     },
+    {
+        "animal", "wildlife", "large animal", "dog", "cat", "bird",
+        "fish", "horse", "rabbit", "cow", "sheep", "bear", "elephant",
+        "giraffe", "zebra",
+    },
+    {
+        "instrument", "musical instrument", "piano", "keyboard", "guitar",
+        "violin", "drum", "flute", "trumpet", "saxophone",
+    },
+    {
+        "food", "dish", "meal", "bread", "cake", "dessert",
+        "ice cream", "ice cream cone", "soft serve",
+        "soft serve ice cream", "gelato",
+    },
 ]
+
+FOREGROUND_CATEGORIES = {
+    "person", "animal", "food", "vehicle", "instrument", "furniture",
+    "electronics", "sun", "moon",
+}
+MIDGROUND_CATEGORIES = {"building", "plant", "other"}
+BACKGROUND_CATEGORIES = {"sky", "water", "ground"}
 
 
 @dataclass
@@ -179,6 +221,12 @@ def _merge_detection_sources(
         if source not in sources:
             sources.append(source)
     target.sources = sources
+    names = list(target.merged_from_names or [target.original_name or target.name])
+    for name in duplicate.merged_from_names or [duplicate.original_name or duplicate.name]:
+        normalized = str(name).strip().lower()
+        if normalized and normalized not in names:
+            names.append(normalized)
+    target.merged_from_names = names
 
 
 def consolidate_instance_detections(
@@ -197,6 +245,7 @@ def consolidate_instance_detections(
         )
         duplicate_index: Optional[int] = None
         duplicate_metrics: Optional[Tuple[float, float, float]] = None
+        duplicate_reason_code: Optional[str] = None
         for index, current in enumerate(kept):
             iou = _box_iou(candidate.box, current.box)
             containment = _intersection_over_smaller(
@@ -228,21 +277,30 @@ def consolidate_instance_detections(
                     )
                 )
             )
-            exact_cross_class_duplicate = (
-                iou >= 0.85
-                and containment >= 0.98
-                and center_distance <= 0.06
+            candidate_area = max(1, (candidate.box[2] - candidate.box[0]) * (candidate.box[3] - candidate.box[1]))
+            current_area = max(1, (current.box[2] - current.box[0]) * (current.box[3] - current.box[1]))
+            smaller_ratio = min(candidate_area, current_area) / max(candidate_area, current_area)
+            same_category_contained_part = (
+                category_name_for(candidate.name) == category_name_for(current.name)
+                and smaller_ratio <= 0.62
+                and containment >= 0.90
+                and center_distance <= 0.32
             )
             if (
                 synonym_duplicate
                 or same_name_non_vehicle_duplicate
-                or exact_cross_class_duplicate
+                or same_category_contained_part
             ):
                 duplicate_index = index
                 duplicate_metrics = (
                     iou,
                     containment,
                     center_distance,
+                )
+                duplicate_reason_code = (
+                    "contained_part"
+                    if same_category_contained_part
+                    else "duplicate_same_object"
                 )
                 break
 
@@ -251,10 +309,36 @@ def consolidate_instance_detections(
             continue
 
         current = kept[duplicate_index]
-        _merge_detection_sources(current, candidate)
+        candidate_area = max(1, (candidate.box[2] - candidate.box[0]) * (candidate.box[3] - candidate.box[1]))
+        current_area = max(1, (current.box[2] - current.box[0]) * (current.box[3] - current.box[1]))
+        keep_candidate = False
+        if duplicate_metrics[1] >= 0.90:
+            larger, smaller = (
+                (candidate, current)
+                if candidate_area >= current_area
+                else (current, candidate)
+            )
+            keep_candidate = (
+                larger is candidate
+                and larger.confidence >= smaller.confidence - 0.18
+            )
+        if keep_candidate:
+            _merge_detection_sources(candidate, current)
+            kept[duplicate_index] = candidate
+            kept_item = candidate
+            removed_item = current
+        else:
+            _merge_detection_sources(current, candidate)
+            kept_item = current
+            removed_item = candidate
+        removed_item.auto_reason = (
+            f"{duplicate_reason_code}: post-detection consolidation; "
+            f"kept={kept_item.name}"
+        )
         print(
-            "instance duplicate merged: "
-            f"kept={current.name} removed={candidate.name} "
+            "instance candidate excluded: "
+            f"reason_code={duplicate_reason_code} "
+            f"kept={kept_item.name} removed={removed_item.name} "
             f"IoU={duplicate_metrics[0]:.4f} "
             f"containment={duplicate_metrics[1]:.4f} "
             f"center_distance={duplicate_metrics[2]:.4f}"
@@ -283,23 +367,32 @@ def find_clicked_instance(
         if x1 <= x <= x2 and y1 <= y <= y2:
             fallback_hits.append(item)
 
+    def click_sort_key(item: InstanceObject) -> Tuple[int, int, float, str]:
+        category = category_name_for(item.detected.name)
+        if category == "plant" and item.mask_result.mask_area_ratio >= 0.15:
+            layer = 2
+        elif category in FOREGROUND_CATEGORIES:
+            layer = 0
+        elif category in MIDGROUND_CATEGORIES:
+            layer = 1
+        else:
+            layer = 2
+        return (
+            layer,
+            item.area_pixels,
+            -float(item.detected.confidence),
+            item.object_id,
+        )
+
     if mask_hits:
         return min(
             mask_hits,
-            key=lambda item: (
-                item.area_pixels,
-                -float(item.detected.confidence),
-                item.object_id,
-            ),
+            key=click_sort_key,
         )
     if fallback_hits:
         return min(
             fallback_hits,
-            key=lambda item: (
-                item.area_pixels,
-                -float(item.detected.confidence),
-                item.object_id,
-            ),
+            key=click_sort_key,
         )
     return None
 
@@ -308,7 +401,54 @@ def consolidate_overlapping_semantic_masks(
     objects: Sequence[InstanceObject],
     overlap_threshold: float = 0.80,
 ) -> Tuple[List[InstanceObject], int]:
-    """Merge duplicate true masks without using fallback rectangles."""
+    """Merge same-object masks while preserving nearby separate instances."""
+
+    def mask_quality_key(item: InstanceObject) -> Tuple[int, int, float, float]:
+        source = str(item.mask_result.mask_source or "").lower()
+        if "semantic" in source or "deeplab" in source:
+            source_quality = 3
+        elif "grabcut" in source:
+            source_quality = 2
+        else:
+            source_quality = 1
+        return (
+            source_quality,
+            int(bool(item.mask_result.model_class_supported)),
+            float(item.mask_result.detection_mask_iou),
+            float(item.detected.confidence),
+        )
+
+    def merge_metadata(
+        winner: InstanceObject,
+        loser: InstanceObject,
+    ) -> None:
+        _merge_detection_sources(winner.detected, loser.detected)
+        merged_names = list(
+            winner.mask_result.merged_from_names
+            or winner.detected.merged_from_names
+            or [winner.detected.name]
+        )
+        for name in (
+            loser.mask_result.merged_from_names
+            or loser.detected.merged_from_names
+            or [loser.detected.name]
+        ):
+            normalized = str(name).strip().lower()
+            if normalized and normalized not in merged_names:
+                merged_names.append(normalized)
+        winner.mask_result.merged_from_names = merged_names
+        merged_ids = list(
+            winner.mask_result.merged_object_ids
+            or [winner.object_id]
+        )
+        for object_id in (
+            loser.mask_result.merged_object_ids
+            or [loser.object_id]
+        ):
+            if object_id not in merged_ids:
+                merged_ids.append(object_id)
+        winner.mask_result.merged_object_ids = merged_ids
+
     kept: List[InstanceObject] = []
     merged_count = 0
     for candidate in sorted(
@@ -316,21 +456,32 @@ def consolidate_overlapping_semantic_masks(
         key=lambda item: item.detected.confidence,
         reverse=True,
     ):
-        duplicate: Optional[InstanceObject] = None
+        duplicate_index: Optional[int] = None
         duplicate_overlap = 0.0
+        duplicate_containment = 0.0
         if candidate.mask_result.segmentation_supported:
             candidate_pixels = candidate.mask > 0
             candidate_area = max(
                 1,
                 int(np.count_nonzero(candidate_pixels)),
             )
-            for current in kept:
+            for index, current in enumerate(kept):
                 if not current.mask_result.segmentation_supported:
                     continue
                 if (
-                    candidate.detected.canonical_name
-                    != current.detected.canonical_name
+                    category_name_for(candidate.detected.name)
+                    != category_name_for(current.detected.name)
                 ):
+                    continue
+                category = category_name_for(candidate.detected.name)
+                same_meaning = (
+                    candidate.detected.name == current.detected.name
+                    or _same_instance_synonym_group(
+                        candidate.detected,
+                        current.detected,
+                    )
+                )
+                if not same_meaning:
                     continue
                 current_pixels = current.mask > 0
                 current_area = max(
@@ -344,27 +495,366 @@ def consolidate_overlapping_semantic_masks(
                     candidate_area,
                     current_area,
                 )
-                if overlap >= overlap_threshold:
-                    duplicate = current
+                box_iou = _box_iou(
+                    candidate.detected.box,
+                    current.detected.box,
+                )
+                box_containment = _intersection_over_smaller(
+                    candidate.detected.box,
+                    current.detected.box,
+                )
+                center_distance = _normalized_center_distance(
+                    candidate.detected,
+                    current.detected,
+                )
+                if category == "person":
+                    required_overlap = 0.92
+                    same_object_geometry = (
+                        box_iou >= 0.68
+                        or (
+                            box_containment >= 0.94
+                            and center_distance <= 0.12
+                        )
+                    )
+                elif category == "animal":
+                    required_overlap = 0.55
+                    same_object_geometry = (
+                        box_iou >= 0.20
+                        and center_distance <= 0.48
+                    )
+                else:
+                    required_overlap = overlap_threshold
+                    same_object_geometry = (
+                        box_iou >= 0.25
+                        or box_containment >= 0.75
+                        or center_distance <= 0.22
+                    )
+                if overlap >= required_overlap and same_object_geometry:
+                    duplicate_index = index
                     duplicate_overlap = overlap
+                    duplicate_containment = box_containment
                     break
 
-        if duplicate is None:
+        if duplicate_index is None:
             kept.append(candidate)
             continue
 
-        _merge_detection_sources(duplicate.detected, candidate.detected)
+        current = kept[duplicate_index]
+        candidate_area = max(1, int(np.count_nonzero(candidate.mask > 0)))
+        current_area = max(1, int(np.count_nonzero(current.mask > 0)))
+        larger = candidate if candidate_area >= current_area else current
+        smaller = current if larger is candidate else candidate
+        highly_contained = (
+            duplicate_overlap >= 0.90
+            and min(candidate_area, current_area)
+            / max(candidate_area, current_area) <= 0.72
+        )
+        category = category_name_for(candidate.detected.name)
+        complementary_animal_masks = (
+            category == "animal"
+            and 0.55 <= duplicate_overlap < 0.90
+        )
+        if complementary_animal_masks:
+            winner = max(
+                (candidate, current),
+                key=lambda item: float(item.detected.confidence),
+            )
+        elif (
+            highly_contained
+            and mask_quality_key(larger)[:2] >= mask_quality_key(smaller)[:2]
+            and larger.detected.confidence >= smaller.detected.confidence - 0.20
+        ):
+            winner = larger
+        else:
+            winner = max((candidate, current), key=mask_quality_key)
+        loser = current if winner is candidate else candidate
+        merge_metadata(winner, loser)
+        if complementary_animal_masks:
+            union_mask = cv2.bitwise_or(candidate.mask, current.mask)
+            ax1, ay1, ax2, ay2 = candidate.detected.box
+            bx1, by1, bx2, by2 = current.detected.box
+            union_box = (
+                min(ax1, bx1),
+                min(ay1, by1),
+                max(ax2, bx2),
+                max(ay2, by2),
+            )
+            winner.detected.box = union_box
+            winner.detected.center = (
+                (union_box[0] + union_box[2]) // 2,
+                (union_box[1] + union_box[3]) // 2,
+            )
+            winner.mask_result = rebuild_mask_result(
+                winner.mask_result,
+                union_mask,
+                mask_source=winner.mask_result.mask_source,
+                fallback_reason=winner.mask_result.fallback_reason,
+                detection_box=union_box,
+                segmentation_supported=True,
+                analysis_scope=winner.mask_result.analysis_scope,
+            )
+        loser.detected.auto_reason = (
+            "duplicate_same_object: semantic mask overlap; "
+            f"kept={winner.detected.name} "
+            f"intersection_over_smaller={duplicate_overlap:.4f}"
+        )
+        if winner is candidate:
+            kept[duplicate_index] = candidate
         merged_count += 1
         print(
-            "semantic mask duplicate merged: "
-            f"kept={duplicate.detected.name} "
-            f"removed={candidate.detected.name} "
-            f"intersection_over_smaller={duplicate_overlap:.4f}"
+            "semantic mask candidate excluded: "
+            "reason_code=duplicate_same_object "
+            f"kept={winner.detected.name} "
+            f"removed={loser.detected.name} "
+            f"intersection_over_smaller={duplicate_overlap:.4f} "
+            f"box_containment={duplicate_containment:.4f}"
         )
 
     for index, item in enumerate(kept, start=1):
         item.mask_result.object_id = f"object_{index:04d}"
     return kept, merged_count
+
+
+def resolve_instance_mask_overlaps(
+    objects: Sequence[InstanceObject],
+) -> Tuple[List[InstanceObject], int, int]:
+    """Give every foreground pixel one owner without merging instances."""
+    resolved = list(objects)
+    masks = [(item.mask > 0).copy() for item in resolved]
+    changed = [False] * len(resolved)
+    affected_pairs = 0
+    removed_overlap_pixels = 0
+    priority = {
+        "food": 0,
+        "person": 1,
+        "animal": 1,
+        "vehicle": 1,
+        "instrument": 1,
+        "electronics": 2,
+        "furniture": 3,
+        "building": 4,
+        "plant": 4,
+        "other": 4,
+    }
+
+    def normalized_distance(
+        item: InstanceObject,
+        xs: np.ndarray,
+        ys: np.ndarray,
+    ) -> np.ndarray:
+        x1, y1, x2, y2 = item.detected.box
+        center_x = (x1 + x2) * 0.5
+        center_y = (y1 + y2) * 0.5
+        width = max(1.0, float(x2 - x1))
+        height = max(1.0, float(y2 - y1))
+        return ((xs - center_x) / width) ** 2 + ((ys - center_y) / height) ** 2
+
+    for first_index in range(len(resolved)):
+        for second_index in range(first_index + 1, len(resolved)):
+            first_box = resolved[first_index].mask_result.mask_box
+            second_box = resolved[second_index].mask_result.mask_box
+            overlap_x1 = max(int(first_box[0]), int(second_box[0]))
+            overlap_y1 = max(int(first_box[1]), int(second_box[1]))
+            overlap_x2 = min(int(first_box[2]), int(second_box[2]))
+            overlap_y2 = min(int(first_box[3]), int(second_box[3]))
+            if overlap_x1 > overlap_x2 or overlap_y1 > overlap_y2:
+                continue
+            overlap_slice = np.s_[
+                overlap_y1:overlap_y2 + 1,
+                overlap_x1:overlap_x2 + 1,
+            ]
+            first_region = masks[first_index][overlap_slice]
+            second_region = masks[second_index][overlap_slice]
+            overlap = first_region & second_region
+            overlap_count = int(np.count_nonzero(overlap))
+            if overlap_count == 0:
+                continue
+            first = resolved[first_index]
+            second = resolved[second_index]
+            first_category = category_name_for(first.detected.name)
+            second_category = category_name_for(second.detected.name)
+            affected_pairs += 1
+            removed_overlap_pixels += overlap_count
+            if first_category != second_category:
+                first_name = str(first.detected.name).strip().lower()
+                second_name = str(second.detected.name).strip().lower()
+                first_priority = priority.get(first_category, 5)
+                second_priority = priority.get(second_category, 5)
+                if first_name in {
+                    "christmas tree",
+                    "decorated christmas tree",
+                }:
+                    first_priority = 3
+                if second_name in {
+                    "christmas tree",
+                    "decorated christmas tree",
+                }:
+                    second_priority = 3
+                if first_priority < second_priority:
+                    second_region[overlap] = False
+                    changed[second_index] = True
+                    continue
+                if second_priority < first_priority:
+                    first_region[overlap] = False
+                    changed[first_index] = True
+                    continue
+
+            ys, xs = np.where(overlap)
+            global_xs = xs + overlap_x1
+            global_ys = ys + overlap_y1
+            first_distance = normalized_distance(first, global_xs, global_ys)
+            second_distance = normalized_distance(second, global_xs, global_ys)
+            first_loses = first_distance > second_distance
+            ties = first_distance == second_distance
+            if np.any(ties):
+                first_loses[ties] = (
+                    first.detected.confidence < second.detected.confidence
+                )
+            if np.any(first_loses):
+                first_region[ys[first_loses], xs[first_loses]] = False
+                changed[first_index] = True
+            second_loses = ~first_loses
+            if np.any(second_loses):
+                second_region[ys[second_loses], xs[second_loses]] = False
+                changed[second_index] = True
+
+    for index, item in enumerate(resolved):
+        if not changed[index]:
+            continue
+        item.mask_result = rebuild_mask_result(
+            item.mask_result,
+            masks[index].astype(np.uint8) * 255,
+            mask_source=item.mask_result.mask_source,
+            fallback_reason=item.mask_result.fallback_reason,
+            detection_box=item.mask_result.detection_box,
+            segmentation_supported=item.mask_result.segmentation_supported,
+            analysis_scope=item.mask_result.analysis_scope,
+        )
+    return resolved, affected_pairs, removed_overlap_pixels
+
+
+def consolidate_objects_by_category(
+    objects: Sequence[InstanceObject],
+    categories: Sequence[str] = ("water",),
+) -> Tuple[List[InstanceObject], int]:
+    """指定カテゴリの複数検出を1件へまとめ、マスクの和集合を保持する。"""
+    target_categories = {
+        str(category).strip().lower()
+        for category in categories
+    }
+
+    def masks_represent_same_region(
+        first: InstanceObject,
+        second: InstanceObject,
+    ) -> bool:
+        first_pixels = first.mask > 0
+        second_pixels = second.mask > 0
+        first_area = max(1, int(np.count_nonzero(first_pixels)))
+        second_area = max(1, int(np.count_nonzero(second_pixels)))
+        intersection = int(np.count_nonzero(first_pixels & second_pixels))
+        union = max(1, first_area + second_area - intersection)
+        if intersection / min(first_area, second_area) >= 0.45:
+            return True
+        if intersection / union >= 0.30:
+            return True
+        if _box_iou(first.mask_result.mask_box, second.mask_result.mask_box) >= 0.25:
+            return True
+
+        height, width = first.mask.shape[:2]
+        gap = max(1, int(round(min(height, width) * 0.006)))
+        ax1, ay1, ax2, ay2 = first.mask_result.mask_box
+        bx1, by1, bx2, by2 = second.mask_result.mask_box
+        x_overlap = min(ax2, bx2) - max(ax1, bx1) >= 0
+        y_overlap = min(ay2, by2) - max(ay1, by1) >= 0
+        if not (x_overlap or y_overlap):
+            return False
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (gap * 2 + 1, gap * 2 + 1),
+        )
+        dilated = cv2.dilate(first.mask, kernel, iterations=1) > 0
+        return bool(np.any(dilated & second_pixels))
+
+    result = list(objects)
+    merged_count = 0
+    for item in result:
+        item.mask_result.category = category_name_for(item.detected.name)
+
+    for category in target_categories:
+        members = [
+            item
+            for item in result
+            if category_name_for(item.detected.name) == category
+        ]
+        clusters: List[List[InstanceObject]] = []
+        for member in members:
+            matching = [
+                cluster
+                for cluster in clusters
+                if any(masks_represent_same_region(member, other) for other in cluster)
+            ]
+            if not matching:
+                clusters.append([member])
+                continue
+            primary_cluster = matching[0]
+            primary_cluster.append(member)
+            for extra_cluster in matching[1:]:
+                primary_cluster.extend(extra_cluster)
+                clusters.remove(extra_cluster)
+
+        for cluster in clusters:
+            if len(cluster) <= 1:
+                continue
+            primary = max(cluster, key=lambda item: float(item.detected.confidence))
+            union_mask = np.zeros_like(primary.mask, dtype=np.uint8)
+            source_ids: List[str] = []
+            source_names: List[str] = []
+            for item in cluster:
+                union_mask = np.maximum(union_mask, item.mask)
+                for object_id in item.mask_result.merged_object_ids or [item.object_id]:
+                    if object_id not in source_ids:
+                        source_ids.append(object_id)
+                for name in (
+                    item.mask_result.merged_from_names
+                    or item.detected.merged_from_names
+                    or [item.detected.name]
+                ):
+                    normalized = str(name).strip().lower()
+                    if normalized and normalized not in source_names:
+                        source_names.append(normalized)
+
+            detection_box = (
+                min(item.mask_result.detection_box[0] for item in cluster),
+                min(item.mask_result.detection_box[1] for item in cluster),
+                max(item.mask_result.detection_box[2] for item in cluster),
+                max(item.mask_result.detection_box[3] for item in cluster),
+            )
+            supported = any(item.mask_result.segmentation_supported for item in cluster)
+            rebuild_mask_result(
+                primary.mask_result,
+                union_mask,
+                mask_source=f"category_union:{category}",
+                fallback_reason=(
+                    None if supported else "category union contains fallback masks only"
+                ),
+                detection_box=detection_box,
+                segmentation_supported=supported,
+                analysis_scope="connected_category_union",
+            )
+            primary.mask_result.merged_object_ids = source_ids
+            primary.mask_result.merged_from_names = source_names
+            primary.mask_result.category = category
+            primary.detected.name = category
+            primary.detected.canonical_name = category
+            for item in cluster:
+                if item is not primary:
+                    _merge_detection_sources(primary.detected, item.detected)
+                    result.remove(item)
+            merged_count += len(cluster) - 1
+
+    for index, item in enumerate(result, start=1):
+        item.mask_result.object_id = f"object_{index:04d}"
+    return result, merged_count
 
 
 class InstanceSegmentationPipeline:
@@ -437,6 +927,7 @@ class InstanceSegmentationPipeline:
         return {
             "object_id": result.object_id,
             "name": detected.name,
+            "category": result.category or category_name_for(detected.name),
             "canonical_name": detected.canonical_name,
             "original_name": detected.original_name,
             "confidence": float(detected.confidence),
@@ -460,6 +951,9 @@ class InstanceSegmentationPipeline:
             ],
             "area_pixels": int(result.area_pixels),
             "mask_source": result.mask_source,
+            "analysis_scope": result.analysis_scope,
+            "merged_from_names": list(result.merged_from_names or []),
+            "merged_object_ids": list(result.merged_object_ids or []),
             "segmentation_supported": bool(
                 result.segmentation_supported
             ),
@@ -585,6 +1079,10 @@ class InstanceSegmentationPipeline:
         objects, semantic_mask_consolidated = (
             consolidate_overlapping_semantic_masks(objects)
         )
+        objects, category_consolidated = consolidate_objects_by_category(
+            objects,
+            categories=("water",),
+        )
         self._save_masks(Path(image_path), objects)
 
         if display_size is None:
@@ -616,10 +1114,15 @@ class InstanceSegmentationPipeline:
             for item in objects
         )
         detector.last_mode_stats["instance_consolidated"] = (
-            instance_consolidated + semantic_mask_consolidated
+            instance_consolidated
+            + semantic_mask_consolidated
+            + category_consolidated
         )
         detector.last_mode_stats["semantic_mask_consolidated"] = (
             semantic_mask_consolidated
+        )
+        detector.last_mode_stats["category_consolidated"] = (
+            category_consolidated
         )
         detector.last_mode_stats["mask_supported_ratio"] = (
             detector.last_mode_stats["mask_supported"] / max(1, len(objects))
@@ -648,9 +1151,10 @@ class InstanceSegmentationPipeline:
             f"mask_supported_ratio="
             f"{detector.last_mode_stats['mask_supported_ratio']:.4f} "
             f"instance_consolidated="
-            f"{instance_consolidated + semantic_mask_consolidated} "
+            f"{instance_consolidated + semantic_mask_consolidated + category_consolidated} "
             f"semantic_mask_consolidated="
             f"{semantic_mask_consolidated} "
+            f"category_consolidated={category_consolidated} "
             f"time={processing_time:.3f}s"
         )
         print(

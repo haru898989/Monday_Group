@@ -1,9 +1,11 @@
-"""Unity向けに、画像内の物体情報だけを出力する精度重視スクリプト。
+"""MagicPhotoの正式なUnity向け画像解析エントリーポイント。
 
 このファイルは、既存実装のうち次の処理だけを再利用します。
 
 * YOLO-World による物体名、confidence、検出位置の取得
 * DeepLabV3 と YOLO の検出枠を組み合わせた物体ごとの二値マスク作成
+* 採用済みOneFormer scene-exclusiveによるsky/water/plantマスク
+* 採用済み品質処理、人物保護、touch対象判定
 * 日本語ファイル名や日本語フォルダ名でも読み書きしやすい画像入出力
 
 GUI表示、クリック操作、発光、スポットライト、reaction、複数表示モードなど、
@@ -29,18 +31,37 @@ CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
 
-from ml_detector_complete import MagicPhotoDetector, imread_unicode, imwrite_unicode
+from ml_detector_complete import (
+    DetectedObject,
+    MagicPhotoDetector,
+    category_name_for,
+    imread_unicode,
+    imwrite_unicode,
+)
 from ml_detector_instance_segmentation import (
     InstanceObject,
     consolidate_instance_detections,
     consolidate_overlapping_semantic_masks,
 )
-from object_segmentation import DeepLabBoxObjectSegmenter, ObjectMaskResult
+from object_segmentation import (
+    DeepLabBoxObjectSegmenter,
+    ObjectMaskResult,
+    rebuild_mask_result,
+)
 from semantic_segmentation_multi import SemanticSegmenterMulti
+from magicphoto_quality import (
+    compare_grabcut_to_box,
+    evaluate_touch_eligibility,
+    postprocess_mask_results,
+    refine_person_boundaries,
+    target_category_for,
+)
 
 
 Point = Tuple[int, int]
 Box = Tuple[int, int, int, int]
+SCENE_CATEGORIES = {"sky", "water", "plant"}
+DEFAULT_SCENE_SEGMENTATION = "oneformer-scene-exclusive"
 
 
 # Unityで音を鳴らす対象として、特に具体名を優先したいクラスです。
@@ -101,6 +122,21 @@ CATEGORY_BY_NAME = {
     "sun": "sky_object",
     "moon": "sky_object",
     "sky": "background",
+    "water": "background",
+    "sea": "background",
+    "ocean": "background",
+    "river": "background",
+    "lake": "background",
+    "pond": "background",
+    "pool": "background",
+    "waterfall": "background",
+    "tree": "plant",
+    "grass": "plant",
+    "plant": "plant",
+    "flower": "plant",
+    "bush": "plant",
+    "shrub": "plant",
+    "vegetation": "plant",
     "person": "person",
     "human": "person",
     "man": "person",
@@ -178,6 +214,26 @@ def parse_args() -> argparse.Namespace:
         "--result-name",
         default="result.jpg",
         help="検出枠と輪郭を描いた確認用画像のファイル名です。",
+    )
+    parser.add_argument(
+        "--scene-segmentation",
+        choices=(DEFAULT_SCENE_SEGMENTATION, "existing"),
+        default=DEFAULT_SCENE_SEGMENTATION,
+        help=(
+            "scene処理。既定は正式採用済みOneFormer scene-exclusive。"
+            "従来scene処理を明示する場合だけ existing を使います。"
+        ),
+    )
+    parser.add_argument(
+        "--oneformer-fallback",
+        choices=("existing", "error"),
+        default="existing",
+        help="OneFormerを使えない場合に従来sceneへ戻すか、エラー終了するかを選びます。",
+    )
+    parser.add_argument(
+        "--oneformer-model-dir",
+        default=None,
+        help="通常は不要。ローカルOneFormerモデルフォルダを明示する場合に使います。",
     )
     return parser.parse_args()
 
@@ -291,7 +347,17 @@ def normalize_name_category_confidence(
         return "unknown_object", "unknown", min(float(raw_confidence), 0.20), True
 
     normalized_name = NORMALIZED_NAME_BY_ALIAS.get(lower_name, lower_name)
-    category = CATEGORY_BY_NAME.get(normalized_name, "object")
+    category = CATEGORY_BY_NAME.get(normalized_name)
+    if category is None:
+        # 新しい具体名（例: ice cream）も既存検出モジュールの正式カテゴリ変換へ
+        # 追随させます。Unityで従来使っているdevice/object表記だけ互換変換します。
+        detector_category = category_name_for(normalized_name)
+        category = {
+            "electronics": "device",
+            "other": "object",
+            "sky": "background",
+            "water": "background",
+        }.get(detector_category, detector_category)
     return normalized_name, category, float(raw_confidence), False
 
 
@@ -441,15 +507,38 @@ def try_grabcut_mask(image: np.ndarray, detection_box: Box) -> Optional[np.ndarr
 
 def refine_fallback_masks_with_grabcut(
     image: np.ndarray,
+    detections: Sequence[object],
     mask_results: Sequence[ObjectMaskResult],
-) -> None:
-    """矩形フォールバックになった物体を、GrabCutでできるだけ前景マスクへ直します。"""
+) -> Dict[str, int]:
+    """非personの矩形fallbackだけを、品質比較付きGrabCutで改善します。
 
-    for result in mask_results:
+    正式採用方針としてpersonはこの共通経路へ入れません。personの境界は後段の
+    ``refine_person_boundaries`` がDeepLabマスクを安全なseedとして個別処理します。
+    """
+
+    stats = {"candidate_count": 0, "accepted_count": 0, "rejected_count": 0}
+    for detection, result in zip(detections, mask_results):
         if result.mask_source != "box_fallback":
             continue
+        if category_name_for(detection.name) == "person":
+            continue
+        stats["candidate_count"] += 1
         refined = try_grabcut_mask(image, result.detection_box)
         if refined is None:
+            stats["rejected_count"] += 1
+            continue
+        accepted, comparison = compare_grabcut_to_box(
+            image,
+            refined,
+            result.detection_box,
+            category_name_for(detection.name),
+        )
+        result.quality_details = {
+            **dict(result.quality_details or {}),
+            "grabcut_quality_comparison": comparison,
+        }
+        if not accepted:
+            stats["rejected_count"] += 1
             continue
         update_mask_result_from_mask(
             result,
@@ -457,6 +546,266 @@ def refine_fallback_masks_with_grabcut(
             "grabcut_box",
             "deeplab unsupported; refined by grabcut",
         )
+        result.correction_reasons = list(result.correction_reasons or []) + [
+            "grabcut_selected_over_box"
+        ]
+        stats["accepted_count"] += 1
+    return stats
+
+
+def filter_sun_moon_candidates(
+    image: np.ndarray,
+    objects: Sequence[InstanceObject],
+    sky_mask: np.ndarray,
+) -> Tuple[List[InstanceObject], Dict[str, object]]:
+    """採用済みのsky支持・形状・明度条件でsun/moon候補を安定化します。"""
+
+    height, width = image.shape[:2]
+    image_area = max(1, height * width)
+    sky_binary = ((sky_mask > 0) * 255).astype(np.uint8)
+    proximity = max(3, int(round(min(height, width) * 0.015)))
+    nearby_sky = cv2.dilate(
+        sky_binary,
+        cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (proximity * 2 + 1, proximity * 2 + 1),
+        ),
+        iterations=1,
+    ) > 0
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    kept: List[InstanceObject] = []
+    details: List[Dict[str, object]] = []
+
+    for item in objects:
+        category = category_name_for(item.detected.name)
+        if category not in {"sun", "moon"}:
+            kept.append(item)
+            continue
+
+        pixels = item.mask > 0
+        area = int(np.count_nonzero(pixels))
+        area_ratio = area / image_area
+        x1, y1, x2, y2 = item.mask_result.mask_box
+        center_x = max(0, min(width - 1, (x1 + x2) // 2))
+        center_y = max(0, min(height - 1, (y1 + y2) // 2))
+        sky_overlap = float(np.count_nonzero(pixels & nearby_sky)) / max(1, area)
+        sky_supported = bool(sky_overlap >= 0.20 or nearby_sky[center_y, center_x])
+
+        contours, _ = cv2.findContours(
+            item.mask,
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
+        circularity = 0.0
+        if contours:
+            contour = max(contours, key=cv2.contourArea)
+            contour_area = float(cv2.contourArea(contour))
+            perimeter = float(cv2.arcLength(contour, True))
+            if perimeter > 0:
+                circularity = min(
+                    1.0,
+                    4.0 * np.pi * contour_area / (perimeter ** 2),
+                )
+
+        value = hsv[:, :, 2][pixels]
+        saturation = hsv[:, :, 1][pixels]
+        mean_brightness = float(np.mean(value)) if value.size else 0.0
+        mean_saturation = float(np.mean(saturation)) if saturation.size else 255.0
+        pad = max(3, int(round(max(x2 - x1, y2 - y1) * 0.45)))
+        rx1, ry1 = max(0, x1 - pad), max(0, y1 - pad)
+        rx2, ry2 = min(width, x2 + pad + 1), min(height, y2 + pad + 1)
+        ring_mask = np.zeros((height, width), dtype=bool)
+        ring_mask[ry1:ry2, rx1:rx2] = True
+        ring_mask &= ~pixels
+        ring_values = hsv[:, :, 2][ring_mask]
+        surrounding_brightness = (
+            float(np.mean(ring_values)) if ring_values.size else mean_brightness
+        )
+        local_contrast = mean_brightness - surrounding_brightness
+        model_supported = float(item.detected.confidence) >= (
+            0.40 if category == "sun" else 0.36
+        )
+        valid_size = 0.000003 <= area_ratio <= 0.08
+        valid_position = center_y <= int(height * 0.88)
+        box_aspect = max(1, x2 - x1 + 1) / max(1, y2 - y1 + 1)
+        shape_supported = 0.42 <= box_aspect <= 2.38
+        if category == "sun":
+            visual_supported = (
+                circularity >= 0.28
+                and shape_supported
+                and mean_brightness >= 145.0
+                and (
+                    local_contrast >= 6.0
+                    or (
+                        float(item.detected.confidence) >= 0.75
+                        and mean_brightness >= 210.0
+                        and area_ratio >= 0.0005
+                    )
+                )
+            )
+        else:
+            visual_supported = (
+                circularity >= 0.30
+                and shape_supported
+                and mean_brightness >= 95.0
+                and mean_saturation <= 155.0
+                and (local_contrast >= 5.0 or mean_brightness >= 190.0)
+            )
+        accepted = bool(
+            sky_supported
+            and model_supported
+            and valid_size
+            and valid_position
+            and visual_supported
+        )
+        details.append({
+            "name": category,
+            "confidence": float(item.detected.confidence),
+            "accepted": accepted,
+            "sky_overlap_ratio": float(sky_overlap),
+            "circularity": float(circularity),
+            "mean_brightness": mean_brightness,
+            "mean_saturation": mean_saturation,
+            "local_contrast": float(local_contrast),
+            "mask_area_ratio": float(area_ratio),
+        })
+        if accepted:
+            kept.append(item)
+
+    accepted_count = sum(1 for detail in details if detail["accepted"])
+    return kept, {
+        "candidate_count": len(details),
+        "accepted_count": accepted_count,
+        "rejected_count": len(details) - accepted_count,
+        "candidates": details,
+    }
+
+
+def build_oneformer_scene_instances(
+    scene_output: Dict[str, object],
+    foreground_mask: np.ndarray,
+    start_index: int,
+) -> Tuple[List[InstanceObject], Dict[str, object]]:
+    """正式採用OneFormerマスクを既存のUnity物体契約へ変換します。
+
+    scene-exclusive方針に従い、既存の非scene物体を一切変更せず、その白画素を
+    sceneから差し引きます。色・位置による局所救済PoCはここでは行いません。
+    """
+
+    masks = scene_output.get("masks")
+    if not isinstance(masks, dict):
+        raise ValueError("OneFormer scene output does not contain masks")
+    category_details = scene_output.get("category_details")
+    if not isinstance(category_details, dict):
+        category_details = {}
+    instances: List[InstanceObject] = []
+    details: Dict[str, object] = {}
+
+    for category in ("sky", "water", "plant"):
+        raw_mask = masks.get(category)
+        if not isinstance(raw_mask, np.ndarray) or raw_mask.ndim != 2:
+            raise ValueError(f"invalid OneFormer {category} mask")
+        mask = np.where(raw_mask > 0, 255, 0).astype(np.uint8)
+        if mask.shape != foreground_mask.shape:
+            raise ValueError(
+                f"OneFormer {category} mask size {mask.shape} does not match "
+                f"image size {foreground_mask.shape}"
+            )
+        before_foreground = int(np.count_nonzero(mask))
+        mask[foreground_mask > 0] = 0
+        foreground_removed = before_foreground - int(np.count_nonzero(mask))
+        points = cv2.findNonZero(mask)
+        source_detail = dict(category_details.get(category) or {})
+        if points is None:
+            details[category] = {
+                **source_detail,
+                "accepted": False,
+                "foreground_removed_pixels": foreground_removed,
+                "reason": "empty_after_foreground_subtraction",
+            }
+            continue
+
+        x, y, width, height = cv2.boundingRect(points)
+        box = (x, y, x + width - 1, y + height - 1)
+        confidence = float(source_detail.get("mean_confidence_grid", 0.0))
+        object_id = f"object_{start_index + len(instances):04d}"
+        result = ObjectMaskResult(
+            object_id=object_id,
+            mask=mask,
+            detection_box=box,
+            mask_box=box,
+            corners={},
+            contour=[],
+            contour_simplified=[],
+            all_contours=[],
+            area_pixels=int(np.count_nonzero(mask)),
+            mask_source=f"oneformer_scene_exclusive:{category}",
+            segmentation_supported=True,
+            model_class_supported=True,
+            semantic_class=category,
+            fallback_reason=None,
+            mask_area_ratio=0.0,
+            box_fill_ratio=0.0,
+            detection_mask_iou=0.0,
+            connected_component_count=0,
+            semantic_candidate_component_count=int(
+                (source_detail.get("component_filter") or {}).get(
+                    "components_before", 0
+                )
+            ),
+            box_delta={},
+            category=category,
+            analysis_scope="full_image",
+            merged_from_names=[category],
+            quality_score=confidence,
+            quality_details={
+                "provider": "OneFormer-Swin-L ADE20K scene-exclusive",
+                "foreground_removed_pixels": foreground_removed,
+                "color_texture_rescue_used": False,
+                "source_category_details": source_detail,
+            },
+            correction_reasons=[
+                (
+                    "tree_confidence_0.6"
+                    if category == "plant"
+                    else "sky_water_probability_competition"
+                ),
+                "foreground_mask_subtracted",
+            ],
+        )
+        rebuild_mask_result(
+            result,
+            mask,
+            mask_source=f"oneformer_scene_exclusive:{category}",
+            fallback_reason=None,
+            detection_box=box,
+            segmentation_supported=True,
+            analysis_scope="full_image",
+        )
+        detected = DetectedObject(
+            name=category,
+            reaction="unknown_magic",
+            confidence=confidence,
+            box=box,
+            center=((box[0] + box[2]) // 2, (box[1] + box[3]) // 2),
+            source="oneformer_scene_exclusive",
+            original_name=category,
+            canonical_name=category,
+        )
+        instances.append(InstanceObject(detected=detected, mask_result=result))
+        details[category] = {
+            **source_detail,
+            "accepted": True,
+            "foreground_removed_pixels": foreground_removed,
+            "final_area_pixels": int(result.area_pixels),
+        }
+
+    return instances, {
+        "provider": "oneformer-scene-exclusive",
+        "candidate_count": 3,
+        "accepted_count": len(instances),
+        "details": details,
+    }
 
 
 def remove_old_mask_files(mask_dir: Path) -> None:
@@ -541,7 +890,12 @@ def build_unity_json_object(detection: object, mask_result: ObjectMaskResult) ->
         "object_id": mask_result.object_id,
         "name": name,
         "category": category,
+        "target_category": target_category_for(name),
         "confidence": confidence,
+        "excluded_from_touch": False,
+        "touch_eligibility": dict(
+            getattr(mask_result, "touch_eligibility", None) or {}
+        ),
         "corners": corners,
         "contour": contour,
         "mask_path": mask_result.mask_path,
@@ -565,6 +919,13 @@ def build_unity_json_object(detection: object, mask_result: ObjectMaskResult) ->
         },
         "mask_quality": {
             "mask_source": mask_result.mask_source,
+            "quality_score": float(getattr(mask_result, "quality_score", 0.0)),
+            "quality_details": dict(
+                getattr(mask_result, "quality_details", None) or {}
+            ),
+            "correction_reasons": list(
+                getattr(mask_result, "correction_reasons", None) or []
+            ),
             "segmentation_supported": bool(mask_result.segmentation_supported),
             "fallback_reason": mask_result.fallback_reason,
             "area_pixels": int(mask_result.area_pixels),
@@ -585,6 +946,8 @@ def save_unity_json(
     processing_time: float,
     objects: Sequence[Tuple[object, ObjectMaskResult]],
     output_path: Path,
+    analysis_features: Optional[Dict[str, object]] = None,
+    excluded_objects: Optional[Sequence[Dict[str, object]]] = None,
 ) -> None:
     """Unityで読み込むためのJSONをUTF-8で保存します。"""
 
@@ -602,6 +965,8 @@ def save_unity_json(
         "detection_mode": detection_mode,
         "processing_time_seconds": float(processing_time),
         "object_count": len(objects),
+        "analysis_features": dict(analysis_features or {}),
+        "excluded_objects": list(excluded_objects or []),
         "objects": [
             build_unity_json_object(detection, mask_result)
             for detection, mask_result in objects
@@ -613,7 +978,14 @@ def save_unity_json(
     )
 
 
-def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> None:
+def analyze_image(
+    image_path: Path,
+    detection_mode: str,
+    paths: OutputPaths,
+    scene_segmentation: str = DEFAULT_SCENE_SEGMENTATION,
+    oneformer_fallback: str = "existing",
+    oneformer_model_dir: Optional[str] = None,
+) -> None:
     """画像を解析し、JSON、確認画像、二値マスクを保存します。"""
 
     if not image_path.exists():
@@ -627,9 +999,14 @@ def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> 
     print(f"入力画像: {image_path}")
     print(f"入力画像サイズ: width={image.shape[1]}, height={image.shape[0]}")
     print(f"検出モード: {detection_mode}")
+    print(f"scene処理: {scene_segmentation}")
 
     # 1. YOLO-Worldで物体名、confidence、元画像基準の検出枠を取得します。
     detector = MagicPhotoDetector(detection_mode=detection_mode)
+    # 不採用PoCは正式入口から明示的に無効化します。通常の共有promptによる
+    # YOLO-World検出・crop再分類は維持し、food専用追加passは実行しません。
+    detector.enable_focused_food_pass = False
+    detector.enable_dominant_food_background_suppression = False
     configure_detector_for_unity(detector)
     detections = detector.detect_from_image(image)
     detections = consolidate_instance_detections(detections)
@@ -650,7 +1027,16 @@ def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> 
         detections,
         semantic_mask=semantic_mask,
     )
-    refine_fallback_masks_with_grabcut(image, mask_results)
+    for detection, mask_result in zip(detections, mask_results):
+        mask_result.category = category_name_for(detection.name)
+        mask_result.merged_from_names = list(
+            getattr(detection, "merged_from_names", None) or [detection.name]
+        )
+    grabcut_analysis = refine_fallback_masks_with_grabcut(
+        image,
+        detections,
+        mask_results,
+    )
 
     # 4. 同じ意味の検出がほぼ同じマスクを指している場合は、1つの物体にまとめます。
     #    これにより、Unity側で同じ物体が二重に出る問題を減らします。
@@ -658,7 +1044,167 @@ def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> 
         InstanceObject(detected=detection, mask_result=mask_result)
         for detection, mask_result in zip(detections, mask_results)
     ]
-    instance_objects, _ = consolidate_overlapping_semantic_masks(instance_objects)
+    instance_objects, semantic_merged_count = (
+        consolidate_overlapping_semantic_masks(instance_objects)
+    )
+
+    # 採用済みperson専用境界補正。DeepLab personだけを安全なseedとして扱い、
+    # 共通の微小成分除去や矩形GrabCutとは分離します。
+    person_boundary_analysis = refine_person_boundaries(
+        image,
+        [item.detected for item in instance_objects],
+        [item.mask_result for item in instance_objects],
+        enabled=True,
+    )
+
+    scene_output: Optional[Dict[str, object]] = None
+    scene_effective = "existing"
+    scene_fallback_reason: Optional[str] = None
+    if scene_segmentation == DEFAULT_SCENE_SEGMENTATION:
+        try:
+            from magicphoto_oneformer_scene import run_fixed_oneformer_scene
+
+            scene_output = run_fixed_oneformer_scene(
+                image,
+                image_path,
+                model_dir=(
+                    Path(oneformer_model_dir).resolve()
+                    if oneformer_model_dir
+                    else None
+                ),
+            )
+            scene_effective = DEFAULT_SCENE_SEGMENTATION
+        except Exception as error:
+            if oneformer_fallback == "error":
+                raise
+            scene_fallback_reason = f"{type(error).__name__}: {error}"
+            print(f"OneFormer scene処理をexistingへフォールバック: {scene_fallback_reason}")
+
+    if scene_output is not None:
+        sky_mask = np.asarray(scene_output["masks"]["sky"], dtype=np.uint8)
+    else:
+        sky_mask = next(
+            (
+                item.mask
+                for item in instance_objects
+                if category_name_for(item.detected.name) == "sky"
+            ),
+            np.zeros(image.shape[:2], dtype=np.uint8),
+        )
+
+    # 採用済みsun/moon安定化。OneFormer（fallback時は既存）のskyだけを探索領域にし、
+    # CLIP支持・形状・明度・局所contrastを満たす候補だけを残します。
+    sun_moon_detections, sun_moon_model_analysis = (
+        detector.detect_sun_moon_candidates(image, sky_mask)
+    )
+    sun_moon_results = [
+        object_segmenter.segment_object(
+            image,
+            detection,
+            f"object_{len(instance_objects) + index:04d}",
+            semantic_mask=semantic_mask,
+        )
+        for index, detection in enumerate(sun_moon_detections, start=1)
+    ]
+    for detection, mask_result in zip(sun_moon_detections, sun_moon_results):
+        mask_result.category = category_name_for(detection.name)
+        mask_result.merged_from_names = [detection.name]
+    refine_fallback_masks_with_grabcut(
+        image,
+        sun_moon_detections,
+        sun_moon_results,
+    )
+    instance_objects.extend(
+        InstanceObject(detected=detection, mask_result=mask_result)
+        for detection, mask_result in zip(sun_moon_detections, sun_moon_results)
+    )
+    instance_objects, additional_merged_count = (
+        consolidate_overlapping_semantic_masks(instance_objects)
+    )
+    instance_objects, sun_moon_analysis = filter_sun_moon_candidates(
+        image,
+        instance_objects,
+        sky_mask,
+    )
+    sun_moon_analysis["model_pass"] = sun_moon_model_analysis
+
+    scene_analysis: Dict[str, object] = {
+        "requested": scene_segmentation,
+        "effective": scene_effective,
+        "fallback_used": scene_fallback_reason is not None,
+        "fallback_reason": scene_fallback_reason,
+    }
+    if scene_output is not None:
+        # 正式採用scene-exclusive: legacyのsky/water/plant/treeを全て除外し、
+        # freeze済み非scene物体のmaskを差し引いたOneFormer結果だけを追加します。
+        non_scene_objects = [
+            item
+            for item in instance_objects
+            if category_name_for(item.detected.name) not in SCENE_CATEGORIES
+        ]
+        foreground_union = np.zeros(image.shape[:2], dtype=np.uint8)
+        for item in non_scene_objects:
+            foreground_union[item.mask > 0] = 255
+        scene_objects, oneformer_instance_analysis = build_oneformer_scene_instances(
+            scene_output,
+            foreground_union,
+            len(non_scene_objects) + 1,
+        )
+        instance_objects = non_scene_objects + scene_objects
+        scene_analysis.update({
+            "scene_exclusive": True,
+            "legacy_scene_providers_excluded": True,
+            "model_id": scene_output.get("model_id"),
+            "model_dir": scene_output.get("model_dir"),
+            "pretrained_dataset": scene_output.get("pretrained_dataset"),
+            "tree_confidence_threshold": scene_output.get(
+                "tree_confidence_threshold"
+            ),
+            "uncertain_margin": scene_output.get("uncertain_margin"),
+            "color_texture_rescue_used": False,
+            "additional_training_used": False,
+            "instance_conversion": oneformer_instance_analysis,
+        })
+
+    # 採用済み品質処理。personはmagicphoto_quality側で共通の微小成分除去を
+    # 明示的に回避し、それ以外だけを保守的に修正します。
+    mask_quality_analysis = postprocess_mask_results(
+        image,
+        [item.detected for item in instance_objects],
+        [item.mask_result for item in instance_objects],
+        apply_repairs=True,
+    )
+    instance_objects = [
+        item for item in instance_objects
+        if item.mask_result.exclusion_reason is None
+    ]
+
+    # 展示touch対象の採用済みサイズ判定。sun/moonは保護、sceneは免除します。
+    touch_records: List[Dict[str, object]] = []
+    touch_excluded: List[Dict[str, object]] = []
+    touch_kept: List[InstanceObject] = []
+    for item in instance_objects:
+        decision = evaluate_touch_eligibility(
+            image.shape,
+            item.detected,
+            item.mask_result,
+        )
+        item.mask_result.touch_eligibility = decision
+        record = {"object_id": item.object_id, **decision}
+        touch_records.append(record)
+        if not bool(decision.get("excluded_from_touch", False)):
+            touch_kept.append(item)
+            continue
+        touch_excluded.append({
+            **record,
+            "stage": "touch_eligibility",
+            "mask_source": str(item.mask_result.mask_source),
+            "action": "excluded_before_mask_save",
+        })
+    instance_objects = touch_kept
+    for index, item in enumerate(instance_objects, start=1):
+        item.mask_result.object_id = f"object_{index:04d}"
+
     mask_results = [item.mask_result for item in instance_objects]
 
     save_binary_masks(paths.mask_dir, mask_results)
@@ -679,6 +1225,33 @@ def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> 
         processing_time=processing_time,
         objects=objects,
         output_path=paths.json_path,
+        analysis_features={
+            "official_entrypoint": "analyze_objects_for_unity.py",
+            "scene_segmentation": scene_analysis,
+            "person_boundary_refinement": person_boundary_analysis,
+            "grabcut_quality_comparison": grabcut_analysis,
+            "mask_quality": mask_quality_analysis,
+            "sun_moon_stabilization": sun_moon_analysis,
+            "touch_eligibility": {
+                "evaluated_count": len(touch_records),
+                "excluded_count": len(touch_excluded),
+                "decisions": touch_records,
+            },
+            "duplicate_merge_count": (
+                semantic_merged_count + additional_merged_count
+            ),
+            "additional_training_models_used": {
+                "person_mask_refinement_unet": False,
+                "person_deeplab_finetuned": False,
+                "deeplab_finetuned": False,
+            },
+            "disabled_experiments": [
+                "food_focused_prompt",
+                "large_food_bbox_priority",
+                "sky_water_local_correction",
+            ],
+        },
+        excluded_objects=touch_excluded,
     )
 
     print(f"検出物体数: {len(objects)}")
@@ -698,6 +1271,12 @@ def analyze_image(image_path: Path, detection_mode: str, paths: OutputPaths) -> 
     print(f"JSON保存先: {paths.json_path}")
     print(f"result.jpg保存先: {paths.result_image_path}")
     print(f"masksフォルダ保存先: {paths.mask_dir}")
+    print(
+        "正式採用処理: "
+        f"scene={scene_effective}, "
+        f"person_refined={person_boundary_analysis.get('accepted_count', 0)}, "
+        f"touch_excluded={len(touch_excluded)}"
+    )
     print(f"処理時間: {processing_time:.3f}秒")
 
 
@@ -707,7 +1286,14 @@ def main() -> None:
     args = parse_args()
     image_path = resolve_input_image(args.image_path)
     paths = make_output_paths(args.output_dir, args.json_name, args.result_name)
-    analyze_image(image_path, args.mode, paths)
+    analyze_image(
+        image_path,
+        args.mode,
+        paths,
+        scene_segmentation=args.scene_segmentation,
+        oneformer_fallback=args.oneformer_fallback,
+        oneformer_model_dir=args.oneformer_model_dir,
+    )
 
 
 if __name__ == "__main__":

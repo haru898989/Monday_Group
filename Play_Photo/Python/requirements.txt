@@ -1,0 +1,12 @@
+numpy==2.5.1
+opencv-python==5.0.0.93
+torch==2.13.0
+torchvision==0.28.0
+ultralytics==8.4.115
+Pillow==12.3.0
+psutil==7.2.2
+transformers==4.55.4
+tokenizers==0.21.4
+safetensors==0.6.2
+huggingface-hub==0.34.4
+clip @ git+https://github.com/ultralytics/CLIP.git@488e81a6711eea7346872b46ea928b367da8889d

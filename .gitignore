@@ -130,4 +130,24 @@ InitTestScene*.unity*
 *.aab
 *.unitypackage
 *.app
+# Python cache
+__pycache__/
+*.py[cod]
 
+# Machine-learning models
+Play_Photo/Python/models/
+Play_Photo/Python/weights/
+weights/
+*.pt
+*.pth
+
+# Generated analysis results
+Play_Photo/Python/objects/
+Play_Photo/Python/unity_output*/
+Play_Photo/Python/result*.jpg
+Play_Photo/Python/analysis_result*.json
+
+# Generated builds and logs
+Play_Photo/Python/build/
+Play_Photo/Python/dist/
+Play_Photo/UpgradeLog*.htm
