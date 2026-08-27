@@ -13,6 +13,7 @@ class SemanticSegmenterMulti:
         "cow", "diningtable", "dog", "horse", "motorbike",
         "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"
     ]
+    SCENE_CLASS_NAMES = ("sky", "water", "ground", "plant")
 
     # OpenCVはBGR。クラスごとに見分けやすい固定色を設定。
     COLORS = np.array([
@@ -78,6 +79,114 @@ class SemanticSegmenterMulti:
 
         mask = ((semantic_mask == class_id) * 255).astype(np.uint8)
         return self.clean_mask(mask) if clean else mask
+
+    def supports_scene_class(self, class_name):
+        """VOC外だが全画像から補助推定できる背景クラスかを返す。"""
+        return str(class_name).strip().lower() in self.SCENE_CLASS_NAMES
+
+    def get_scene_class_mask(self, img_bgr, class_name, clean=True):
+        """検出枠で切らず、元画像全体から背景クラスのマスクを作る。
+
+        現在のDeepLabV3/VOCにないsky/water/groundを、位置条件を伴う
+        保守的なHSV候補として推定する。最終的な物体割当では検出枠に
+        近い連結成分だけを選ぶ。
+        """
+        if img_bgr is None or img_bgr.size == 0:
+            raise ValueError("入力画像が空です。")
+
+        normalized_name = str(class_name).strip().lower()
+        if normalized_name not in self.SCENE_CLASS_NAMES:
+            raise ValueError(f"全画像推定に未対応のクラスです: {class_name}")
+
+        hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+        hue, saturation, value = cv2.split(hsv)
+        height, width = hue.shape
+        if normalized_name == "sky":
+            blue = (
+                (hue >= 85)
+                & (hue <= 135)
+                & (saturation >= 35)
+                & (value >= 55)
+            )
+            bright_cloud = (saturation <= 55) & (value >= 155)
+            candidate = (blue | bright_cloud).astype(np.uint8)
+            candidate[int(height * 0.90):, :] = 0
+        elif normalized_name == "water":
+            blue_water = (
+                (hue >= 75)
+                & (hue <= 125)
+                & (saturation >= 12)
+                & (value >= 35)
+                & (value <= 235)
+            )
+            # Distant sea is often grey because of haze or backlight.  Position
+            # and the later sky/foreground subtraction constrain this broader
+            # low-saturation candidate more safely than hue alone.
+            neutral_water = (
+                (saturation <= 58)
+                & (value >= 45)
+                & (value <= 215)
+            )
+            candidate = (blue_water | neutral_water).astype(np.uint8)
+            candidate[:int(height * 0.12), :] = 0
+            candidate[int(height * 0.90):, :] = 0
+        elif normalized_name == "ground":
+            brown = (
+                (hue >= 5)
+                & (hue <= 35)
+                & (saturation >= 20)
+                & (value >= 25)
+                & (value <= 220)
+            )
+            neutral = (
+                (saturation <= 50)
+                & (value >= 35)
+                & (value <= 185)
+            )
+            candidate = (brown | neutral).astype(np.uint8)
+            candidate[:int(height * 0.42), :] = 0
+        else:
+            candidate = (
+                (hue >= 32)
+                & (hue <= 92)
+                & (saturation >= 38)
+                & (value >= 28)
+                & (value <= 235)
+            ).astype(np.uint8)
+
+        count, labels, stats, _ = cv2.connectedComponentsWithStats(
+            candidate,
+            8,
+        )
+        selected = np.zeros((height, width), dtype=np.uint8)
+        top_band = max(1, int(height * 0.08))
+        bottom_band = int(height * 0.88)
+        minimum_area = max(20, int(height * width * 0.0005))
+        for label_id in range(1, count):
+            component_top = int(stats[label_id, cv2.CC_STAT_TOP])
+            component_height = int(stats[label_id, cv2.CC_STAT_HEIGHT])
+            component_bottom = component_top + component_height
+            component_area = int(stats[label_id, cv2.CC_STAT_AREA])
+            if component_area < minimum_area:
+                continue
+            if normalized_name == "sky" and component_top <= top_band:
+                selected[labels == label_id] = 255
+            elif normalized_name == "water":
+                selected[labels == label_id] = 255
+            elif normalized_name == "ground" and component_bottom >= bottom_band:
+                selected[labels == label_id] = 255
+            elif normalized_name == "plant":
+                selected[labels == label_id] = 255
+
+        if clean and np.count_nonzero(selected) > 0:
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            selected = cv2.morphologyEx(
+                selected,
+                cv2.MORPH_CLOSE,
+                kernel,
+                iterations=1,
+            )
+        return selected
 
     def clean_mask(self, mask):
         """小さなノイズを除去し、穴や切れ目を軽く補正する。"""

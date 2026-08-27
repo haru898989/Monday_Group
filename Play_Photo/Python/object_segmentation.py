@@ -53,6 +53,33 @@ YOLO_TO_DEEPLAB: Dict[str, Optional[str]] = {
     "sheep": "sheep",
     "dining table": "diningtable",
     "table": "diningtable",
+    "sky": "sky",
+    "cloud": "sky",
+    "sunset": "sky",
+    "sunrise": "sky",
+    "night sky": "sky",
+    "water": "water",
+    "water surface": "water",
+    "sea": "water",
+    "ocean": "water",
+    "lake": "water",
+    "river": "water",
+    "pond": "water",
+    "stream": "water",
+    "canal": "water",
+    "pool": "water",
+    "swimming pool": "water",
+    "fountain": "water",
+    "road": "ground",
+    "pavement": "ground",
+    "sidewalk": "ground",
+    "ground": "ground",
+    "soil": "ground",
+    "sand": "ground",
+    "gravel": "ground",
+    "floor": "ground",
+    "path": "ground",
+    "street": "ground",
 }
 
 
@@ -79,6 +106,15 @@ class ObjectMaskResult:
     semantic_candidate_component_count: int
     box_delta: Dict[str, int]
     mask_path: Optional[str] = None
+    category: Optional[str] = None
+    analysis_scope: str = "detection_box"
+    merged_from_names: Optional[List[str]] = None
+    merged_object_ids: Optional[List[str]] = None
+    quality_score: float = 0.0
+    quality_details: Optional[Dict[str, object]] = None
+    correction_reasons: Optional[List[str]] = None
+    exclusion_reason: Optional[str] = None
+    stage_trace: Optional[Dict[str, object]] = None
 
 
 class ObjectMaskProvider(Protocol):
@@ -168,6 +204,82 @@ def _contour_data(
     )
 
 
+def rebuild_mask_result(
+    result: ObjectMaskResult,
+    mask: np.ndarray,
+    mask_source: Optional[str] = None,
+    fallback_reason: Optional[str] = None,
+    detection_box: Optional[Box] = None,
+    segmentation_supported: Optional[bool] = None,
+    analysis_scope: Optional[str] = None,
+) -> ObjectMaskResult:
+    """既存の結果へ新しいマスクを反映し、座標と品質指標を再計算する。"""
+    final_mask = ((mask > 0) * 255).astype(np.uint8)
+    if detection_box is not None:
+        result.detection_box = detection_box
+    result.mask = final_mask
+    result.mask_box = _mask_box(final_mask, result.detection_box)
+    result.corners = _corners(result.mask_box)
+    result.area_pixels = int(np.count_nonzero(final_mask))
+
+    # 輪郭・連結成分は非ゼロ領域だけで計算する。高解像度画像でも、結果は
+    # 全画面で計算した場合と同じまま処理時間と一時メモリを抑えられる。
+    if result.area_pixels > 0:
+        mx1, my1, mx2, my2 = result.mask_box
+        mask_region = final_mask[my1:my2 + 1, mx1:mx2 + 1]
+        contour, contour_simplified, all_contours = _contour_data(
+            mask_region,
+            0.002,
+            512,
+        )
+
+        def offset_points(points: Sequence[Point]) -> List[Point]:
+            return [
+                (int(point[0]) + mx1, int(point[1]) + my1)
+                for point in points
+            ]
+
+        result.contour = offset_points(contour)
+        result.contour_simplified = offset_points(contour_simplified)
+        result.all_contours = [offset_points(item) for item in all_contours]
+        component_count, _ = cv2.connectedComponents(
+            (mask_region > 0).astype(np.uint8),
+            connectivity=8,
+        )
+        result.connected_component_count = max(0, int(component_count) - 1)
+    else:
+        result.contour = []
+        result.contour_simplified = []
+        result.all_contours = []
+        result.connected_component_count = 0
+
+    x1, y1, x2, y2 = result.detection_box
+    box_area = max(1, (x2 - x1 + 1) * (y2 - y1 + 1))
+    intersection_area = int(np.count_nonzero(final_mask[y1:y2 + 1, x1:x2 + 1]))
+    union_area = max(1, box_area + result.area_pixels - intersection_area)
+    image_area = max(1, final_mask.shape[0] * final_mask.shape[1])
+    result.mask_area_ratio = result.area_pixels / image_area
+    result.box_fill_ratio = result.area_pixels / box_area
+    result.detection_mask_iou = intersection_area / union_area
+    mx1, my1, mx2, my2 = result.mask_box
+    result.box_delta = {
+        "left": mx1 - x1,
+        "top": my1 - y1,
+        "right": mx2 - x2,
+        "bottom": my2 - y2,
+        "width": (mx2 - mx1 + 1) - (x2 - x1 + 1),
+        "height": (my2 - my1 + 1) - (y2 - y1 + 1),
+    }
+    if mask_source is not None:
+        result.mask_source = mask_source
+    result.fallback_reason = fallback_reason
+    if segmentation_supported is not None:
+        result.segmentation_supported = bool(segmentation_supported)
+    if analysis_scope is not None:
+        result.analysis_scope = analysis_scope
+    return result
+
+
 class DeepLabBoxObjectSegmenter:
     """Assign DeepLab semantic pixels to individual YOLO detections."""
 
@@ -189,6 +301,7 @@ class DeepLabBoxObjectSegmenter:
             max(self.minimum_box_coverage, float(maximum_box_coverage)),
         )
         self.max_simplified_points = max(4, int(max_simplified_points))
+        self._scene_mask_cache: Dict[str, np.ndarray] = {}
 
     @property
     def supported_semantic_classes(self) -> List[str]:
@@ -196,6 +309,46 @@ class DeepLabBoxObjectSegmenter:
 
     def semantic_class_for(self, detection_name: str) -> Optional[str]:
         return YOLO_TO_DEEPLAB.get(str(detection_name).strip().lower())
+
+    def build_scene_result(
+        self,
+        image: np.ndarray,
+        scene_class: str,
+        object_id: str,
+    ) -> Optional[ObjectMaskResult]:
+        """Build one cached full-image background result without GrabCut."""
+        normalized = str(scene_class).strip().lower()
+        if not self.semantic_segmenter.supports_scene_class(normalized):
+            return None
+        mask = self._scene_mask_cache.get(normalized)
+        if mask is None:
+            mask = self.semantic_segmenter.get_scene_class_mask(
+                image,
+                normalized,
+                clean=True,
+            )
+            self._scene_mask_cache[normalized] = mask
+        if int(np.count_nonzero(mask)) < self.minimum_mask_pixels:
+            return None
+        height, width = image.shape[:2]
+        full_box = (0, 0, width - 1, height - 1)
+        scene_box = _mask_box(mask, full_box)
+        component_count, _ = cv2.connectedComponents(
+            (mask > 0).astype(np.uint8),
+            connectivity=8,
+        )
+        return self._build_result(
+            object_id,
+            mask,
+            scene_box,
+            f"full_image_scene:{normalized}",
+            True,
+            True,
+            normalized,
+            None,
+            max(0, int(component_count) - 1),
+            "full_image",
+        )
 
     @staticmethod
     def _component_near_detection(
@@ -213,7 +366,13 @@ class DeepLabBoxObjectSegmenter:
         center_x = (x1 + x2) / 2.0
         center_y = (y1 + y2) / 2.0
         diagonal = max(1.0, float(np.hypot(x2 - x1, y2 - y1)))
-        scored_components: List[Tuple[float, int, int]] = []
+        scored_components: List[Tuple[float, float, int, int]] = []
+        center_label = int(
+            labels[
+                max(0, min(labels.shape[0] - 1, int(round(center_y)))),
+                max(0, min(labels.shape[1] - 1, int(round(center_x)))),
+            ]
+        )
 
         for label_id in range(1, count):
             area = int(stats[label_id, cv2.CC_STAT_AREA])
@@ -224,20 +383,32 @@ class DeepLabBoxObjectSegmenter:
                 component_x - center_x,
                 component_y - center_y,
             ) / diagonal
-            score = distance - min(0.35, np.log1p(area) / 40.0)
-            scored_components.append((score, label_id, area))
+            component_left = int(stats[label_id, cv2.CC_STAT_LEFT])
+            component_top = int(stats[label_id, cv2.CC_STAT_TOP])
+            component_width = int(stats[label_id, cv2.CC_STAT_WIDTH])
+            component_height = int(stats[label_id, cv2.CC_STAT_HEIGHT])
+            component_right = component_left + component_width - 1
+            component_bottom = component_top + component_height - 1
+            overlap_width = max(0, min(x2, component_right) - max(x1, component_left) + 1)
+            overlap_height = max(0, min(y2, component_bottom) - max(y1, component_top) + 1)
+            overlap_ratio = (overlap_width * overlap_height) / max(1, area)
+            center_priority = 0.0 if label_id == center_label else 1.0
+            scored_components.append(
+                (center_priority, distance - overlap_ratio * 0.15, label_id, area)
+            )
 
         component_count = len(scored_components)
         if not scored_components:
             return np.zeros_like(candidate), 0, False
         scored_components.sort()
-        best_score, best_label, best_area = scored_components[0]
-        total_area = max(1, sum(item[2] for item in scored_components))
+        best_priority, best_score, best_label, best_area = scored_components[0]
+        total_area = max(1, sum(item[3] for item in scored_components))
         ambiguous = False
         if len(scored_components) >= 2:
-            second_score, _, second_area = scored_components[1]
+            second_priority, second_score, _, second_area = scored_components[1]
             ambiguous = (
-                best_area / total_area >= 0.25
+                best_priority == second_priority
+                and best_area / total_area >= 0.25
                 and second_area / total_area >= 0.25
                 and abs(second_score - best_score) <= 0.08
             )
@@ -270,6 +441,7 @@ class DeepLabBoxObjectSegmenter:
         semantic_class: Optional[str],
         fallback_reason: Optional[str],
         semantic_candidate_component_count: int,
+        analysis_scope: str = "detection_box",
     ) -> ObjectMaskResult:
         final_box = _mask_box(mask, detection_box)
         contour, contour_simplified, all_contours = _contour_data(
@@ -322,6 +494,7 @@ class DeepLabBoxObjectSegmenter:
                 "width": (mx2 - mx1 + 1) - (dx2 - dx1 + 1),
                 "height": (my2 - my1 + 1) - (dy2 - dy1 + 1),
             },
+            analysis_scope=analysis_scope,
         )
 
     def segment_object(
@@ -337,12 +510,22 @@ class DeepLabBoxObjectSegmenter:
         detection_box = _clip_detection_box(detection.box, width, height)
         fallback_mask = _box_mask((height, width), detection_box)
         semantic_class = self.semantic_class_for(detection.name)
+        scene_class_supported = (
+            semantic_class is not None
+            and self.semantic_segmenter.supports_scene_class(semantic_class)
+        )
         model_class_supported = (
             semantic_class is not None
-            and semantic_class in self.semantic_segmenter.CLASS_NAMES
+            and (
+                semantic_class in self.semantic_segmenter.CLASS_NAMES
+                or scene_class_supported
+            )
         )
 
-        if not model_class_supported or semantic_mask is None:
+        if (
+            not model_class_supported
+            or (semantic_mask is None and not scene_class_supported)
+        ):
             return self._build_result(
                 object_id,
                 fallback_mask,
@@ -353,6 +536,47 @@ class DeepLabBoxObjectSegmenter:
                 semantic_class,
                 "semantic class not found",
                 0,
+            )
+
+        if scene_class_supported:
+            class_mask = self._scene_mask_cache.get(semantic_class)
+            if class_mask is None:
+                class_mask = self.semantic_segmenter.get_scene_class_mask(
+                    image,
+                    semantic_class,
+                    clean=True,
+                )
+                self._scene_mask_cache[semantic_class] = class_mask
+            scene_component_count = 1
+            if semantic_class != "sky":
+                class_mask, scene_component_count, _ = self._component_near_detection(
+                    class_mask,
+                    detection_box,
+                )
+            if int(np.count_nonzero(class_mask)) < self.minimum_mask_pixels:
+                return self._build_result(
+                    object_id,
+                    fallback_mask,
+                    detection_box,
+                    "box_fallback",
+                    False,
+                    True,
+                    semantic_class,
+                    "full-image scene mask empty",
+                    0,
+                    "full_image",
+                )
+            return self._build_result(
+                object_id,
+                class_mask,
+                detection_box,
+                f"full_image_scene:{semantic_class}",
+                True,
+                True,
+                semantic_class,
+                None,
+                scene_component_count,
+                "full_image",
             )
 
         class_mask = self.semantic_segmenter.get_class_mask(
@@ -389,8 +613,6 @@ class DeepLabBoxObjectSegmenter:
         fallback_reason: Optional[str] = None
         if candidate_area == 0:
             fallback_reason = "empty after crop"
-        elif ambiguous:
-            fallback_reason = "multiple components ambiguous"
         elif candidate_area < self.minimum_mask_pixels:
             fallback_reason = "mask too small"
         elif candidate_coverage < self.minimum_box_coverage:
@@ -429,6 +651,7 @@ class DeepLabBoxObjectSegmenter:
         detections: Sequence,
         semantic_mask: Optional[np.ndarray] = None,
     ) -> List[ObjectMaskResult]:
+        self._scene_mask_cache = {}
         if semantic_mask is None:
             semantic_mask = self.semantic_segmenter.segment_image(image)
         return [
