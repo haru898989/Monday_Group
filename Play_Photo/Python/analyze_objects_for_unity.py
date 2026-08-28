@@ -56,15 +56,12 @@ from magicphoto_quality import (
     refine_person_boundaries,
     target_category_for,
 )
-from udp_sender import DEFAULT_HOST, DEFAULT_PORT, send_to_unity
-from unity_mask_cutouts import MaskCutoutSource, create_rgba_cutouts_from_masks
 
 
 Point = Tuple[int, int]
 Box = Tuple[int, int, int, int]
 SCENE_CATEGORIES = {"sky", "water", "plant"}
 DEFAULT_SCENE_SEGMENTATION = "oneformer-scene-exclusive"
-CUTOUT_DIR = CURRENT_DIR / "objects"
 
 
 # Unityで音を鳴らす対象として、特に具体名を優先したいクラスです。
@@ -183,6 +180,15 @@ class OutputPaths:
     mask_dir: Path
 
 
+@dataclass(frozen=True)
+class AnalysisResult:
+    """解析後の物体と保存先を、別のスクリプトから再利用するための戻り値です。"""
+
+    objects: List[InstanceObject]
+    paths: OutputPaths
+    processing_time: float
+
+
 def parse_args() -> argparse.Namespace:
     """コマンドライン引数を読み取ります。
 
@@ -237,22 +243,6 @@ def parse_args() -> argparse.Namespace:
         "--oneformer-model-dir",
         default=None,
         help="通常は不要。ローカルOneFormerモデルフォルダを明示する場合に使います。",
-    )
-    parser.add_argument(
-        "--no-udp",
-        action="store_true",
-        help="透過切り抜きは保存しますが、UnityへのUDP送信だけを無効にします。",
-    )
-    parser.add_argument(
-        "--unity-host",
-        default=DEFAULT_HOST,
-        help=f"UnityのUDP受信先IPです。既定値: {DEFAULT_HOST}",
-    )
-    parser.add_argument(
-        "--unity-port",
-        type=int,
-        default=DEFAULT_PORT,
-        help=f"UnityのUDP受信ポートです。既定値: {DEFAULT_PORT}",
     )
     return parser.parse_args()
 
@@ -918,9 +908,6 @@ def build_unity_json_object(detection: object, mask_result: ObjectMaskResult) ->
         "corners": corners,
         "contour": contour,
         "mask_path": mask_result.mask_path,
-        "cutout_file_name": str(
-            getattr(mask_result, "cutout_file_name", "") or ""
-        ),
         "position_original": {
             "center": json_point(detection.center_original),
             "detection_box": json_box(mask_result.detection_box),
@@ -1007,11 +994,8 @@ def analyze_image(
     scene_segmentation: str = DEFAULT_SCENE_SEGMENTATION,
     oneformer_fallback: str = "existing",
     oneformer_model_dir: Optional[str] = None,
-    send_udp: bool = False,
-    unity_host: str = DEFAULT_HOST,
-    unity_port: int = DEFAULT_PORT,
-) -> None:
-    """画像を解析し、JSON、確認画像、二値マスクを保存します。"""
+) -> AnalysisResult:
+    """画像を解析し、成果物を保存して、物体一覧を呼び出し元へ返します。"""
 
     if not image_path.exists():
         raise FileNotFoundError(f"入力画像が見つかりません: {image_path}")
@@ -1238,27 +1222,6 @@ def analyze_image(
         for item in instance_objects
     ]
 
-    cutout_sources: List[MaskCutoutSource] = []
-    for detection, mask_result in objects:
-        name, _, _, _ = normalize_name_category_confidence(
-            detection.name,
-            detection.confidence,
-        )
-        cutout_sources.append(
-            MaskCutoutSource(
-                name=name,
-                box=tuple(int(value) for value in mask_result.mask_box),
-                mask=mask_result.mask,
-            )
-        )
-    udp_objects, cutout_files = create_rgba_cutouts_from_masks(
-        image,
-        cutout_sources,
-        CUTOUT_DIR,
-    )
-    for (_, mask_result), filename in zip(objects, cutout_files):
-        mask_result.cutout_file_name = filename
-
     result_image = draw_result_image(image, objects)
     if not imwrite_unicode(str(paths.result_image_path), result_image):
         raise OSError(f"確認画像を保存できませんでした: {paths.result_image_path}")
@@ -1300,24 +1263,6 @@ def analyze_image(
         excluded_objects=touch_excluded,
     )
 
-    if send_udp:
-        try:
-            sent_bytes = send_to_unity(
-                udp_objects,
-                host=unity_host,
-                port=unity_port,
-                mode="legacy",
-                cutout_files=cutout_files,
-                image_width=image.shape[1],
-                image_height=image.shape[0],
-            )
-            print(
-                f"UnityへUDP送信しました: {unity_host}:{unity_port} "
-                f"/ {sent_bytes} bytes"
-            )
-        except (OSError, TypeError, ValueError) as error:
-            print(f"UnityへのUDP送信に失敗しました: {error}")
-
     print(f"検出物体数: {len(objects)}")
     for detection, mask_result in objects:
         name, category, confidence, _ = normalize_name_category_confidence(
@@ -1342,6 +1287,11 @@ def analyze_image(
         f"touch_excluded={len(touch_excluded)}"
     )
     print(f"処理時間: {processing_time:.3f}秒")
+    return AnalysisResult(
+        objects=instance_objects,
+        paths=paths,
+        processing_time=processing_time,
+    )
 
 
 def main() -> None:
@@ -1357,9 +1307,6 @@ def main() -> None:
         scene_segmentation=args.scene_segmentation,
         oneformer_fallback=args.oneformer_fallback,
         oneformer_model_dir=args.oneformer_model_dir,
-        send_udp=not args.no_udp,
-        unity_host=args.unity_host,
-        unity_port=args.unity_port,
     )
 
 
