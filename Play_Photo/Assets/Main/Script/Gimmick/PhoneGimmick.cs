@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// スマホをタッチすると、画面が光って震え続ける。
-/// もう一度タッチすると、発光と振動が止まり、元の状態へ戻る。
+/// さらに着信音とバイブ音を同時に鳴らす。
+/// もう一度タッチすると、発光・振動・音をすべて停止する。
 /// </summary>
 public class PhoneGimmick : MonoBehaviour, GimmickBase
 {
@@ -43,10 +44,52 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
     private float vibrationTimer;
 
 
+    // 着信音用
+    private AudioSource phoneAudioSource;
+
+    // バイブ音用
+    private AudioSource vibrationAudioSource;
+
+
     private void Awake()
     {
         originalLocalPosition =
             transform.localPosition;
+    }
+
+
+    /// <summary>
+    /// Reseiverから着信音とバイブ音を受け取る
+    /// </summary>
+    public void SetAudioClip(
+        AudioClip phoneClip,
+        AudioClip vibrationClip
+    )
+    {
+        // 着信音用AudioSourceを取得または追加
+        if (phoneAudioSource == null)
+        {
+            phoneAudioSource =
+                gameObject.AddComponent<AudioSource>();
+        }
+
+        phoneAudioSource.clip = phoneClip;
+        phoneAudioSource.playOnAwake = false;
+        phoneAudioSource.loop = true;
+        phoneAudioSource.spatialBlend = 0f;
+
+
+        // バイブ音用AudioSourceを取得または追加
+        if (vibrationAudioSource == null)
+        {
+            vibrationAudioSource =
+                gameObject.AddComponent<AudioSource>();
+        }
+
+        vibrationAudioSource.clip = vibrationClip;
+        vibrationAudioSource.playOnAwake = false;
+        vibrationAudioSource.loop = true;
+        vibrationAudioSource.spatialBlend = 0f;
     }
 
 
@@ -105,8 +148,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
             return;
         }
 
-        // 他の物体へ影響しないように、
-        // このスマホ専用のMaterialを取得する
+        // このスマホ専用のMaterialを取得
         targetMaterial =
             targetRenderer.material;
 
@@ -153,8 +195,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
         if (targetRenderer == null)
         {
             SetTargetRenderer(
-                GetComponentInChildren
-                    <Renderer>(true)
+                GetComponentInChildren<Renderer>(true)
             );
         }
 
@@ -179,7 +220,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
 
 
     /// <summary>
-    /// 発光を開始し、震え続ける状態にする。
+    /// 発光・振動・音を開始する。
     /// </summary>
     private void TurnOn()
     {
@@ -191,11 +232,27 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
         SetLight(true);
 
         isPowerOn = true;
+
+
+        // 着信音を再生
+        if (phoneAudioSource != null &&
+            phoneAudioSource.clip != null)
+        {
+            phoneAudioSource.Play();
+        }
+
+
+        // バイブ音を再生
+        if (vibrationAudioSource != null &&
+            vibrationAudioSource.clip != null)
+        {
+            vibrationAudioSource.Play();
+        }
     }
 
 
     /// <summary>
-    /// 発光と振動を止めて元の状態へ戻す。
+    /// 発光・振動・音を停止する。
     /// </summary>
     private void TurnOff()
     {
@@ -207,6 +264,20 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
             originalLocalPosition;
 
         SetLight(false);
+
+
+        // 着信音を停止
+        if (phoneAudioSource != null)
+        {
+            phoneAudioSource.Stop();
+        }
+
+
+        // バイブ音を停止
+        if (vibrationAudioSource != null)
+        {
+            vibrationAudioSource.Stop();
+        }
     }
 
 
@@ -244,6 +315,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
                 originalColor;
         }
 
+
         // Standard Shaderなど
         if (targetMaterial.HasProperty(
                 "_Color"
@@ -255,6 +327,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
             );
         }
 
+
         // URP Litなど
         if (targetMaterial.HasProperty(
                 "_BaseColor"
@@ -265,6 +338,7 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
                 displayColor
             );
         }
+
 
         // Emission対応Shader
         if (targetMaterial.HasProperty(
@@ -296,6 +370,17 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
             originalLocalPosition;
 
         SetLight(false);
+
+
+        if (phoneAudioSource != null)
+        {
+            phoneAudioSource.Stop();
+        }
+
+        if (vibrationAudioSource != null)
+        {
+            vibrationAudioSource.Stop();
+        }
     }
 
 
