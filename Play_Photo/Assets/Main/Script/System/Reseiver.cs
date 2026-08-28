@@ -115,6 +115,30 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip clockAudioClip;
 
+    [SerializeField]
+    private AudioClip airplaneAudioClip;
+
+    [SerializeField]
+    private AudioClip toyAudioClip;
+
+    [SerializeField]
+    private AudioClip wallAudioClip;
+
+    [SerializeField]
+    private AudioClip phoneAudioClip;
+
+    [SerializeField]
+    private AudioClip phoneVibrationAudioClip;
+
+    [SerializeField]
+    private AudioClip bridgeAudioClip;
+
+    [SerializeField]
+    private AudioClip cloudAudioClip;
+
+    [SerializeField]
+    private AudioClip carbonatedDrinkAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -459,11 +483,17 @@ public class Reseiver : MonoBehaviour
 
             case "airplane":
             case "plane":
-                GetOrAddComponent<AirplaneGimmick>(target);
+                AirplaneGimmick airplaneGimmick =
+                    GetOrAddComponent<AirplaneGimmick>(target);
+
+                airplaneGimmick.SetAudioClip(airplaneAudioClip);
                 break;
 
             case "toy":
-                GetOrAddComponent<ToyGimmick>(target);
+                ToyGimmick toyGimmick =
+                    GetOrAddComponent<ToyGimmick>(target);
+
+                toyGimmick.SetAudioClip(toyAudioClip);
                 break;
 
             case "fish":
@@ -492,6 +522,12 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<PhoneGimmick>(target);
 
                 phoneGimmick.SetTargetRenderer(cutoutRenderer);
+
+                phoneGimmick.SetAudioClip(
+                    phoneAudioClip,
+                    phoneVibrationAudioClip
+                );
+
                 break;
 
             case "ball":
@@ -509,15 +545,19 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<WallGimmick>(target);
 
                 wallGimmick.SetTargetRenderer(cutoutRenderer);
+                wallGimmick.SetAudioClip(wallAudioClip);
                 break;
 
             case "bridge":
                 BridgeGimmick bridgeGimmick =
                     GetOrAddComponent<BridgeGimmick>(target);
 
-                bridgeGimmick.SetTargetRenderer(
-                    cutoutRenderer
+                bridgeGimmick.SetTargetRenderer(cutoutRenderer);
+
+                bridgeGimmick.SetAudioClip(
+                    bridgeAudioClip
                 );
+
                 break;
 
             case "clock":
@@ -551,6 +591,11 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<CloudGimmick>(target);
 
                 cloudGimmick.SetTargetRenderer(cutoutRenderer);
+
+                cloudGimmick.SetAudioClip(
+                    cloudAudioClip
+                );
+
                 break;
 
             case "soda":
@@ -565,8 +610,13 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<CarbonatedDrinkGimmick>(target);
 
                 drinkGimmick.SetTargetRenderer(cutoutRenderer);
+
+                drinkGimmick.SetAudioClip(
+                    carbonatedDrinkAudioClip
+                );
+
                 break;
-                
+
         }
     }
 

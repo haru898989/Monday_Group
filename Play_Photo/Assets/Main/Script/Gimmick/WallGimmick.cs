@@ -21,6 +21,9 @@ public class WallGimmick : MonoBehaviour, GimmickBase
 
     private bool isShaking;
 
+    // ★追加
+    private AudioSource audioSource;
+
     /// <summary>
     /// Reseiverから壁の切り抜きRendererを受け取る
     /// </summary>
@@ -32,6 +35,24 @@ public class WallGimmick : MonoBehaviour, GimmickBase
         {
             targetVisual = targetRenderer.transform;
         }
+    }
+
+    // ★追加：Reseiverから音源を受け取る
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        audioSource.clip = clip;
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
     }
 
     public void ActivateMagic()
@@ -47,6 +68,12 @@ public class WallGimmick : MonoBehaviour, GimmickBase
                 "壁の切り抜き画像が設定されていません。"
             );
             return;
+        }
+
+        // ★追加：壁が揺れるときに音を鳴らす
+        if (audioSource != null && audioSource.clip != null)
+        {
+            audioSource.Play();
         }
 
         StartCoroutine(ShakeWall());

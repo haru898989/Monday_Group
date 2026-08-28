@@ -6,7 +6,7 @@ using UnityEngine;
 /// 丸い半透明の泡が下から上へ
 /// シュワシュワと昇り続ける。
 ///
-/// もう一度タッチすると泡が停止する。
+/// もう一度タッチすると泡と音が停止する。
 /// </summary>
 public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
 {
@@ -91,6 +91,10 @@ public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
     private Material bubbleMaterial;
 
 
+    // ★追加：炭酸のシュワシュワ音用
+    private AudioSource audioSource;
+
+
     /// <summary>
     /// 泡ごとの個別情報。
     /// </summary>
@@ -126,6 +130,35 @@ public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
 
             return;
         }
+    }
+
+
+    /// <summary>
+    /// Reseiverから炭酸の効果音を受け取る。
+    /// </summary>
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource == null)
+        {
+            audioSource =
+                GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource =
+                    gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        audioSource.clip = clip;
+
+        audioSource.playOnAwake = false;
+
+        // 泡が出ている間は音を繰り返す
+        audioSource.loop = true;
+
+        // 2D音声
+        audioSource.spatialBlend = 0f;
     }
 
 
@@ -211,6 +244,14 @@ public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
                 true
             );
         }
+
+
+        // ★追加：シュワシュワ音を開始
+        if (audioSource != null &&
+            audioSource.clip != null)
+        {
+            audioSource.Play();
+        }
     }
 
 
@@ -234,6 +275,13 @@ public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
                     false
                 );
             }
+        }
+
+
+        // ★追加：シュワシュワ音を停止
+        if (audioSource != null)
+        {
+            audioSource.Stop();
         }
     }
 
@@ -939,6 +987,13 @@ public class CarbonatedDrinkGimmick : MonoBehaviour, GimmickBase
                     false
                 );
             }
+        }
+
+
+        // ★追加：音も停止する
+        if (audioSource != null)
+        {
+            audioSource.Stop();
         }
     }
 

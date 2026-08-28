@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 橋をタッチすると、左右に折れたように動く
+/// 橋をタッチすると、左右に折れたように動き、破壊音が鳴る
 /// </summary>
 public class BridgeGimmick : MonoBehaviour, GimmickBase
 {
@@ -22,6 +22,10 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
 
     private bool isBroken;
 
+    // ★追加：橋の破壊音用
+    private AudioSource audioSource;
+
+
     /// <summary>
     /// Reseiverから橋の切り抜きRendererを受け取る
     /// </summary>
@@ -29,6 +33,30 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
     {
         targetRenderer = renderer;
     }
+
+
+    /// <summary>
+    /// Reseiverから橋の効果音を受け取る
+    /// </summary>
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource =
+                    gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        audioSource.clip = clip;
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0f;
+    }
+
 
     public void ActivateMagic()
     {
@@ -42,6 +70,7 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
             Debug.LogWarning(
                 "橋の切り抜き画像が設定されていません。"
             );
+
             return;
         }
 
@@ -54,8 +83,18 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
 
         isBroken = true;
 
+
+        // ★追加：橋の破壊音を再生
+        if (audioSource != null &&
+            audioSource.clip != null)
+        {
+            audioSource.Play();
+        }
+
+
         StartCoroutine(BreakBridge());
     }
+
 
     /// <summary>
     /// 元の橋画像を複製して左右パーツを作る
@@ -76,6 +115,7 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
 
         leftObject.name = "Bridge_Left";
 
+
         // 右側
         GameObject rightObject =
             Instantiate(
@@ -87,19 +127,31 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
 
         rightObject.name = "Bridge_Right";
 
+
         leftPart = leftObject.transform;
         rightPart = rightObject.transform;
 
+
         // 少し左右へずらす
         leftPart.localPosition +=
-            new Vector3(-0.25f, 0f, -0.001f);
+            new Vector3(
+                -0.25f,
+                0f,
+                -0.001f
+            );
 
         rightPart.localPosition +=
-            new Vector3(0.25f, 0f, -0.002f);
+            new Vector3(
+                0.25f,
+                0f,
+                -0.002f
+            );
+
 
         // 元の橋画像を消す
         targetRenderer.enabled = false;
     }
+
 
     /// <summary>
     /// 左右へ折れて落ちる
@@ -112,11 +164,13 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
         Quaternion rightStartRotation =
             rightPart.localRotation;
 
+
         Vector3 leftStartPosition =
             leftPart.localPosition;
 
         Vector3 rightStartPosition =
             rightPart.localPosition;
+
 
         Quaternion leftTargetRotation =
             leftStartRotation *
@@ -134,6 +188,7 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
                 -breakAngle
             );
 
+
         Vector3 leftTargetPosition =
             leftStartPosition +
             Vector3.down * dropDistance;
@@ -142,7 +197,9 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
             rightStartPosition +
             Vector3.down * dropDistance;
 
+
         float elapsedTime = 0f;
+
 
         while (elapsedTime < breakDuration)
         {
@@ -160,6 +217,7 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
                     rate
                 );
 
+
             leftPart.localRotation =
                 Quaternion.Lerp(
                     leftStartRotation,
@@ -173,6 +231,7 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
                     rightTargetRotation,
                     smoothRate
                 );
+
 
             leftPart.localPosition =
                 Vector3.Lerp(
@@ -188,8 +247,24 @@ public class BridgeGimmick : MonoBehaviour, GimmickBase
                     smoothRate
                 );
 
+
             yield return null;
         }
+
+
+        // 最終位置を確実に設定
+        leftPart.localRotation =
+            leftTargetRotation;
+
+        rightPart.localRotation =
+            rightTargetRotation;
+
+        leftPart.localPosition =
+            leftTargetPosition;
+
+        rightPart.localPosition =
+            rightTargetPosition;
+
 
         Debug.Log("橋が折れました。");
     }

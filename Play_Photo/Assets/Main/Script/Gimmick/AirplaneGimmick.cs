@@ -14,11 +14,38 @@ public class AirplaneGimmick : MonoBehaviour, GimmickBase
 
     private bool isFlying;
 
+    // š’Ç‰Á
+    private AudioSource audioSource;
+
+    // š’Ç‰ÁFReceiver‚©‚ç‰¹Œ¹‚ğó‚¯æ‚é
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        audioSource.clip = clip;
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+    }
+
     public void ActivateMagic()
     {
         if (isFlying)
         {
             return;
+        }
+
+        // š’Ç‰ÁF”ò‚Ñn‚ß‚é‚Æ‚«‚É‰¹‚ğ–Â‚ç‚·
+        if (audioSource != null && audioSource.clip != null)
+        {
+            audioSource.Play();
         }
 
         StartCoroutine(FlyUp());
@@ -29,7 +56,8 @@ public class AirplaneGimmick : MonoBehaviour, GimmickBase
         isFlying = true;
 
         Vector3 startPosition = transform.position;
-        Vector3 targetPosition = startPosition + Vector3.up * flyHeight;
+        Vector3 targetPosition =
+            startPosition + Vector3.up * flyHeight;
 
         float elapsedTime = 0f;
 

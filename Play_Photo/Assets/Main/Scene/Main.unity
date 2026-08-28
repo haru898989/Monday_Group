@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1181,6 +1181,14 @@ MonoBehaviour:
   computerAudioClip: {fileID: 0}
   treasureChestAudioClip: {fileID: 0}
   clockAudioClip: {fileID: 8300000, guid: 9d09a72c73b97fd468488efe439c7738, type: 3}
+  airplaneAudioClip: {fileID: 8300000, guid: bd31acceee23721439d90d0f031871ee, type: 3}
+  toyAudioClip: {fileID: 8300000, guid: d559fecc81cb5584582ae18eacebc74d, type: 3}
+  wallAudioClip: {fileID: 8300000, guid: 8403bd982ce1a304388bad73f08282cf, type: 3}
+  phoneAudioClip: {fileID: 8300000, guid: 7938db2bd7b19c94490f53814e9e7abc, type: 3}
+  phoneVibrationAudioClip: {fileID: 8300000, guid: 7b87d8850a4d1974ebcd5ebd4714287a, type: 3}
+  bridgeAudioClip: {fileID: 8300000, guid: 19afb77e39455f3429d8fcb392d5bd19, type: 3}
+  cloudAudioClip: {fileID: 8300000, guid: 5cc6d617b11cc0e43a323878256ff4ab, type: 3}
+  carbonatedDrinkAudioClip: {fileID: 8300000, guid: c400b8130b44d884ea3bec65c391f95b, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
