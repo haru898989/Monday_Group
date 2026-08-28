@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Main/Scene/ModeSelect.unity
     guid: e05663d03664c2a4db8d5f515b5d4974
+  - enabled: 1
+    path: Assets/Main/Scene/PhotoSelect.unity
+    guid: d0707ba461aa3dd4fb109de9e146e659
   m_configObjects: {}
