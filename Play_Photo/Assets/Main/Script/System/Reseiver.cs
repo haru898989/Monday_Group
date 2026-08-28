@@ -438,10 +438,20 @@ public class Reseiver : MonoBehaviour
             case "water":
             case "river":
             case "lake":
+            case "pond":
+            case "sea":
+            case "ocean":
                 WaterGimmick waterGimmick =
                     GetOrAddComponent<WaterGimmick>(target);
 
-                waterGimmick.SetAudioClip(waterAudioClip);
+                waterGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                waterGimmick.SetAudioClip(
+                    waterAudioClip
+                );
+
                 break;
 
             case "balloon":
@@ -615,6 +625,25 @@ public class Reseiver : MonoBehaviour
                     carbonatedDrinkAudioClip
                 );
 
+                break;
+
+            case "giraffe":
+                GiraffeGimmick giraffeGimmick =
+                    GetOrAddComponent<GiraffeGimmick>(target);
+
+                giraffeGimmick.SetTargetRenderer(cutoutRenderer);
+                break;
+
+            case "building":
+            case "skyscraper":
+            case "tower":
+            case "office building":
+            case "apartment building":
+            case "apartment":
+                BuildingGimmick buildingGimmick =
+                    GetOrAddComponent<BuildingGimmick>(target);
+
+                buildingGimmick.SetTargetRenderer(cutoutRenderer);
                 break;
 
         }
