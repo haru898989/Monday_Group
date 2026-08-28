@@ -296,7 +296,7 @@ public class DoorController : MonoBehaviour
         }
 
         SceneLoader.Instance.LoadScene(
-            "LoadingLINE"
+            "ModeSelect"
         );
     }
 
