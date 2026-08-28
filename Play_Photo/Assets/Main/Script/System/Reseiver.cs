@@ -627,25 +627,6 @@ public class Reseiver : MonoBehaviour
 
                 break;
 
-            case "giraffe":
-                GiraffeGimmick giraffeGimmick =
-                    GetOrAddComponent<GiraffeGimmick>(target);
-
-                giraffeGimmick.SetTargetRenderer(cutoutRenderer);
-                break;
-
-            case "building":
-            case "skyscraper":
-            case "tower":
-            case "office building":
-            case "apartment building":
-            case "apartment":
-                BuildingGimmick buildingGimmick =
-                    GetOrAddComponent<BuildingGimmick>(target);
-
-                buildingGimmick.SetTargetRenderer(cutoutRenderer);
-                break;
-
         }
     }
 
