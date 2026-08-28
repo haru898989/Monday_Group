@@ -56,12 +56,16 @@ from magicphoto_quality import (
     refine_person_boundaries,
     target_category_for,
 )
+from udp_sender import send_to_unity
 
 
 Point = Tuple[int, int]
 Box = Tuple[int, int, int, int]
 SCENE_CATEGORIES = {"sky", "water", "plant"}
 DEFAULT_SCENE_SEGMENTATION = "oneformer-scene-exclusive"
+UNITY_UDP_HOST = "127.0.0.1"
+UNITY_UDP_PORT = 1140
+UNITY_UDP_MODE = "legacy"
 
 
 # Unityで音を鳴らす対象として、特に具体名を優先したいクラスです。
@@ -1262,6 +1266,20 @@ def analyze_image(
         },
         excluded_objects=touch_excluded,
     )
+
+    try:
+        sent_bytes = send_to_unity(
+            objects,
+            host=UNITY_UDP_HOST,
+            port=UNITY_UDP_PORT,
+            mode=UNITY_UDP_MODE,
+        )
+        print(
+            f"UnityへUDP送信しました: {UNITY_UDP_HOST}:{UNITY_UDP_PORT} "
+            f"/ {sent_bytes} bytes"
+        )
+    except Exception as error:
+        print(f"UnityへのUDP送信に失敗しました: {error}")
 
     print(f"検出物体数: {len(objects)}")
     for detection, mask_result in objects:
