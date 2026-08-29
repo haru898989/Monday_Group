@@ -139,6 +139,12 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip carbonatedDrinkAudioClip;
 
+    [SerializeField]
+    private AudioClip mountainAudioClip;
+
+    [SerializeField]
+    private AudioClip birdAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -623,6 +629,37 @@ public class Reseiver : MonoBehaviour
 
                 drinkGimmick.SetAudioClip(
                     carbonatedDrinkAudioClip
+                );
+
+                break;
+
+            case "mountain":
+            case "volcano":
+                MountainGimmick mountainGimmick =
+                    GetOrAddComponent<MountainGimmick>(target);
+
+                mountainGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                mountainGimmick.SetAudioClip(
+                    mountainAudioClip
+                );
+
+                break;
+
+            case "bird":
+            case "eagle":
+            case "sparrow":
+                BirdGimmick birdGimmick =
+                    GetOrAddComponent<BirdGimmick>(target);
+
+                birdGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                birdGimmick.SetAudioClip(
+                    birdAudioClip
                 );
 
                 break;
