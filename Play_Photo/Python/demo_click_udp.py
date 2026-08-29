@@ -7,7 +7,7 @@ ml_detector.py の動作確認用デモ。
 - 画面サイズを自動取得
 - 画像の縦横比を保ったまま、画面に収まる最大サイズにする
 - AI検出・表示・クリック判定を同じ画像座標で統一
-- 人・水・建物・空も認識対象
+- 空と壁は操作対象から除外
 
 実行:
     python demo_click.py
@@ -44,6 +44,7 @@ ERASED_BACKGROUND = (
     / "downloaded_images"
     / "sample_erased.png"
 )
+EXCLUDED_SCENE_CLASSES = {"sky", "wall"}
 
 
 def create_erased_background(
@@ -180,10 +181,31 @@ def main() -> None:
     print("AIが画像を解析中...")
     # 表示に使う画像そのものをAIに渡す。これで座標が絶対にズレない。
     detected_objects = detector.detect_from_image(img)
-    print(f"検出数: raw={detector.last_raw_count}, 後処理後={len(detected_objects)}")
+    had_detection_before_exclusion = len(detected_objects) > 0
+
+    # skyとwallは写真の広範囲を覆う背景であり、タッチ対象や切り抜きとして
+    # 重ねると前景物体の残像・色むらの原因になるため、以降の処理へ渡さない。
+    detected_before_scene_exclusion = len(detected_objects)
+    detected_objects = [
+        obj
+        for obj in detected_objects
+        if str(
+            getattr(obj, "canonical_name", "") or obj.name
+        ).strip().lower() not in EXCLUDED_SCENE_CLASSES
+    ]
+    excluded_scene_count = (
+        detected_before_scene_exclusion - len(detected_objects)
+    )
+    detector.last_objects = detected_objects
+
+    print(
+        f"検出数: raw={detector.last_raw_count}, "
+        f"後処理後={len(detected_objects)}, "
+        f"背景除外(sky/wall)={excluded_scene_count}"
+    )
 
     # unknownグリッドは従来のクリック用フォールバック。写真理解JSONには含めない。
-    if len(detected_objects) == 0:
+    if not had_detection_before_exclusion:
         print("AIが物体を見つけられませんでした。unknown領域を作ります。")
         objects = detector.detect_unknown_regions_from_image(img, grid_size=4)
         detector.last_objects = objects
