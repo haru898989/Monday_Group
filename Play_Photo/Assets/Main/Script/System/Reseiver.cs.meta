@@ -25,6 +25,8 @@ MonoImporter:
   - bridgeAudioClip: {fileID: 8300000, guid: 19afb77e39455f3429d8fcb392d5bd19, type: 3}
   - cloudAudioClip: {fileID: 8300000, guid: 5cc6d617b11cc0e43a323878256ff4ab, type: 3}
   - carbonatedDrinkAudioClip: {fileID: 8300000, guid: c400b8130b44d884ea3bec65c391f95b, type: 3}
+  - mountainAudioClip: {fileID: 8300000, guid: 369eb42f6417f72408523b2bc7eb9e01, type: 3}
+  - birdAudioClip: {fileID: 8300000, guid: cd114b88e7928614ebd3d251dd828a99, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
