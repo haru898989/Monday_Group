@@ -61,7 +61,7 @@ public class PhotoSelectGalleryController : MonoBehaviour
     private bool isLoadingMainScene;
 
     private const int SlotsPerWall = 5;
-    private const int BasePhotoCount = 10;
+    private const int BasePhotoCount = 12;
 
     // HallWall.pngの不透明部分は、画像全高724px中431px。
     private const float VisibleWallHeightRatio = 431f / 724f;

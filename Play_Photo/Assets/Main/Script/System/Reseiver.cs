@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 public class Reseiver : MonoBehaviour
 {
@@ -130,8 +131,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip phoneVibrationAudioClip;
 
+    [FormerlySerializedAs("bridgeAudioClip")]
     [SerializeField]
-    private AudioClip bridgeAudioClip;
+    private AudioClip buildingAudioClip;
 
     [SerializeField]
     private AudioClip cloudAudioClip;
@@ -616,14 +618,32 @@ public class Reseiver : MonoBehaviour
                 break;
 
 
+            case "building":
+            case "house":
+            case "apartment":
+            case "apartment building":
+            case "office building":
+            case "warehouse":
+            case "school":
+            case "store":
+            case "shop":
+            case "station":
+            case "stadium":
+            case "hotel":
+            case "skyscraper":
+            case "tower":
+            case "castle":
+            case "palace":
+            case "church":
+            case "temple":
             case "bridge":
-                BridgeGimmick bridgeGimmick =
-                    GetOrAddComponent<BridgeGimmick>(target);
+                BuildingGimmick buildingGimmick =
+                    GetOrAddComponent<BuildingGimmick>(target);
 
-                bridgeGimmick.SetTargetRenderer(cutoutRenderer);
+                buildingGimmick.SetTargetRenderer(cutoutRenderer);
 
-                bridgeGimmick.SetAudioClip(
-                    bridgeAudioClip
+                buildingGimmick.SetAudioClip(
+                    buildingAudioClip
                 );
 
                 break;
