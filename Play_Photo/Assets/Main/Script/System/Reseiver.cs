@@ -125,9 +125,6 @@ public class Reseiver : MonoBehaviour
     private AudioClip toyAudioClip;
 
     [SerializeField]
-    private AudioClip wallAudioClip;
-
-    [SerializeField]
     private AudioClip phoneAudioClip;
 
     [SerializeField]
@@ -618,13 +615,6 @@ public class Reseiver : MonoBehaviour
                 GetOrAddComponent<BallGimmick>(target);
                 break;
 
-            case "wall":
-                WallGimmick wallGimmick =
-                    GetOrAddComponent<WallGimmick>(target);
-
-                wallGimmick.SetTargetRenderer(cutoutRenderer);
-                wallGimmick.SetAudioClip(wallAudioClip);
-                break;
 
             case "bridge":
                 BridgeGimmick bridgeGimmick =
