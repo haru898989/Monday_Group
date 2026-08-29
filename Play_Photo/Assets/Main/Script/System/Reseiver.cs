@@ -493,11 +493,11 @@ public class Reseiver : MonoBehaviour
 
             case "airplane":
             case "plane":
-                AirplaneGimmick airplaneGimmick =
-                    GetOrAddComponent<AirplaneGimmick>(target);
-
-                airplaneGimmick.SetAudioClip(airplaneAudioClip);
-                break;
+            AirplaneGimmick airplaneGimmick =
+            GetOrAddComponent<AirplaneGimmick>(target);
+            
+            airplaneGimmick.SetAudioClip(airplaneAudioClip);
+            break;
 
             case "toy":
                 ToyGimmick toyGimmick =
@@ -857,7 +857,7 @@ public class Reseiver : MonoBehaviour
         string safeFileName =
             Path.GetFileName(backgroundPhotoFileName);
 
-        string photoPath = Path.GetFullPath(
+        string originalPath = Path.GetFullPath(
             Path.Combine(
                 Application.dataPath,
                 "..",
@@ -865,6 +865,21 @@ public class Reseiver : MonoBehaviour
                 safeFileName
             )
         );
+        
+        string erasedPath = Path.GetFullPath(
+            Path.Combine(
+                Application.dataPath,
+                "..",
+                "Python",
+                "eraser_magic_output",
+                safeFileName
+            )
+        );
+        
+        // 消しゴムマジック後の画像があればそちらを優先
+        string photoPath = File.Exists(erasedPath)
+        ? erasedPath
+        : originalPath;
 
         if (!File.Exists(photoPath))
         {

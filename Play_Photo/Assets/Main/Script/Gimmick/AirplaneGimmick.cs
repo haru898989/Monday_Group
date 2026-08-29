@@ -2,62 +2,87 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// ��s�@���^�b�`����Ɛ^��֔��
+/// 飛行機をタッチすると、音を鳴らしながら上へ飛んでいくギミック
 /// </summary>
 public class AirplaneGimmick : MonoBehaviour, GimmickBase
 {
+    [Header("上に飛ぶ距離")]
     [SerializeField]
     private float flyHeight = 5f;
 
+    [Header("飛ぶ時間")]
     [SerializeField]
     private float flyDuration = 2f;
 
+    private AudioSource audioSource;
+    private AudioClip airplaneAudioClip;
+
     private bool isFlying;
 
-    // ���ǉ�
-    private AudioSource audioSource;
-
-    // ���ǉ��FReceiver���特�����󂯎��
-    public void SetAudioClip(AudioClip clip)
+    private void Awake()
     {
+        // AudioSourceを取得
+        audioSource = GetComponent<AudioSource>();
+
+        // なければ自動で追加
         if (audioSource == null)
         {
-            audioSource = GetComponent<AudioSource>();
-
-            if (audioSource == null)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-            }
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        audioSource.clip = clip;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
     }
 
+    /// <summary>
+    /// Reseiver.csから飛行機の音を受け取る
+    /// </summary>
+    public void SetAudioClip(AudioClip clip)
+    {
+        airplaneAudioClip = clip;
+    }
+
+    /// <summary>
+    /// 飛行機をタップしたときに実行される
+    /// </summary>
     public void ActivateMagic()
     {
+        // すでに飛んでいる場合は何もしない
         if (isFlying)
         {
             return;
         }
 
-        // ���ǉ��F��юn�߂�Ƃ��ɉ���炷
-        if (audioSource != null && audioSource.clip != null)
+        Debug.Log("飛行機ギミック発動");
+
+        // 飛行音を鳴らす
+        if (audioSource != null &&
+            airplaneAudioClip != null)
         {
-            audioSource.Play();
+            audioSource.PlayOneShot(
+                airplaneAudioClip
+            );
         }
 
+        // 上へ飛ぶ処理を開始
         StartCoroutine(FlyUp());
     }
 
+    /// <summary>
+    /// 飛行機を上へ移動させる
+    /// </summary>
     private IEnumerator FlyUp()
     {
         isFlying = true;
 
-        Vector3 startPosition = transform.position;
+        // 開始位置
+        Vector3 startPosition =
+            transform.position;
+
+        // 到着位置
         Vector3 targetPosition =
-            startPosition + Vector3.up * flyHeight;
+            startPosition +
+            Vector3.up * flyHeight;
 
         float elapsedTime = 0f;
 
@@ -65,23 +90,32 @@ public class AirplaneGimmick : MonoBehaviour, GimmickBase
         {
             elapsedTime += Time.deltaTime;
 
-            float t = Mathf.SmoothStep(
-                0f,
-                1f,
-                elapsedTime / flyDuration
-            );
+            float rate =
+                Mathf.Clamp01(
+                    elapsedTime / flyDuration
+                );
+
+            // 少し自然な動きにする
+            float smoothRate =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    rate
+                );
 
             transform.position =
                 Vector3.Lerp(
                     startPosition,
                     targetPosition,
-                    t
+                    smoothRate
                 );
 
             yield return null;
         }
 
-        transform.position = targetPosition;
+        // 最後に位置を確実に合わせる
+        transform.position =
+            targetPosition;
 
         isFlying = false;
     }
