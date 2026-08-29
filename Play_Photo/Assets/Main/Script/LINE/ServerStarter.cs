@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
@@ -452,7 +451,15 @@ public class ServerStarter : MonoBehaviour
             "Main Sceneへ移動します"
         );
 
-        SceneManager.LoadScene("Main");
+        if (SceneLoader.Instance == null)
+        {
+            UnityEngine.Debug.LogError(
+                "SceneLoaderが見つかりません。"
+            );
+            return;
+        }
+
+        SceneLoader.Instance.LoadScene("Main");
     }
 
     /// <summary>

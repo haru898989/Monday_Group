@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// PhotoLibrary内の写真を読み込み、額縁付きの展示物として横一列に並べる。
@@ -635,7 +634,14 @@ public class PhotoSelectGalleryController : MonoBehaviour
                 selectedPhotoPath
             );
 
-            SceneManager.LoadScene("Main");
+            if (SceneLoader.Instance == null)
+            {
+                throw new InvalidOperationException(
+                    "SceneLoaderが見つかりません。"
+                );
+            }
+
+            SceneLoader.Instance.LoadScene("Main");
         }
         catch (Exception exception)
         {
