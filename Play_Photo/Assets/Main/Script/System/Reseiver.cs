@@ -153,6 +153,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip humanDanceAudioClip;
 
+    [SerializeField]
+    private AudioClip glassBreakAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -749,6 +752,21 @@ public class Reseiver : MonoBehaviour
 
                 birdGimmick.SetAudioClip(
                     birdAudioClip
+                );
+
+                break;
+
+            case "window":
+            case "glass":
+                GlassGimmick glassGimmick =
+                    GetOrAddComponent<GlassGimmick>(target);
+
+                glassGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                glassGimmick.SetAudioClip(
+                    glassBreakAudioClip
                 );
 
                 break;
