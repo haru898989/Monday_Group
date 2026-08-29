@@ -16,8 +16,9 @@ public class MuseumLoadingPresenter : MonoBehaviour
     private const float FadeOutSeconds = 0.65f;
 
     private CanvasGroup canvasGroup;
-    private TMP_Text titleText;
-    private TMP_Text stageText;
+    private RawImage titleImage;
+    private RawImage stageImage;
+    private RawImage elapsedLabelImage;
     private TMP_Text elapsedText;
     private TMP_Text percentText;
     private RectTransform progressFillRect;
@@ -31,6 +32,7 @@ public class MuseumLoadingPresenter : MonoBehaviour
     private float targetProgress;
     private float displayedProgress;
     private string currentStatus = "展示の準備を始めています";
+    private string displayedStageImageName;
     private bool viewCreated;
     private bool isHiding;
 
@@ -249,14 +251,7 @@ public class MuseumLoadingPresenter : MonoBehaviour
                 Mathf.RoundToInt(displayedProgress * 100f) + "%";
         }
 
-        if (stageText != null)
-        {
-            int dotCount =
-                1 + Mathf.FloorToInt(Time.unscaledTime * 2f) % 3;
-
-            stageText.text =
-                currentStatus + new string('・', dotCount);
-        }
+        UpdateStageImage();
     }
 
     private void UpdateElapsedTime()
@@ -275,7 +270,7 @@ public class MuseumLoadingPresenter : MonoBehaviour
         int seconds = Mathf.FloorToInt(elapsedSeconds) % 60;
 
         elapsedText.text = string.Format(
-            "経過時間  {0:00}:{1:00}",
+            "{0:00}:{1:00}",
             minutes,
             seconds
         );
@@ -332,46 +327,52 @@ public class MuseumLoadingPresenter : MonoBehaviour
                 new Color(0.018f, 0.008f, 0.012f, 0.82f);
         }
 
-        titleText = GetComponentInChildren<TMP_Text>(true);
-        if (titleText == null)
+        TMP_Text oldLoadingText =
+            GetComponentInChildren<TMP_Text>(true);
+
+        if (oldLoadingText != null)
         {
-            titleText = CreateText("LoadingTitle");
+            oldLoadingText.gameObject.SetActive(false);
         }
 
-        ConfigureText(
-            titleText,
-            "写真をかざる準備をしています",
-            46f,
-            GoldColor,
+        titleImage = CreateTextImage(
+            "LoadingTitleImage",
+            "LoadingText/loading_title",
             new Vector2(0f, -270f),
-            new Vector2(1300f, 80f)
+            new Vector2(1300f, 100f)
         );
 
-        TMP_FontAsset font = titleText.font;
-
-        stageText = CreateText("LoadingStage", font);
-        ConfigureText(
-            stageText,
-            currentStatus,
-            30f,
-            Color.white,
+        stageImage = CreateTextImage(
+            "LoadingStageImage",
+            "LoadingText/stage_preparing",
             new Vector2(0f, -330f),
-            new Vector2(1300f, 60f)
+            new Vector2(1300f, 72f)
         );
 
         CreateProgressBar();
 
-        elapsedText = CreateText("ElapsedTime", font);
-        ConfigureText(
-            elapsedText,
-            "経過時間  00:00",
-            24f,
-            new Color(1f, 0.86f, 0.58f, 1f),
-            new Vector2(0f, -425f),
-            new Vector2(500f, 50f)
+        elapsedLabelImage = CreateTextImage(
+            "ElapsedTimeLabelImage",
+            "LoadingText/elapsed_label",
+            new Vector2(-105f, -425f),
+            new Vector2(210f, 52f)
         );
 
-        percentText = CreateText("ProgressPercent", font);
+        TMP_FontAsset defaultFont = Resources.Load<TMP_FontAsset>(
+            "Fonts & Materials/LiberationSans SDF"
+        );
+
+        elapsedText = CreateText("ElapsedTime", defaultFont);
+        ConfigureText(
+            elapsedText,
+            "00:00",
+            24f,
+            new Color(1f, 0.86f, 0.58f, 1f),
+            new Vector2(110f, -425f),
+            new Vector2(180f, 50f)
+        );
+
+        percentText = CreateText("ProgressPercent", defaultFont);
         ConfigureText(
             percentText,
             "0%",
@@ -382,6 +383,81 @@ public class MuseumLoadingPresenter : MonoBehaviour
         );
 
         CreateSpotlight();
+    }
+
+    private RawImage CreateTextImage(
+        string objectName,
+        string resourcePath,
+        Vector2 position,
+        Vector2 size
+    )
+    {
+        GameObject imageObject = new GameObject(objectName);
+        imageObject.transform.SetParent(transform, false);
+
+        RectTransform rect =
+            imageObject.AddComponent<RectTransform>();
+
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+
+        RawImage image = imageObject.AddComponent<RawImage>();
+        image.texture = Resources.Load<Texture2D>(resourcePath);
+        image.color = Color.white;
+        image.raycastTarget = false;
+
+        return image;
+    }
+
+    private void UpdateStageImage()
+    {
+        if (stageImage == null)
+        {
+            return;
+        }
+
+        string imageName = GetStageImageName(currentStatus);
+
+        if (imageName == displayedStageImageName)
+        {
+            return;
+        }
+
+        Texture2D texture = Resources.Load<Texture2D>(
+            "LoadingText/" + imageName
+        );
+
+        if (texture != null)
+        {
+            stageImage.texture = texture;
+            displayedStageImageName = imageName;
+        }
+    }
+
+    private string GetStageImageName(string status)
+    {
+        switch (status)
+        {
+            case "写真を受け取っています":
+                return "stage_receiving";
+            case "写真の中を見ています":
+                return "stage_inspecting";
+            case "写真の中のものを見つけています":
+                return "stage_detecting";
+            case "写真をきれいに整えています":
+                return "stage_cleaning";
+            case "楽しいしかけを準備しています":
+                return "stage_gimmicks";
+            case "写真をかざっています":
+                return "stage_displaying";
+            case "写真をかざす準備ができました":
+                return "stage_complete";
+            default:
+                return "stage_preparing";
+        }
     }
 
     private void CreateProgressBar()
