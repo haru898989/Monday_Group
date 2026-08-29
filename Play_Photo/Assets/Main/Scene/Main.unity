@@ -1202,6 +1202,7 @@ MonoBehaviour:
   birdAudioClip: {fileID: 8300000, guid: cd114b88e7928614ebd3d251dd828a99, type: 3}
   ballAudioClip: {fileID: 8300000, guid: 917ae55191dee464592d157e4b197c94, type: 3}
   humanDanceAudioClip: {fileID: 8300000, guid: 8249811f84be6aa4a941ea59590d17fe, type: 3}
+  glassBreakAudioClip: {fileID: 8300000, guid: e7b33c91a2514a14cb46c25ff72454c3, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
