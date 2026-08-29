@@ -1,10 +1,27 @@
+using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// 車をタッチすると発進音が鳴り、
+/// 左方向へ加速しながら走り去る。
+/// </summary>
 public class CarGimmick : MonoBehaviour, GimmickBase
 {
+    // どれくらい左へ進むか
+    [SerializeField]
+    private float driveDistance = 7f;
+
+    // 走り切るまでの時間
+    [SerializeField]
+    private float driveDuration = 1.5f;
+
+    private AudioClip carAudioClip;
     private AudioSource audioSource;
 
-    public void SetAudioClip(AudioClip clip)
+    private bool isActivated = false;
+
+
+    private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
 
@@ -14,37 +31,102 @@ public class CarGimmick : MonoBehaviour, GimmickBase
         }
 
         audioSource.playOnAwake = false;
-        audioSource.loop = false;
+
+        // 2D音声として再生
         audioSource.spatialBlend = 0f;
-        audioSource.volume = 1f;
-        audioSource.mute = false;
-
-        if (clip == null)
-        {
-            Debug.LogError(
-                "Reseiverから渡された車のAudioClipがnullです。"
-            );
-            return;
-        }
-
-        audioSource.clip = clip;
-
-        Debug.Log($"車の音声を設定しました：{clip.name}");
     }
 
+
+    /// <summary>
+    /// Receiverから車の発進音を受け取る
+    /// </summary>
+    public void SetAudioClip(AudioClip clip)
+    {
+        carAudioClip = clip;
+    }
+
+
+    /// <summary>
+    /// 車をタッチしたときに実行
+    /// </summary>
     public void ActivateMagic()
     {
-        if (audioSource == null || audioSource.clip == null)
+        if (isActivated)
         {
-            Debug.LogWarning(
-                "車の音声が設定されていません。"
-            );
             return;
         }
 
-        audioSource.Stop();
-        audioSource.Play();
+        isActivated = true;
 
-        Debug.Log($"車の音を再生しました：{audioSource.clip.name}");
+        StartCoroutine(Drive());
+    }
+
+
+    /// <summary>
+    /// 車を左方向へ走らせる
+    /// </summary>
+    private IEnumerator Drive()
+    {
+        Vector3 startPosition = transform.position;
+
+        // =========================
+        // ① 発進音
+        // =========================
+
+        if (audioSource != null &&
+            carAudioClip != null)
+        {
+            audioSource.PlayOneShot(
+                carAudioClip
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "CarGimmick：Car Audio Clipが設定されていません。"
+            );
+        }
+
+
+        // =========================
+        // ② 左方向へ発進
+        // =========================
+
+        float elapsedTime = 0f;
+
+
+        while (elapsedTime < driveDuration)
+        {
+            elapsedTime += Time.deltaTime;
+
+
+            float rate =
+                Mathf.Clamp01(
+                    elapsedTime / driveDuration
+                );
+
+
+            // 最初はゆっくり、
+            // 徐々に加速する
+            float moveRate =
+                rate * rate;
+
+
+            transform.position =
+                startPosition +
+                Vector3.left *
+                driveDistance *
+                moveRate;
+
+
+            yield return null;
+        }
+
+
+        // =========================
+        // ③ 画面外へ行ったら削除
+        // =========================
+
+        Destroy(gameObject);
     }
 }

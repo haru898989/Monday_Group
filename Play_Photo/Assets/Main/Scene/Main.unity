@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1185,7 +1185,7 @@ MonoBehaviour:
   pianoAudioClip: {fileID: 8300000, guid: eeada69b3353c514398a9bdbbc88e8c8, type: 3}
   dogAudioClip: {fileID: 8300000, guid: feba2311a85d7af4baa342cfdab33db6, type: 3}
   catAudioClip: {fileID: 8300000, guid: f06577b2dae719f4e9de36c5722c2d99, type: 3}
-  carAudioClip: {fileID: 8300000, guid: a0ac4b33f5235724a8c69ca2d9e2d88d, type: 3}
+  carAudioClip: {fileID: 8300000, guid: c0b524aa628325448b63e2e020e1a3c8, type: 3}
   waterAudioClip: {fileID: 8300000, guid: 467805333a19b704d9753eced887db47, type: 3}
   balloonAudioClip: {fileID: 0}
   computerAudioClip: {fileID: 0}
@@ -1201,6 +1201,7 @@ MonoBehaviour:
   mountainAudioClip: {fileID: 8300000, guid: 369eb42f6417f72408523b2bc7eb9e01, type: 3}
   birdAudioClip: {fileID: 8300000, guid: cd114b88e7928614ebd3d251dd828a99, type: 3}
   ballAudioClip: {fileID: 8300000, guid: 917ae55191dee464592d157e4b197c94, type: 3}
+  humanDanceAudioClip: {fileID: 8300000, guid: 8249811f84be6aa4a941ea59590d17fe, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0

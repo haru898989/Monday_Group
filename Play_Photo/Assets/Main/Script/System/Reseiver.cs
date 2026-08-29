@@ -150,6 +150,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip ballAudioClip;
 
+    [SerializeField]
+    private AudioClip humanDanceAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -476,6 +479,11 @@ public class Reseiver : MonoBehaviour
                     GetOrAddComponent<HumanGimmick1>(target);
 
                 humanGimmick.SetTargetRenderer(cutoutRenderer);
+
+                humanGimmick.SetAudioClip(
+                    humanDanceAudioClip
+                );
+
                 break;
 
             case "cat":

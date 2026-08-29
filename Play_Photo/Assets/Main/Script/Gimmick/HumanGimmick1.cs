@@ -1,95 +1,204 @@
+using System.Collections;
 using UnityEngine;
 
-// 人をタップしたときのギミック
+/// <summary>
+/// 人をタッチすると左右にステップしながら踊り、
+/// ダンス音を鳴らす。
+/// </summary>
 public class HumanGimmick1 : MonoBehaviour, GimmickBase
 {
-    // 人物のRenderer
-    private Renderer objectRenderer;
+    [SerializeField]
+    private float moveAmount = 0.4f;
 
-    // Reseiverが生成した人物専用マテリアル
-    private Material objectMaterial;
+    [SerializeField]
+    private float bounceAmount = 0.12f;
 
-    // 光るかどうか
-    private bool isLight = false;
+    [SerializeField]
+    private float rotationAmount = 12f;
 
-    void Start()
+    [SerializeField]
+    private float danceSpeed = 6f;
+
+    [SerializeField]
+    private float danceDuration = 2.5f;
+
+    private Renderer targetRenderer;
+
+    private AudioClip danceAudioClip;
+    private AudioSource audioSource;
+
+    private bool isActivated = false;
+
+
+    private void Awake()
     {
-        if (objectRenderer == null)
+        audioSource = GetComponent<AudioSource>();
+
+        if (audioSource == null)
         {
-            Renderer[] childRenderers =
-                GetComponentsInChildren<Renderer>(true);
-
-            foreach (Renderer renderer in childRenderers)
-            {
-                if (renderer.gameObject != gameObject)
-                {
-                    objectRenderer = renderer;
-                    break;
-                }
-            }
-
-            if (objectRenderer == null)
-            {
-                objectRenderer = GetComponent<Renderer>();
-            }
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        ConfigureTargetRenderer();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
     }
+
+
+    public void SetTargetRenderer(Renderer renderer)
+    {
+        targetRenderer = renderer;
+    }
+
 
     /// <summary>
-    /// 当たり判定の子として生成した人物Rendererを登録する
+    /// Receiverからダンス音を受け取る
     /// </summary>
-    public void SetTargetRenderer(Renderer targetRenderer)
+    public void SetAudioClip(AudioClip clip)
     {
-        objectRenderer = targetRenderer;
-        ConfigureTargetRenderer();
+        danceAudioClip = clip;
     }
 
-    private void ConfigureTargetRenderer()
-    {
-        if (objectRenderer == null)
-        {
-            Debug.LogWarning(
-                "人物切り抜きのRendererが設定されていません。"
-            );
-            return;
-        }
-
-        objectMaterial = objectRenderer.sharedMaterial;
-        if (objectMaterial == null)
-        {
-            Debug.LogWarning(
-                "人物切り抜きのMaterialが設定されていません。"
-            );
-            return;
-        }
-
-        // Emissionを有効化
-        objectMaterial.EnableKeyword("_EMISSION");
-        objectMaterial.SetColor("_EmissionColor", Color.black);
-    }
 
     public void ActivateMagic()
     {
-        Debug.Log("人が光った");
+        if (isActivated)
+        {
+            return;
+        }
 
-        isLight = true;
+        isActivated = true;
+
+        StartCoroutine(Dance());
     }
 
-    void Update()
-    {
-        if (isLight && objectMaterial != null)
-        {
-            // 虹色に変化
-            float hue = Mathf.Repeat(Time.time * 0.5f, 1f);
-            Color rainbow = Color.HSVToRGB(hue, 1f, 1f);
 
-            // 発光色
-            objectMaterial.SetColor(
-                "_EmissionColor",
-                rainbow * 3f
+    private IEnumerator Dance()
+    {
+        Vector3 startPosition =
+            transform.position;
+
+        Quaternion startRotation =
+            transform.rotation;
+
+        Vector3 startScale =
+            transform.localScale;
+
+
+        // =========================
+        // ダンス音を再生
+        // =========================
+
+        if (audioSource != null &&
+            danceAudioClip != null)
+        {
+            audioSource.PlayOneShot(
+                danceAudioClip
             );
         }
+        else
+        {
+            Debug.LogWarning(
+                "HumanGimmick：ダンス音が設定されていません。"
+            );
+        }
+
+
+        float elapsedTime = 0f;
+
+
+        while (elapsedTime < danceDuration)
+        {
+            elapsedTime += Time.deltaTime;
+
+
+            // 左右に動く
+            float moveX =
+                Mathf.Sin(
+                    elapsedTime * danceSpeed
+                ) * moveAmount;
+
+
+            // 上下に跳ねる
+            float bounceY =
+                Mathf.Abs(
+                    Mathf.Sin(
+                        elapsedTime
+                        * danceSpeed
+                        * 2f
+                    )
+                ) * bounceAmount;
+
+
+            transform.position =
+                startPosition +
+                new Vector3(
+                    moveX,
+                    bounceY,
+                    0f
+                );
+
+
+            // 左右に傾ける
+            float rotationZ =
+                Mathf.Sin(
+                    elapsedTime * danceSpeed
+                ) * rotationAmount;
+
+
+            transform.rotation =
+                startRotation *
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    rotationZ
+                );
+
+
+            // 少し伸び縮み
+            float scaleY =
+                1f +
+                Mathf.Abs(
+                    Mathf.Sin(
+                        elapsedTime
+                        * danceSpeed
+                        * 2f
+                    )
+                ) * 0.04f;
+
+
+            transform.localScale =
+                new Vector3(
+                    startScale.x,
+                    startScale.y * scaleY,
+                    startScale.z
+                );
+
+
+            yield return null;
+        }
+
+
+        // ダンスが終わったら音も止める
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+
+
+        transform.position =
+            startPosition;
+
+        transform.rotation =
+            startRotation;
+
+        transform.localScale =
+            startScale;
+
+
+        isActivated = false;
+
+        Debug.Log(
+            "HumanGimmick：ダンス終了"
+        );
     }
 }
