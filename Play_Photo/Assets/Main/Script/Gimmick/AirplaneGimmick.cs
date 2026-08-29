@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 飛行機をタッチすると、音を鳴らしながら上へ飛んでいくギミック
+/// 飛行機をタッチすると、音を鳴らしながらゆっくり上へ浮かぶギミック
 /// </summary>
 public class AirplaneGimmick : MonoBehaviour, GimmickBase
 {
@@ -12,7 +12,7 @@ public class AirplaneGimmick : MonoBehaviour, GimmickBase
 
     [Header("飛ぶ時間")]
     [SerializeField]
-    private float flyDuration = 2f;
+    private float flyDuration = 4f;
 
     private AudioSource audioSource;
     private AudioClip airplaneAudioClip;
@@ -64,12 +64,12 @@ public class AirplaneGimmick : MonoBehaviour, GimmickBase
             );
         }
 
-        // 上へ飛ぶ処理を開始
+        // 現在位置からゆっくり上へ浮かぶ処理を開始
         StartCoroutine(FlyUp());
     }
 
     /// <summary>
-    /// 飛行機を上へ移動させる
+    /// 飛行機をゆっくり上へ移動させる
     /// </summary>
     private IEnumerator FlyUp()
     {

@@ -18,6 +18,14 @@ OUTPUT_DIR = "objects"
 BOX_RESULT_PATH = "result_boxes.jpg"
 ERASED_RESULT_PATH = "erased_result.jpg"
 
+# 背景として広い範囲を覆う検出物は、手前の物体まで巻き込んだ
+# 切り抜きになりやすい。これらのマスクから前景物体を除外する。
+BACKGROUND_LAYER_CLASSES = {
+    "background", "sky", "cloud", "ground", "road", "pavement", "grass",
+    "water", "sea", "ocean", "river", "lake", "pond", "mountain", "wall",
+    "city",
+}
+
 def safe_name(name: str) -> str:
     name = name.strip().lower().replace(" ", "_")
     return re.sub(r"[^a-zA-Z0-9_\-]", "_", name)
@@ -152,6 +160,8 @@ def create_object_cutouts(
     object_masks = [None for _ in object_list]
     person_mask = _person_mask_from_semantic_segmentation(img, object_list)
 
+    # 先に全物体のマスクを作る。背景マスクを保存する前に、後から検出された
+    # 飛行機なども含めて、すべての前景物体を差し引けるようにするため。
     for index, obj in enumerate(object_list):
         object_name = str(
             getattr(obj, "canonical_name", "") or obj.name
@@ -170,6 +180,46 @@ def create_object_cutouts(
             continue
 
         object_masks[index] = obj_mask
+
+    foreground_mask = np.zeros(img.shape[:2], dtype=np.uint8)
+    for index, obj in enumerate(object_list):
+        object_name = str(
+            getattr(obj, "canonical_name", "") or obj.name
+        ).lower()
+        obj_mask = object_masks[index]
+        if obj_mask is None or object_name in BACKGROUND_LAYER_CLASSES:
+            continue
+        np.maximum(foreground_mask, obj_mask, out=foreground_mask)
+
+    if np.any(foreground_mask):
+        # 輪郭の半透明な残像も背景側へ残さないよう、除外範囲を少しだけ広げる。
+        exclusion_kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (9, 9),
+        )
+        foreground_exclusion = cv2.dilate(
+            foreground_mask,
+            exclusion_kernel,
+            iterations=1,
+        )
+    else:
+        foreground_exclusion = foreground_mask
+
+    for index, obj in enumerate(object_list):
+        object_name = str(
+            getattr(obj, "canonical_name", "") or obj.name
+        ).lower()
+        obj_mask = object_masks[index]
+        if obj_mask is None:
+            continue
+
+        if object_name in BACKGROUND_LAYER_CLASSES:
+            obj_mask = cv2.bitwise_and(
+                obj_mask,
+                cv2.bitwise_not(foreground_exclusion),
+            )
+            object_masks[index] = obj_mask
+
         filename = f"{index}_{safe_name(obj.name)}.png"
         if save_object_png(img, obj_mask, obj.box, output_path / filename):
             cutout_files[index] = filename
