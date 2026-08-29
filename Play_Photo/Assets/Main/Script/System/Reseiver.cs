@@ -25,6 +25,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private GameObject loadingPanel;
 
+    private MuseumLoadingPresenter museumLoadingPresenter;
+    private bool loadingHideRequested;
+
     // Rayを飛ばすカメラ
     [SerializeField]
     private Camera targetCamera;
@@ -178,6 +181,8 @@ public class Reseiver : MonoBehaviour
 
     private void Start()
     {
+        PrepareMuseumLoadingPresenter();
+
         // 最初はローディング画面を表示
         SetLoadingVisible(true);
 
@@ -378,12 +383,69 @@ public class Reseiver : MonoBehaviour
 
     private void SetLoadingVisible(bool isVisible)
     {
-        if (loadingPanel != null)
+        if (isVisible)
         {
-            loadingPanel.SetActive(isVisible);
+            loadingHideRequested = false;
+
+            if (loadingPanel != null)
+            {
+                loadingPanel.SetActive(true);
+
+                if (museumLoadingPresenter != null)
+                {
+                    museumLoadingPresenter.Show();
+                }
+            }
+
+            DualDisplayManager.SetPlayLoadingVisible(true);
+            return;
         }
 
-        DualDisplayManager.SetPlayLoadingVisible(isVisible);
+        if (loadingHideRequested)
+        {
+            return;
+        }
+
+        loadingHideRequested = true;
+
+        if (museumLoadingPresenter != null &&
+            loadingPanel != null &&
+            loadingPanel.activeInHierarchy)
+        {
+            museumLoadingPresenter.HideWithCompletion(
+                FinishHidingLoadingView
+            );
+            return;
+        }
+
+        FinishHidingLoadingView();
+    }
+
+    private void PrepareMuseumLoadingPresenter()
+    {
+        if (loadingPanel == null)
+        {
+            return;
+        }
+
+        museumLoadingPresenter =
+            loadingPanel.GetComponent<MuseumLoadingPresenter>();
+
+        if (museumLoadingPresenter == null)
+        {
+            museumLoadingPresenter =
+                loadingPanel.AddComponent<MuseumLoadingPresenter>();
+        }
+    }
+
+    private void FinishHidingLoadingView()
+    {
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(false);
+        }
+
+        DualDisplayManager.SetPlayLoadingVisible(false);
     }
 
 

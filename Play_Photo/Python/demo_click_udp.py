@@ -45,6 +45,28 @@ ERASED_BACKGROUND = (
     / "sample_erased.png"
 )
 EXCLUDED_SCENE_CLASSES = {"sky", "wall"}
+UNITY_PROGRESS_PREFIX = "UNITY_PROGRESS"
+UNITY_PROGRESS_FILE = (
+    Path(__file__).resolve().parent / "loading_progress.txt"
+)
+
+
+def report_progress(progress: float, message: str) -> None:
+    """UnityのLoading画面へ実処理の段階を通知する。"""
+    clamped_progress = max(0.0, min(1.0, float(progress)))
+    progress_text = f"{clamped_progress:.3f}|{message}"
+
+    try:
+        temporary_path = UNITY_PROGRESS_FILE.with_suffix(".tmp")
+        temporary_path.write_text(progress_text, encoding="utf-8")
+        os.replace(temporary_path, UNITY_PROGRESS_FILE)
+    except OSError as error:
+        print(f"進捗ファイルを更新できませんでした: {error}", flush=True)
+
+    print(
+        f"{UNITY_PROGRESS_PREFIX}|{progress_text}",
+        flush=True,
+    )
 
 
 def create_erased_background(
@@ -163,12 +185,14 @@ def draw_objects(img: Any, objects: Sequence[DetectedObject]) -> Any:
 
 
 def main() -> None:
+    report_progress(0.03, "展示の準備を始めています")
     detector = MagicPhotoDetector(confidence=0.12)
 
     screen_w, screen_h = get_screen_size()
     print(f"画面サイズ: {screen_w} x {screen_h}")
 
     try:
+        report_progress(0.08, "写真を受け取っています")
         # 画面サイズに合わせて、縦横比を保ったまま画像を縮小
         img = detector.load_image_for_screen(IMAGE_PATH, screen_w, screen_h, margin=100)
     except FileNotFoundError:
@@ -178,6 +202,7 @@ def main() -> None:
     h, w = img.shape[:2]
     print(f"表示・AI解析に使う画像サイズ: {w} x {h}")
 
+    report_progress(0.18, "写真の中を見ています")
     print("AIが画像を解析中...")
     # 表示に使う画像そのものをAIに渡す。これで座標が絶対にズレない。
     detected_objects = detector.detect_from_image(img)
@@ -212,6 +237,7 @@ def main() -> None:
     else:
         objects = detected_objects
 
+    report_progress(0.46, "写真の中のものを見つけています")
     cutout_files, object_masks = create_object_cutouts(
         img,
         objects,
@@ -220,8 +246,10 @@ def main() -> None:
     )
 
     # 消去済み背景が完成してからUnityへ座標を送る
+    report_progress(0.68, "写真をきれいに整えています")
     create_erased_background(img, objects, object_masks)
 
+    report_progress(0.86, "楽しいしかけを準備しています")
     brain_result = MagicBrain().analyze(
         detected_objects,
         image_width=w,
@@ -233,6 +261,7 @@ def main() -> None:
 
     # UDP送信は専用モジュールへ分離。現在はReseiver.cs互換形式で送る。
     try:
+        report_progress(0.96, "写真をかざっています")
         sent_bytes = send_to_unity(
             objects,
             brain_result,
@@ -247,6 +276,7 @@ def main() -> None:
             f"UnityへUDP送信しました: {UNITY_HOST}:{UNITY_PORT} "
             f"/ mode={UDP_SEND_MODE} / {sent_bytes} bytes"
         )
+        report_progress(1.0, "写真をかざす準備ができました")
     except (OSError, TypeError, ValueError) as error:
         # Unityが起動していなくても、画像認識デモ自体は続行する。
         print(f"UnityへのUDP送信に失敗しました: {error}")
