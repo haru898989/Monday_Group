@@ -38,6 +38,11 @@ public class BallGimmick : MonoBehaviour, GimmickBase
     private float arcHeight = 0.35f;
 
 
+    [Header("サウンド設定")]
+
+    private AudioSource audioSource;
+
+
     private bool isMoving;
 
     // 写真より手前に表示されている最初のZ座標
@@ -48,6 +53,55 @@ public class BallGimmick : MonoBehaviour, GimmickBase
     {
         fixedLocalZ =
             transform.localPosition.z;
+
+        audioSource =
+            GetComponent<AudioSource>();
+
+        if (audioSource == null)
+        {
+            audioSource =
+                gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0f;
+        audioSource.volume = 1f;
+        audioSource.mute = false;
+    }
+
+
+    /// <summary>
+    /// Reseiverからボールの音を受け取る
+    /// </summary>
+    public void SetAudioClip(AudioClip clip)
+    {
+        if (audioSource == null)
+        {
+            audioSource =
+                GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource =
+                    gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        if (clip == null)
+        {
+            Debug.LogError(
+                "Reseiverから渡されたボールのAudioClipがnullです。"
+            );
+
+            return;
+        }
+
+        audioSource.clip = clip;
+
+        Debug.Log(
+            $"ボールの音声を設定しました：{clip.name}"
+        );
     }
 
 
@@ -60,6 +114,27 @@ public class BallGimmick : MonoBehaviour, GimmickBase
         {
             return;
         }
+
+
+        // ボールの音を再生
+        if (audioSource != null &&
+            audioSource.clip != null)
+        {
+            audioSource.PlayOneShot(
+                audioSource.clip
+            );
+
+            Debug.Log(
+                $"ボールの音を再生しました：{audioSource.clip.name}"
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "ボールの音声が設定されていません。"
+            );
+        }
+
 
         StartCoroutine(
             FlyInRandomDirection()

@@ -147,6 +147,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip birdAudioClip;
 
+    [SerializeField]
+    private AudioClip ballAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -614,7 +617,13 @@ public class Reseiver : MonoBehaviour
             case "basketball":
             case "baseball":
             case "tennis ball":
-                GetOrAddComponent<BallGimmick>(target);
+                BallGimmick ballGimmick =
+                    GetOrAddComponent<BallGimmick>(target);
+
+                ballGimmick.SetAudioClip(
+                    ballAudioClip
+                );
+
                 break;
 
 
