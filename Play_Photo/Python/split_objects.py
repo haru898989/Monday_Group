@@ -139,11 +139,17 @@ def _mask_inside_box(mask, box):
     return result
 
 
-def create_object_cutouts(img, objects, output_dir=OUTPUT_DIR):
+def create_object_cutouts(
+    img,
+    objects,
+    output_dir=OUTPUT_DIR,
+    return_masks=False,
+):
     """検出物体の背景透明PNGを生成し、物体順にファイル名を返す。"""
     object_list = list(objects)
     output_path = reset_cutout_directory(output_dir)
     cutout_files = ["" for _ in object_list]
+    object_masks = [None for _ in object_list]
     person_mask = _person_mask_from_semantic_segmentation(img, object_list)
 
     for index, obj in enumerate(object_list):
@@ -163,6 +169,7 @@ def create_object_cutouts(img, objects, output_dir=OUTPUT_DIR):
             print(f"{index}: {obj.name} の切り抜きマスクを生成できませんでした。")
             continue
 
+        object_masks[index] = obj_mask
         filename = f"{index}_{safe_name(obj.name)}.png"
         if save_object_png(img, obj_mask, obj.box, output_path / filename):
             cutout_files[index] = filename
@@ -170,6 +177,8 @@ def create_object_cutouts(img, objects, output_dir=OUTPUT_DIR):
         else:
             print(f"{index}: 物体切り抜きを保存できませんでした: {filename}")
 
+    if return_masks:
+        return cutout_files, object_masks
     return cutout_files
 
 def draw_boxes(img, objects):

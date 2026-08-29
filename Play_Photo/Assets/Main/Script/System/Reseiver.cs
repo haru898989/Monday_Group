@@ -251,12 +251,12 @@ public class Reseiver : MonoBehaviour
                 ? receivedData.imageHeight
                 : imageHeight;
 
-        // 受信した画像サイズに写真と額縁を追従させる
-        UpdateDisplayWorldSize(
+        // 消しゴムマジック完了後の画像を背景へ反映する
+        backgroundPhotoFileName = "sample_erased.png";
+        RefreshPhotoBackground(
             receivedImageWidth,
             receivedImageHeight
         );
-        UpdatePhotoDisplayTransforms();
 
         // 前回生成したタッチ範囲を削除する
         ClearGeneratedObjects();

@@ -2,641 +2,82 @@
   "schema_version": "1.0",
   "image": {
     "path": "../downloaded_images/sample.jpg",
-    "width": 602,
-    "height": 700,
+    "width": 547,
+    "height": 365,
     "coordinate_space": "analysis_image"
   },
   "scene": {
-    "primary": "indoor",
+    "primary": "nature",
     "scores": {
-      "indoor": 0.4282,
-      "outdoor": 0.0,
-      "home": 0.2141,
+      "indoor": 0.0,
+      "outdoor": 0.2646,
+      "home": 0.0,
       "office": 0.0,
       "restaurant": 0.0,
       "classroom": 0.0,
-      "park": 0.1809,
-      "nature": 0.0,
+      "park": 0.2023,
+      "nature": 0.2864,
       "food_scene": 0.0,
       "animal_scene": 0.0,
       "transportation_scene": 0.0,
       "entertainment_scene": 0.0,
       "night_scene": 0.0,
-      "unknown": 0.0483
+      "unknown": 0.3636
     }
   },
   "main_objects": [
     {
-      "object_id": 2,
-      "name": "person",
-      "importance": 0.7898
-    },
-    {
-      "object_id": 3,
-      "name": "mirror",
-      "importance": 0.6956
-    },
-    {
-      "object_id": 4,
-      "name": "face",
-      "importance": 0.6929
+      "object_id": 1,
+      "name": "flower",
+      "importance": 0.6426
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "person",
-      "original_name": "person",
+      "canonical_name": "flower",
+      "original_name": "flower",
       "aliases": [
-        "person"
+        "flower"
       ],
-      "category": "human",
-      "confidence": 0.551684,
+      "category": "nature",
+      "confidence": 0.311281,
       "box": [
-        365,
-        551,
-        440,
-        631
+        6,
+        10,
+        544,
+        362
       ],
       "center": [
-        402.5,
-        591
+        275,
+        186
       ],
       "normalized_center": [
-        0.668605,
-        0.844286
+        0.502742,
+        0.509589
       ],
       "normalized_box": [
-        0.606312,
-        0.787143,
-        0.730897,
-        0.901429
+        0.010969,
+        0.027397,
+        0.994516,
+        0.991781
       ],
-      "width": 75,
-      "height": 80,
-      "area_ratio": 0.01423825,
-      "horizontal_position": "right",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.5112,
-      "importance_score": 0.5112
-    },
-    {
-      "object_id": 2,
-      "canonical_name": "person",
-      "original_name": "human",
-      "aliases": [
-        "person",
-        "human"
-      ],
-      "category": "human",
-      "confidence": 0.510683,
-      "box": [
-        128,
-        91,
-        475,
-        438
-      ],
-      "center": [
-        301.5,
-        264.5
-      ],
-      "normalized_center": [
-        0.500831,
-        0.377857
-      ],
-      "normalized_box": [
-        0.212625,
-        0.13,
-        0.789037,
-        0.625714
-      ],
-      "width": 347,
-      "height": 347,
-      "area_ratio": 0.28573564,
+      "width": 538,
+      "height": 352,
+      "area_ratio": 0.94851619,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.7898,
-      "importance_score": 0.7898
-    },
-    {
-      "object_id": 3,
-      "canonical_name": "mirror",
-      "original_name": "mirror",
-      "aliases": [
-        "mirror"
-      ],
-      "category": "indoor_fixture",
-      "confidence": 0.475833,
-      "box": [
-        123,
-        82,
-        482,
-        441
-      ],
-      "center": [
-        302.5,
-        261.5
-      ],
-      "normalized_center": [
-        0.502492,
-        0.373571
-      ],
-      "normalized_box": [
-        0.204319,
-        0.117143,
-        0.800664,
-        0.63
-      ],
-      "width": 359,
-      "height": 359,
-      "area_ratio": 0.30584006,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.6956,
-      "importance_score": 0.6956
-    },
-    {
-      "object_id": 4,
-      "canonical_name": "face",
-      "original_name": "face",
-      "aliases": [
-        "face"
-      ],
-      "category": "human",
-      "confidence": 0.39006,
-      "box": [
-        143,
-        96,
-        458,
-        391
-      ],
-      "center": [
-        300.5,
-        243.5
-      ],
-      "normalized_center": [
-        0.499169,
-        0.347857
-      ],
-      "normalized_box": [
-        0.237542,
-        0.137143,
-        0.760797,
-        0.558571
-      ],
-      "width": 315,
-      "height": 295,
-      "area_ratio": 0.22051495,
-      "horizontal_position": "center",
-      "vertical_position": "middle",
-      "geometry_valid": true,
-      "importance": 0.6929,
-      "importance_score": 0.6929
-    },
-    {
-      "object_id": 5,
-      "canonical_name": "person",
-      "original_name": "person",
-      "aliases": [
-        "person"
-      ],
-      "category": "human",
-      "confidence": 0.279294,
-      "box": [
-        159,
-        551,
-        238,
-        632
-      ],
-      "center": [
-        198.5,
-        591.5
-      ],
-      "normalized_center": [
-        0.329734,
-        0.845
-      ],
-      "normalized_box": [
-        0.26412,
-        0.787143,
-        0.395349,
-        0.902857
-      ],
-      "width": 79,
-      "height": 81,
-      "area_ratio": 0.0151851,
-      "horizontal_position": "left",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.4307,
-      "importance_score": 0.4307
-    },
-    {
-      "object_id": 6,
-      "canonical_name": "face",
-      "original_name": "face",
-      "aliases": [
-        "face"
-      ],
-      "category": "human",
-      "confidence": 0.255458,
-      "box": [
-        261,
-        550,
-        339,
-        624
-      ],
-      "center": [
-        300,
-        587
-      ],
-      "normalized_center": [
-        0.498339,
-        0.838571
-      ],
-      "normalized_box": [
-        0.433555,
-        0.785714,
-        0.563123,
-        0.891429
-      ],
-      "width": 78,
-      "height": 74,
-      "area_ratio": 0.0136972,
-      "horizontal_position": "center",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.3996,
-      "importance_score": 0.3996
-    },
-    {
-      "object_id": 7,
-      "canonical_name": "person",
-      "original_name": "person",
-      "aliases": [
-        "person"
-      ],
-      "category": "human",
-      "confidence": 0.209839,
-      "box": [
-        262,
-        550,
-        340,
-        626
-      ],
-      "center": [
-        301,
-        588
-      ],
-      "normalized_center": [
-        0.5,
-        0.84
-      ],
-      "normalized_box": [
-        0.435216,
-        0.785714,
-        0.564784,
-        0.894286
-      ],
-      "width": 78,
-      "height": 76,
-      "area_ratio": 0.01406739,
-      "horizontal_position": "center",
-      "vertical_position": "bottom",
-      "geometry_valid": true,
-      "importance": 0.4383,
-      "importance_score": 0.4383
+      "importance": 0.6426,
+      "importance_score": 0.6426
     }
   ],
-  "relations": [
-    {
-      "subject_id": 4,
-      "object_id": 2,
-      "type": "in_front_of",
-      "score": 0.8527
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.8732
-    },
-    {
-      "subject_id": 4,
-      "object_id": 2,
-      "type": "inside",
-      "score": 0.8616
-    },
-    {
-      "subject_id": 4,
-      "object_id": 3,
-      "type": "inside",
-      "score": 0.8577
-    },
-    {
-      "subject_id": 3,
-      "object_id": 2,
-      "type": "contains",
-      "score": 0.8732
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.8616
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "contains",
-      "score": 0.8577
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "overlap",
-      "score": 0.8732
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8616
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "overlap",
-      "score": 0.8577
-    },
-    {
-      "subject_id": 6,
-      "object_id": 7,
-      "type": "overlap",
-      "score": 0.8079
-    },
-    {
-      "subject_id": 2,
-      "object_id": 3,
-      "type": "near",
-      "score": 0.8732
-    },
-    {
-      "subject_id": 2,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8616
-    },
-    {
-      "subject_id": 3,
-      "object_id": 4,
-      "type": "near",
-      "score": 0.8577
-    },
-    {
-      "subject_id": 7,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.8079
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.4771
-    },
-    {
-      "subject_id": 1,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.4658
-    },
-    {
-      "subject_id": 1,
-      "object_id": 6,
-      "type": "near",
-      "score": 0.4651
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "near",
-      "score": 0.456
-    },
-    {
-      "subject_id": 5,
-      "object_id": 1,
-      "type": "left_of",
-      "score": 0.6064
-    },
-    {
-      "subject_id": 6,
-      "object_id": 1,
-      "type": "left_of",
-      "score": 0.3493
-    },
-    {
-      "subject_id": 7,
-      "object_id": 1,
-      "type": "left_of",
-      "score": 0.338
-    },
-    {
-      "subject_id": 5,
-      "object_id": 6,
-      "type": "left_of",
-      "score": 0.3197
-    },
-    {
-      "subject_id": 5,
-      "object_id": 7,
-      "type": "left_of",
-      "score": 0.3159
-    },
-    {
-      "subject_id": 1,
-      "object_id": 5,
-      "type": "right_of",
-      "score": 0.6064
-    },
-    {
-      "subject_id": 1,
-      "object_id": 6,
-      "type": "right_of",
-      "score": 0.3493
-    },
-    {
-      "subject_id": 1,
-      "object_id": 7,
-      "type": "right_of",
-      "score": 0.338
-    },
-    {
-      "subject_id": 6,
-      "object_id": 5,
-      "type": "right_of",
-      "score": 0.3197
-    },
-    {
-      "subject_id": 7,
-      "object_id": 5,
-      "type": "right_of",
-      "score": 0.3159
-    },
-    {
-      "subject_id": 4,
-      "object_id": 1,
-      "type": "above",
-      "score": 0.8606
-    },
-    {
-      "subject_id": 3,
-      "object_id": 1,
-      "type": "above",
-      "score": 0.8342
-    },
-    {
-      "subject_id": 2,
-      "object_id": 1,
-      "type": "above",
-      "score": 0.8323
-    },
-    {
-      "subject_id": 4,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.8282
-    },
-    {
-      "subject_id": 4,
-      "object_id": 6,
-      "type": "above",
-      "score": 0.815
-    },
-    {
-      "subject_id": 4,
-      "object_id": 7,
-      "type": "above",
-      "score": 0.8097
-    },
-    {
-      "subject_id": 3,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.7983
-    },
-    {
-      "subject_id": 2,
-      "object_id": 5,
-      "type": "above",
-      "score": 0.7951
-    },
-    {
-      "subject_id": 3,
-      "object_id": 6,
-      "type": "above",
-      "score": 0.7847
-    },
-    {
-      "subject_id": 2,
-      "object_id": 6,
-      "type": "above",
-      "score": 0.7814
-    },
-    {
-      "subject_id": 3,
-      "object_id": 7,
-      "type": "above",
-      "score": 0.7786
-    },
-    {
-      "subject_id": 2,
-      "object_id": 7,
-      "type": "above",
-      "score": 0.7751
-    },
-    {
-      "subject_id": 1,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.8606
-    },
-    {
-      "subject_id": 1,
-      "object_id": 3,
-      "type": "below",
-      "score": 0.8342
-    },
-    {
-      "subject_id": 1,
-      "object_id": 2,
-      "type": "below",
-      "score": 0.8323
-    },
-    {
-      "subject_id": 5,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.8282
-    },
-    {
-      "subject_id": 6,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.815
-    },
-    {
-      "subject_id": 7,
-      "object_id": 4,
-      "type": "below",
-      "score": 0.8097
-    },
-    {
-      "subject_id": 5,
-      "object_id": 3,
-      "type": "below",
-      "score": 0.7983
-    },
-    {
-      "subject_id": 5,
-      "object_id": 2,
-      "type": "below",
-      "score": 0.7951
-    },
-    {
-      "subject_id": 6,
-      "object_id": 3,
-      "type": "below",
-      "score": 0.7847
-    },
-    {
-      "subject_id": 6,
-      "object_id": 2,
-      "type": "below",
-      "score": 0.7814
-    },
-    {
-      "subject_id": 7,
-      "object_id": 3,
-      "type": "below",
-      "score": 0.7786
-    },
-    {
-      "subject_id": 7,
-      "object_id": 2,
-      "type": "below",
-      "score": 0.7751
-    }
-  ],
+  "relations": [],
   "summary": {
-    "object_count": 7,
-    "has_person": true,
+    "object_count": 1,
+    "has_person": false,
     "categories": [
-      "human",
-      "indoor_fixture"
+      "nature"
     ]
   },
   "debug": {

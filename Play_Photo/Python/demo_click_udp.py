@@ -19,7 +19,13 @@ from typing import Any, Sequence
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import cv2
+import numpy as np
 from ml_detector import DetectedObject, MagicPhotoDetector
+from eraser_magic import (
+    BACKGROUND_CLASSES,
+    inpaint_background,
+    patch_refine_background,
+)
 from magic_brain import MagicBrain
 from split_objects import create_object_cutouts
 from udp_sender import send_to_unity
@@ -33,6 +39,73 @@ UDP_SEND_MODE = "legacy"
 UNITY_HOST = "127.0.0.1"
 UNITY_PORT = 1140
 CUTOUT_DIR = Path(__file__).resolve().parent / "objects"
+ERASED_BACKGROUND = (
+    Path(__file__).resolve().parent.parent
+    / "downloaded_images"
+    / "sample_erased.png"
+)
+
+
+def create_erased_background(
+    img: Any,
+    objects: Sequence[DetectedObject],
+    object_masks: Sequence[Any],
+) -> None:
+    """切り抜き生成時のマスクを再利用して背景を補完する。"""
+    height, width = img.shape[:2]
+    erase_mask = np.zeros((height, width), dtype=np.uint8)
+    person_mask = np.zeros_like(erase_mask)
+
+    for index, obj in enumerate(objects):
+        object_name = str(
+            getattr(obj, "canonical_name", "") or obj.name
+        ).lower()
+        if object_name in BACKGROUND_CLASSES:
+            continue
+
+        obj_mask = object_masks[index] if index < len(object_masks) else None
+        if obj_mask is None or obj_mask.shape != erase_mask.shape:
+            continue
+
+        np.maximum(erase_mask, obj_mask, out=erase_mask)
+        if object_name in {"person", "human"}:
+            np.maximum(person_mask, obj_mask, out=person_mask)
+
+    if np.any(erase_mask):
+        close_kernel = np.ones((7, 7), dtype=np.uint8)
+        erase_mask = cv2.morphologyEx(
+            erase_mask,
+            cv2.MORPH_CLOSE,
+            close_kernel,
+        )
+        expand_kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (21, 21),
+        )
+        erase_mask = cv2.dilate(erase_mask, expand_kernel, iterations=1)
+        result = inpaint_background(img, erase_mask, 5.0, "lama", 4)
+
+        if np.any(person_mask):
+            cleanup_kernel = cv2.getStructuringElement(
+                cv2.MORPH_ELLIPSE,
+                (49, 49),
+            )
+            cleanup_mask = cv2.dilate(
+                person_mask,
+                cleanup_kernel,
+                iterations=1,
+            )
+            result = inpaint_background(result, cleanup_mask, 5.0, "lama", 2)
+            result = patch_refine_background(result, cleanup_mask)
+    else:
+        result = img
+        print("消去対象がないため、元画像を消去済み背景として使用します。")
+
+    ERASED_BACKGROUND.parent.mkdir(parents=True, exist_ok=True)
+    encoded, buffer = cv2.imencode(".png", result)
+    if not encoded:
+        raise OSError("消去済み背景を保存できませんでした。")
+    ERASED_BACKGROUND.write_bytes(buffer.tobytes())
 
 
 def get_screen_size() -> tuple[int, int]:
@@ -117,7 +190,15 @@ def main() -> None:
     else:
         objects = detected_objects
 
-    cutout_files = create_object_cutouts(img, objects, CUTOUT_DIR)
+    cutout_files, object_masks = create_object_cutouts(
+        img,
+        objects,
+        CUTOUT_DIR,
+        return_masks=True,
+    )
+
+    # 消去済み背景が完成してからUnityへ座標を送る
+    create_erased_background(img, objects, object_masks)
 
     brain_result = MagicBrain().analyze(
         detected_objects,
