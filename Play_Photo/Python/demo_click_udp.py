@@ -45,6 +45,14 @@ ERASED_BACKGROUND = (
     / "sample_erased.png"
 )
 EXCLUDED_SCENE_CLASSES = {"sky", "wall"}
+LARGE_STATIC_BACKGROUND_CLASSES = {
+    "desk",
+    "table",
+    "floor",
+    "ground",
+    "road",
+    "pavement",
+}
 UNITY_PROGRESS_PREFIX = "UNITY_PROGRESS"
 UNITY_PROGRESS_FILE = (
     Path(__file__).resolve().parent / "loading_progress.txt"
@@ -123,6 +131,24 @@ def remove_overlapping_detections(
 
     suppressed = set()
     image_area = max(1.0, float(image_width * image_height))
+
+    # 机や床を写真全体ほど大きな「物体」として検出することがある。
+    # これを切り抜くと巨大なマスクの生成・背景修復が走り、前景のスマホなどとは
+    # 無関係にロードが大幅に長くなるため、静的背景に限って除外する。
+    for index, candidate in enumerate(candidates):
+        candidate_name = _normalized_object_name(candidate)
+        candidate_area_ratio = _box_area(candidate.box) / image_area
+
+        if (
+            candidate_name in LARGE_STATIC_BACKGROUND_CLASSES
+            and candidate_area_ratio >= 0.70
+        ):
+            suppressed.add(index)
+            print(
+                "巨大な静的背景を除外: "
+                f"{candidate.name} box={candidate.box} "
+                f"/ image_area={candidate_area_ratio:.3f}"
+            )
 
     ranked_indices = sorted(
         range(len(candidates)),

@@ -1,72 +1,45 @@
 using UnityEngine;
 
 /// <summary>
-/// ƒXƒ}ƒz‚ğƒ^ƒbƒ`‚·‚é‚ÆA‰æ–Ê‚ªŒõ‚Á‚Äk‚¦‘±‚¯‚éB
-/// ‚³‚ç‚É’…M‰¹‚ÆƒoƒCƒu‰¹‚ğ“¯‚É–Â‚ç‚·B
-/// ‚à‚¤ˆê“xƒ^ƒbƒ`‚·‚é‚ÆA”­ŒõEU“®E‰¹‚ğ‚·‚×‚Ä’â~‚·‚éB
+/// ã‚¹ãƒãƒ¼ãƒˆãƒ•ã‚©ãƒ³ã‚’ã‚¿ãƒƒãƒã™ã‚‹ã¨ã€ç€ä¿¡éŸ³ã¨ãƒã‚¤ãƒ–éŸ³ã‚’é³´ã‚‰ã—ãªãŒã‚‰
+/// ã‚¹ãƒãƒ¼ãƒˆãƒ•ã‚©ãƒ³æœ¬ä½“ã‚’æŒ¯å‹•ã•ã›ã‚‹ã€‚ã‚‚ã†ä¸€åº¦ã‚¿ãƒƒãƒã™ã‚‹ã¨åœæ­¢ã™ã‚‹ã€‚
 /// </summary>
 public class PhoneGimmick : MonoBehaviour, GimmickBase
 {
-    [Header("”­Œõİ’è")]
+    [Header("æŒ¯å‹•è¨­å®š")]
 
     [SerializeField]
-    private Color screenLightColor =
-        new Color(
-            0.35f,
-            0.8f,
-            1f,
-            1f
-        );
+    private float vibrationAmount = 0.08f;
 
     [SerializeField]
-    private float emissionStrength = 4f;
-
-
-    [Header("U“®İ’è")]
+    private float vibrationSpeed = 32f;
 
     [SerializeField]
-    private float vibrationAmount = 0.07f;
-
-    [SerializeField]
-    private float vibrationSpeed = 24f;
-
-
-    private Renderer targetRenderer;
-    private Material targetMaterial;
-
-    private Color originalColor = Color.white;
-    private Color originalEmissionColor = Color.black;
+    private float rotationAmount = 2.2f;
 
     private Vector3 originalLocalPosition;
-
-    private bool isPowerOn;
-
+    private Quaternion originalLocalRotation;
+    private bool isVibrating;
     private float vibrationTimer;
 
-
-    // ’…M‰¹—p
     private AudioSource phoneAudioSource;
-
-    // ƒoƒCƒu‰¹—p
     private AudioSource vibrationAudioSource;
 
 
     private void Awake()
     {
-        originalLocalPosition =
-            transform.localPosition;
+        RememberOriginalTransform();
     }
 
 
     /// <summary>
-    /// Reseiver‚©‚ç’…M‰¹‚ÆƒoƒCƒu‰¹‚ğó‚¯æ‚é
+    /// Reseiverã‹ã‚‰ç€ä¿¡éŸ³ã¨ãƒã‚¤ãƒ–éŸ³ã‚’å—ã‘å–ã‚‹ã€‚
     /// </summary>
     public void SetAudioClip(
         AudioClip phoneClip,
         AudioClip vibrationClip
     )
     {
-        // ’…M‰¹—pAudioSource‚ğæ“¾‚Ü‚½‚Í’Ç‰Á
         if (phoneAudioSource == null)
         {
             phoneAudioSource =
@@ -78,8 +51,6 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
         phoneAudioSource.loop = true;
         phoneAudioSource.spatialBlend = 0f;
 
-
-        // ƒoƒCƒu‰¹—pAudioSource‚ğæ“¾‚Ü‚½‚Í’Ç‰Á
         if (vibrationAudioSource == null)
         {
             vibrationAudioSource =
@@ -95,185 +66,98 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
 
     private void Update()
     {
-        if (!isPowerOn)
+        if (!isVibrating)
         {
             return;
         }
 
-        vibrationTimer +=
-            Time.deltaTime;
+        vibrationTimer += Time.deltaTime;
 
-        float offsetX =
-            Mathf.Sin(
-                vibrationTimer
-                * vibrationSpeed
-            )
-            * vibrationAmount;
-
+        float phase = vibrationTimer * vibrationSpeed;
+        float offsetX = Mathf.Sin(phase) * vibrationAmount;
         float offsetY =
-            Mathf.Cos(
-                vibrationTimer
-                * vibrationSpeed
-                * 1.15f
-            )
+            Mathf.Sin(phase * 0.73f + 1.2f)
             * vibrationAmount
-            * 0.25f;
+            * 0.2f;
+        float angle =
+            Mathf.Sin(phase * 0.91f)
+            * rotationAmount;
 
+        // åˆ‡ã‚ŠæŠœã„ãŸã‚¹ãƒãƒ¼ãƒˆãƒ•ã‚©ãƒ³ã®ãƒ«ãƒ¼ãƒˆè‡ªä½“ã‚’å‹•ã‹ã™ãŸã‚ã€
+        // ç”»é¢ã ã‘ã§ã¯ãªãæœ¬ä½“å…¨ä½“ãŒæŒ¯å‹•ã™ã‚‹ã€‚
         transform.localPosition =
             originalLocalPosition
-            + new Vector3(
-                offsetX,
-                offsetY,
-                0f
-            );
+            + new Vector3(offsetX, offsetY, 0f);
+
+        transform.localRotation =
+            originalLocalRotation
+            * Quaternion.Euler(0f, 0f, angle);
     }
 
 
     /// <summary>
-    /// Reseiver‚©‚çƒXƒ}ƒz‚ÌØ‚è”²‚«Renderer‚ğó‚¯æ‚éB
+    /// Reseiverã¨ã®å‘¼ã³å‡ºã—äº’æ›æ€§ã‚’ä¿ã¤ãŸã‚ã«æ®‹ã—ã¦ã„ã‚‹ã€‚
+    /// ç™½ããªã‚‹åŸå› ã ã£ãŸãƒãƒ†ãƒªã‚¢ãƒ«å¤‰æ›´ã¯è¡Œã‚ãªã„ã€‚
     /// </summary>
-    public void SetTargetRenderer(
-        Renderer renderer
-    )
+    public void SetTargetRenderer(Renderer renderer)
     {
-        targetRenderer =
-            renderer;
-
-        if (targetRenderer == null)
+        if (renderer == null)
         {
             Debug.LogWarning(
-                "PhoneGimmick‚ÌRenderer‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "PhoneGimmickã®RendererãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
-
-            return;
         }
-
-        // ‚±‚ÌƒXƒ}ƒzê—p‚ÌMaterial‚ğæ“¾
-        targetMaterial =
-            targetRenderer.material;
-
-        if (targetMaterial.HasProperty(
-                "_Color"
-            ))
-        {
-            originalColor =
-                targetMaterial.GetColor(
-                    "_Color"
-                );
-        }
-        else if (
-            targetMaterial.HasProperty(
-                "_BaseColor"
-            )
-        )
-        {
-            originalColor =
-                targetMaterial.GetColor(
-                    "_BaseColor"
-                );
-        }
-
-        if (targetMaterial.HasProperty(
-                "_EmissionColor"
-            ))
-        {
-            originalEmissionColor =
-                targetMaterial.GetColor(
-                    "_EmissionColor"
-                );
-        }
-
-        SetLight(false);
     }
 
 
-    /// <summary>
-    /// ƒXƒ}ƒz‚ğƒ^ƒbƒ`‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éB
-    /// </summary>
     public void ActivateMagic()
     {
-        if (targetRenderer == null)
+        if (isVibrating)
         {
-            SetTargetRenderer(
-                GetComponentInChildren<Renderer>(true)
-            );
-        }
-
-        if (targetMaterial == null)
-        {
-            Debug.LogWarning(
-                "PhoneGimmick‚ÌMaterial‚ª‚ ‚è‚Ü‚¹‚ñB"
-            );
-
-            return;
-        }
-
-        if (isPowerOn)
-        {
-            TurnOff();
+            StopVibration();
         }
         else
         {
-            TurnOn();
+            StartVibration();
         }
     }
 
 
-    /// <summary>
-    /// ”­ŒõEU“®E‰¹‚ğŠJn‚·‚éB
-    /// </summary>
-    private void TurnOn()
+    private void StartVibration()
     {
-        originalLocalPosition =
-            transform.localPosition;
-
+        RememberOriginalTransform();
         vibrationTimer = 0f;
+        isVibrating = true;
 
-        SetLight(true);
-
-        isPowerOn = true;
-
-
-        // ’…M‰¹‚ğÄ¶
-        if (phoneAudioSource != null &&
-            phoneAudioSource.clip != null)
+        if (
+            phoneAudioSource != null
+            && phoneAudioSource.clip != null
+        )
         {
             phoneAudioSource.Play();
         }
 
-
-        // ƒoƒCƒu‰¹‚ğÄ¶
-        if (vibrationAudioSource != null &&
-            vibrationAudioSource.clip != null)
+        if (
+            vibrationAudioSource != null
+            && vibrationAudioSource.clip != null
+        )
         {
             vibrationAudioSource.Play();
         }
     }
 
 
-    /// <summary>
-    /// ”­ŒõEU“®E‰¹‚ğ’â~‚·‚éB
-    /// </summary>
-    private void TurnOff()
+    private void StopVibration()
     {
-        isPowerOn = false;
-
+        isVibrating = false;
         vibrationTimer = 0f;
+        RestoreOriginalTransform();
 
-        transform.localPosition =
-            originalLocalPosition;
-
-        SetLight(false);
-
-
-        // ’…M‰¹‚ğ’â~
         if (phoneAudioSource != null)
         {
             phoneAudioSource.Stop();
         }
 
-
-        // ƒoƒCƒu‰¹‚ğ’â~
         if (vibrationAudioSource != null)
         {
             vibrationAudioSource.Stop();
@@ -281,116 +165,22 @@ public class PhoneGimmick : MonoBehaviour, GimmickBase
     }
 
 
-    /// <summary>
-    /// ”­Œõ‚Æ’ÊíF‚ÌONEOFF‚ğØ‚è‘Ö‚¦‚éB
-    /// </summary>
-    private void SetLight(
-        bool shouldLight
-    )
+    private void RememberOriginalTransform()
     {
-        if (targetMaterial == null)
-        {
-            return;
-        }
-
-        Color displayColor;
-
-        if (shouldLight)
-        {
-            displayColor =
-                Color.Lerp(
-                    originalColor,
-                    screenLightColor,
-                    0.85f
-                );
-
-            displayColor *= 1.4f;
-
-            displayColor.a =
-                originalColor.a;
-        }
-        else
-        {
-            displayColor =
-                originalColor;
-        }
+        originalLocalPosition = transform.localPosition;
+        originalLocalRotation = transform.localRotation;
+    }
 
 
-        // Standard Shader‚È‚Ç
-        if (targetMaterial.HasProperty(
-                "_Color"
-            ))
-        {
-            targetMaterial.SetColor(
-                "_Color",
-                displayColor
-            );
-        }
-
-
-        // URP Lit‚È‚Ç
-        if (targetMaterial.HasProperty(
-                "_BaseColor"
-            ))
-        {
-            targetMaterial.SetColor(
-                "_BaseColor",
-                displayColor
-            );
-        }
-
-
-        // Emission‘Î‰Shader
-        if (targetMaterial.HasProperty(
-                "_EmissionColor"
-            ))
-        {
-            targetMaterial.EnableKeyword(
-                "_EMISSION"
-            );
-
-            targetMaterial.SetColor(
-                "_EmissionColor",
-                shouldLight
-                    ? screenLightColor
-                      * emissionStrength
-                    : originalEmissionColor
-            );
-        }
+    private void RestoreOriginalTransform()
+    {
+        transform.localPosition = originalLocalPosition;
+        transform.localRotation = originalLocalRotation;
     }
 
 
     private void OnDisable()
     {
-        isPowerOn = false;
-
-        vibrationTimer = 0f;
-
-        transform.localPosition =
-            originalLocalPosition;
-
-        SetLight(false);
-
-
-        if (phoneAudioSource != null)
-        {
-            phoneAudioSource.Stop();
-        }
-
-        if (vibrationAudioSource != null)
-        {
-            vibrationAudioSource.Stop();
-        }
-    }
-
-
-    private void OnDestroy()
-    {
-        if (targetMaterial != null)
-        {
-            Destroy(targetMaterial);
-
-            targetMaterial = null;
-        }
+        StopVibration();
     }
 }
