@@ -15,7 +15,7 @@ ml_detector.py の動作確認用デモ。
 import sys
 import os
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, List, Sequence, Tuple
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import cv2
@@ -67,6 +67,143 @@ def report_progress(progress: float, message: str) -> None:
         f"{UNITY_PROGRESS_PREFIX}|{progress_text}",
         flush=True,
     )
+
+
+def _normalized_object_name(obj: DetectedObject) -> str:
+    return str(
+        getattr(obj, "canonical_name", "")
+        or getattr(obj, "name", "")
+    ).strip().lower()
+
+
+def _box_area(box: Sequence[float]) -> float:
+    x1, y1, x2, y2 = box
+    return max(0.0, float(x2) - float(x1)) * max(
+        0.0,
+        float(y2) - float(y1),
+    )
+
+
+def _box_intersection(a: Sequence[float], b: Sequence[float]) -> float:
+    ax1, ay1, ax2, ay2 = a
+    bx1, by1, bx2, by2 = b
+    width = max(0.0, min(float(ax2), float(bx2)) - max(float(ax1), float(bx1)))
+    height = max(0.0, min(float(ay2), float(by2)) - max(float(ay1), float(by1)))
+    return width * height
+
+
+def _box_iou(a: Sequence[float], b: Sequence[float]) -> float:
+    intersection = _box_intersection(a, b)
+    if intersection <= 0.0:
+        return 0.0
+
+    union = _box_area(a) + _box_area(b) - intersection
+    return intersection / union if union > 0.0 else 0.0
+
+
+def _intersection_over_smaller(
+    a: Sequence[float],
+    b: Sequence[float],
+) -> float:
+    smaller_area = min(_box_area(a), _box_area(b))
+    if smaller_area <= 0.0:
+        return 0.0
+    return _box_intersection(a, b) / smaller_area
+
+
+def remove_overlapping_detections(
+    objects: Sequence[DetectedObject],
+    image_width: int,
+    image_height: int,
+) -> Tuple[List[DetectedObject], int]:
+    """切り抜き前に明らかな重複枠と巨大な集合枠を除外する。"""
+    candidates = list(objects)
+    if len(candidates) <= 1:
+        return candidates, 0
+
+    suppressed = set()
+    image_area = max(1.0, float(image_width * image_height))
+
+    ranked_indices = sorted(
+        range(len(candidates)),
+        key=lambda index: (
+            -float(getattr(candidates[index], "confidence", 0.0)),
+            _box_area(candidates[index].box),
+        ),
+    )
+
+    # ほぼ同一の枠は、名前が異なる競合判定も含めて信頼度の高い方だけを残す。
+    # 同じ種類では少しずれた重複枠も除外するが、離れた複数物体は残す。
+    for order, kept_index in enumerate(ranked_indices):
+        if kept_index in suppressed:
+            continue
+
+        kept = candidates[kept_index]
+        kept_name = _normalized_object_name(kept)
+
+        for candidate_index in ranked_indices[order + 1:]:
+            if candidate_index in suppressed:
+                continue
+
+            candidate = candidates[candidate_index]
+            iou = _box_iou(kept.box, candidate.box)
+            same_name = (
+                kept_name == _normalized_object_name(candidate)
+            )
+
+            if iou >= 0.90 or (same_name and iou >= 0.68):
+                suppressed.add(candidate_index)
+                print(
+                    "重複検出を除外: "
+                    f"{candidate.name} box={candidate.box} "
+                    f"/ kept={kept.name} iou={iou:.3f}"
+                )
+
+    # 花畑などでは、個々の花に加えて写真全体を覆うflower枠が残ることがある。
+    # 同じ種類の小さな枠を2個以上ほぼ完全に包む巨大枠は、集合的な重複として除く。
+    for container_index, container in enumerate(candidates):
+        if container_index in suppressed:
+            continue
+
+        container_area = _box_area(container.box)
+        container_area_ratio = container_area / image_area
+        if container_area_ratio < 0.42:
+            continue
+
+        container_name = _normalized_object_name(container)
+        contained_count = 0
+
+        for child_index, child in enumerate(candidates):
+            if (
+                child_index == container_index
+                or child_index in suppressed
+                or container_name != _normalized_object_name(child)
+            ):
+                continue
+
+            child_area = _box_area(child.box)
+            if child_area >= container_area * 0.45:
+                continue
+
+            if _intersection_over_smaller(container.box, child.box) >= 0.90:
+                contained_count += 1
+
+        if contained_count >= 2:
+            suppressed.add(container_index)
+            print(
+                "巨大な集合重複を除外: "
+                f"{container.name} box={container.box} "
+                f"/ image_area={container_area_ratio:.3f} "
+                f"/ contained={contained_count}"
+            )
+
+    filtered = [
+        item
+        for index, item in enumerate(candidates)
+        if index not in suppressed
+    ]
+
+    return filtered, len(suppressed)
 
 
 def create_erased_background(
@@ -221,12 +358,19 @@ def main() -> None:
     excluded_scene_count = (
         detected_before_scene_exclusion - len(detected_objects)
     )
+
+    detected_objects, duplicate_count = remove_overlapping_detections(
+        detected_objects,
+        w,
+        h,
+    )
     detector.last_objects = detected_objects
 
     print(
         f"検出数: raw={detector.last_raw_count}, "
         f"後処理後={len(detected_objects)}, "
-        f"背景除外(sky/wall)={excluded_scene_count}"
+        f"背景除外(sky/wall)={excluded_scene_count}, "
+        f"重複除外={duplicate_count}"
     )
 
     # unknownグリッドは従来のクリック用フォールバック。写真理解JSONには含めない。

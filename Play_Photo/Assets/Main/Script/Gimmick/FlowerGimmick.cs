@@ -2,55 +2,59 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// ‰Ô‚ğƒ^ƒbƒ`‚·‚é‚ÆAŸ‚Ì2í—Ş‚©‚çƒ‰ƒ“ƒ_ƒ€‚Å1‚Â”­“®‚·‚éB
-/// 1. ‚ä‚Á‚­‚è¶‰E‚É—h‚ê‚é
-/// 2. F‚ª•Ï‚í‚èAŸ‚ÌF•ÏX‚Ü‚Å‚»‚ÌF‚ğˆÛ‚·‚é
-///
-/// “¯‚¶‰‰o‚Í˜A‘±‚µ‚È‚¢B
+/// æœ€åˆã®ã‚¿ãƒƒãƒå¾Œã€èŠ±ãŒå³ã‹ã‚‰ã®é¢¨ã‚’å—ã‘ã¦å¸¸ã«æºã‚Œç¶šã‘ã‚‹ã€‚
+/// é¢¨ãŒå¹ã„ã¦ã„ã‚‹é–“ã‚‚ã€ã‚¿ãƒƒãƒã™ã‚‹ãŸã³èŠ±ã®è‰²ã‚’å¤‰æ›´ã§ãã‚‹ã€‚
 /// </summary>
 public class FlowerGimmick : MonoBehaviour, GimmickBase
 {
-    [Header("—h‚ê‚é‰‰o")]
-
-    // —h‚ê‚éŠÔ
+    [Header("Wind From Right")]
     [SerializeField]
-    private float swayDuration = 2.2f;
+    private float calmWindAngle = 0.7f;
 
-    // Å‘å‚ÌŒX‚«
     [SerializeField]
-    private float swayAngle = 8f;
+    private float normalWindAngle = 6.5f;
 
-    // —h‚ê‚é‰ñ”
     [SerializeField]
-    private float swayCount = 1.5f;
+    private float strongWindAngle = 11f;
 
+    [SerializeField, Range(0f, 1f)]
+    private float calmWindProbability = 0.25f;
 
-    [Header("F•ÏX‰‰o")]
+    [SerializeField, Range(0f, 1f)]
+    private float strongWindProbability = 0.28f;
 
-    // F‚ªØ‚è‘Ö‚í‚é‚Ü‚Å‚ÌŠÔ
+    [SerializeField]
+    private float minimumWindChangeDuration = 0.65f;
+
+    [SerializeField]
+    private float maximumWindChangeDuration = 2.1f;
+
+    [SerializeField]
+    private float flutterAngle = 0.65f;
+
+    [SerializeField]
+    private float flutterFrequency = 0.75f;
+
+    [Header("Color Change")]
     [SerializeField]
     private float colorChangeDuration = 0.7f;
 
-
     private Renderer targetRenderer;
     private Material targetMaterial;
-
     private Color currentColor = Color.white;
 
-    private bool isAnimating;
+    private Vector3 originalLocalPosition;
+    private Vector3 originalLocalScale;
+    private Quaternion originalLocalRotation;
+    private Vector3 bottomPivotOffset;
+    private Vector3 bottomPivotPosition;
 
-    // “¯‚¶‰‰o‚ª˜A‘±‚µ‚È‚¢‚æ‚¤‚É‹L˜^
-    // 0F—h‚ê‚é
-    // 1FF‚ª•Ï‚í‚é
-    private int previousEffect = -1;
-
-    // “¯‚¶F‚ª‘±‚©‚È‚¢‚æ‚¤‚É‹L˜^
+    private Coroutine windCoroutine;
+    private Coroutine colorChangeCoroutine;
+    private float windNoiseSeed;
     private int previousColorIndex = -1;
+    private bool hasWindPivot;
 
-
-    /// <summary>
-    /// Reseiver‚©‚çAÊ^‚ÌØ‚è”²‚«Renderer‚ğİ’è‚·‚éB
-    /// </summary>
     public void SetTargetRenderer(Renderer renderer)
     {
         targetRenderer = renderer;
@@ -60,29 +64,16 @@ public class FlowerGimmick : MonoBehaviour, GimmickBase
             return;
         }
 
-        // ‘¼‚ÌƒIƒuƒWƒFƒNƒg‚ÌMaterial‚Ö‰e‹¿‚µ‚È‚¢‚æ‚¤A
-        // ‚±‚Ì‰Ôê—p‚ÌMaterial‚ğæ“¾‚·‚é
         targetMaterial = targetRenderer.material;
 
         if (targetMaterial.HasProperty("_Color"))
         {
-            currentColor =
-                targetMaterial.GetColor("_Color");
+            currentColor = targetMaterial.GetColor("_Color");
         }
     }
 
-
-    /// <summary>
-    /// ‰Ô‚ğƒNƒŠƒbƒN‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éB
-    /// </summary>
     public void ActivateMagic()
     {
-        // ‰‰o’†‚Ì˜A‘Å‚Íó‚¯•t‚¯‚È‚¢
-        if (isAnimating)
-        {
-            return;
-        }
-
         if (targetRenderer == null)
         {
             SetTargetRenderer(
@@ -90,205 +81,234 @@ public class FlowerGimmick : MonoBehaviour, GimmickBase
             );
         }
 
-        int selectedEffect;
-
-        do
+        if (windCoroutine == null)
         {
-            selectedEffect =
-                Random.Range(0, 2);
+            CaptureWindPivot();
+            windCoroutine = StartCoroutine(ContinuousWind());
         }
-        while (selectedEffect == previousEffect);
 
-        previousEffect = selectedEffect;
-
-        switch (selectedEffect)
+        if (colorChangeCoroutine != null)
         {
-            // ‚ä‚Á‚­‚è—h‚ê‚é
-            case 0:
-                StartCoroutine(SwayEffect());
-                break;
-
-            // F‚ª•Ï‚í‚é
-            case 1:
-                StartCoroutine(ColorChangeEffect());
-                break;
+            StopCoroutine(colorChangeCoroutine);
         }
+
+        colorChangeCoroutine = StartCoroutine(
+            ColorChangeEffect()
+        );
     }
 
-
-    /// <summary>
-    /// ‰Ô‚ğ‚ä‚Á‚­‚è¶‰E‚É—h‚ç‚·B
-    /// </summary>
-    private IEnumerator SwayEffect()
+    private void CaptureWindPivot()
     {
-        isAnimating = true;
+        originalLocalPosition = transform.localPosition;
+        originalLocalScale = transform.localScale;
+        originalLocalRotation = transform.localRotation;
 
-        Quaternion startRotation =
-            transform.localRotation;
+        bottomPivotOffset = Vector3.Scale(
+            Vector3.down * 0.5f,
+            originalLocalScale
+        );
 
-        float elapsedTime = 0f;
+        bottomPivotPosition =
+            originalLocalPosition +
+            originalLocalRotation * bottomPivotOffset;
 
-        while (elapsedTime < swayDuration)
-        {
-            elapsedTime += Time.deltaTime;
-
-            float progress =
-                Mathf.Clamp01(
-                    elapsedTime / swayDuration
-                );
-
-            /*
-             * swayCount‰ñ•ª‚¾‚¯A‚ä‚Á‚­‚è¶‰E‚Ö‰•œ‚·‚éB
-             *
-             * SmoothStep‚ğg‚Á‚ÄŠJn‚ÆI—¹‚ğŠŠ‚ç‚©‚É‚µA
-             * ÅŒã‚Í©‘R‚ÉŒ³‚ÌŠp“x‚Ö–ß‚·B
-             */
-            float smoothProgress =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    progress
-                );
-
-            float fadeOut =
-                Mathf.Sin(
-                    progress * Mathf.PI
-                );
-
-            float angle =
-                Mathf.Sin(
-                    smoothProgress
-                    * swayCount
-                    * Mathf.PI
-                    * 2f
-                )
-                * swayAngle
-                * fadeOut;
-
-            transform.localRotation =
-                startRotation
-                * Quaternion.Euler(
-                    0f,
-                    0f,
-                    angle
-                );
-
-            yield return null;
-        }
-
-        transform.localRotation =
-            startRotation;
-
-        isAnimating = false;
+        windNoiseSeed = Random.Range(0f, 1000f);
+        hasWindPivot = true;
     }
 
-
-    /// <summary>
-    /// ‰Ô‚ÌF‚ğ™X‚É•ÏX‚·‚éB
-    /// •ÏXŒã‚ÍAŸ‚ÉF•ÏX‚ª‘I‚Î‚ê‚é‚Ü‚Å‚»‚ÌF‚ğˆÛ‚·‚éB
-    /// </summary>
-    private IEnumerator ColorChangeEffect()
+    private IEnumerator ContinuousWind()
     {
-        isAnimating = true;
+        float currentAngle = 0f;
 
-        if (targetMaterial == null)
+        while (true)
         {
-            isAnimating = false;
-            yield break;
-        }
+            float targetAngle = ChooseNextWindAngle();
+            float duration = ChooseWindChangeDuration(targetAngle);
+            float startAngle = currentAngle;
+            float elapsedTime = 0f;
 
-        Color nextColor =
-            GetNextFlowerColor();
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
 
-        Color startColor =
-            currentColor;
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < colorChangeDuration)
-        {
-            elapsedTime += Time.deltaTime;
-
-            float rate =
-                Mathf.Clamp01(
-                    elapsedTime / colorChangeDuration
+                float rate = Mathf.Clamp01(
+                    elapsedTime / duration
                 );
 
-            // F‚Ì•Ï‰»‚ğŠŠ‚ç‚©‚É‚·‚é
-            float smoothRate =
-                Mathf.SmoothStep(
+                float smoothRate = Mathf.SmoothStep(
                     0f,
                     1f,
                     rate
                 );
 
-            Color changingColor =
-                Color.Lerp(
-                    startColor,
-                    nextColor,
+                currentAngle = Mathf.Lerp(
+                    startAngle,
+                    targetAngle,
                     smoothRate
                 );
 
-            SetMaterialColor(
-                changingColor
+                float flutter = GetWindFlutter(currentAngle);
+                ApplyWindRotation(currentAngle + flutter);
+
+                yield return null;
+            }
+
+            currentAngle = targetAngle;
+        }
+    }
+
+    private float ChooseNextWindAngle()
+    {
+        float roll = Random.value;
+        float calmThreshold = Mathf.Clamp01(
+            calmWindProbability
+        );
+
+        float strongThreshold = Mathf.Clamp01(
+            calmThreshold + strongWindProbability
+        );
+
+        if (roll < calmThreshold)
+        {
+            return Random.Range(
+                Mathf.Max(0.1f, calmWindAngle * 0.45f),
+                Mathf.Max(0.2f, calmWindAngle * 1.7f)
+            );
+        }
+
+        if (roll < strongThreshold)
+        {
+            return Random.Range(
+                Mathf.Max(normalWindAngle, calmWindAngle),
+                Mathf.Max(strongWindAngle, normalWindAngle)
+            );
+        }
+
+        return Random.Range(
+            Mathf.Max(calmWindAngle, 0.2f),
+            Mathf.Max(normalWindAngle, calmWindAngle + 0.1f)
+        );
+    }
+
+    private float ChooseWindChangeDuration(float targetAngle)
+    {
+        float minimumDuration = Mathf.Max(
+            minimumWindChangeDuration,
+            0.1f
+        );
+
+        float maximumDuration = Mathf.Max(
+            maximumWindChangeDuration,
+            minimumDuration
+        );
+
+        if (targetAngle >= normalWindAngle)
+        {
+            return Random.Range(
+                minimumDuration,
+                Mathf.Lerp(minimumDuration, maximumDuration, 0.45f)
+            );
+        }
+
+        return Random.Range(minimumDuration, maximumDuration);
+    }
+
+    private float GetWindFlutter(float currentAngle)
+    {
+        float noise = Mathf.PerlinNoise(
+            windNoiseSeed,
+            Time.time * Mathf.Max(flutterFrequency, 0.05f)
+        );
+
+        float normalizedNoise = (noise - 0.5f) * 2f;
+        float windRate = Mathf.InverseLerp(
+            calmWindAngle,
+            Mathf.Max(strongWindAngle, calmWindAngle + 0.1f),
+            currentAngle
+        );
+
+        return normalizedNoise *
+            flutterAngle *
+            Mathf.Lerp(0.35f, 1f, windRate);
+    }
+
+    private void ApplyWindRotation(float angle)
+    {
+        Quaternion windRotation =
+            originalLocalRotation *
+            Quaternion.Euler(0f, 0f, angle);
+
+        transform.localRotation = windRotation;
+
+        transform.localPosition =
+            bottomPivotPosition -
+            windRotation * bottomPivotOffset;
+    }
+
+    private IEnumerator ColorChangeEffect()
+    {
+        if (targetMaterial == null)
+        {
+            colorChangeCoroutine = null;
+            yield break;
+        }
+
+        Color startColor = currentColor;
+        Color nextColor = GetNextFlowerColor();
+        float duration = Mathf.Max(colorChangeDuration, 0.05f);
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float rate = Mathf.SmoothStep(
+                0f,
+                1f,
+                Mathf.Clamp01(elapsedTime / duration)
             );
 
+            currentColor = Color.Lerp(
+                startColor,
+                nextColor,
+                rate
+            );
+
+            SetMaterialColor(currentColor);
             yield return null;
         }
 
-        // •ÏXŒã‚ÌF‚ğ•Û‘¶‚µAŒ³‚É‚Í–ß‚³‚È‚¢
-        currentColor =
-            nextColor;
-
-        SetMaterialColor(
-            currentColor
-        );
-
-        isAnimating = false;
+        currentColor = nextColor;
+        SetMaterialColor(currentColor);
+        colorChangeCoroutine = null;
     }
 
-
-    /// <summary>
-    /// ‘O‰ñ‚Æ‚ÍˆÙ‚È‚é‰Ô‚ÌF‚ğ•Ô‚·B
-    /// </summary>
     private Color GetNextFlowerColor()
     {
         Color[] flowerColors =
         {
-            new Color(1f, 0.35f, 0.55f),  // ƒsƒ“ƒN
-            new Color(1f, 0.85f, 0.15f),  // ‰©F
-            new Color(0.65f, 0.35f, 1f),  // ‡
-            new Color(1f, 0.25f, 0.2f),   // Ô
-            new Color(0.3f, 0.75f, 1f)    // …F
+            new Color(1f, 0.35f, 0.55f),
+            new Color(1f, 0.85f, 0.15f),
+            new Color(0.65f, 0.35f, 1f),
+            new Color(1f, 0.25f, 0.2f),
+            new Color(0.3f, 0.75f, 1f)
         };
 
         int selectedColorIndex;
 
         do
         {
-            selectedColorIndex =
-                Random.Range(
-                    0,
-                    flowerColors.Length
-                );
+            selectedColorIndex = Random.Range(
+                0,
+                flowerColors.Length
+            );
         }
-        while (
-            selectedColorIndex ==
-            previousColorIndex
-        );
+        while (selectedColorIndex == previousColorIndex);
 
-        previousColorIndex =
-            selectedColorIndex;
-
-        return flowerColors[
-            selectedColorIndex
-        ];
+        previousColorIndex = selectedColorIndex;
+        return flowerColors[selectedColorIndex];
     }
 
-
-    /// <summary>
-    /// Material‚Ì’ÊíF‚Æ”­ŒõF‚ğİ’è‚·‚éB
-    /// </summary>
     private void SetMaterialColor(Color color)
     {
         if (targetMaterial == null)
@@ -298,20 +318,12 @@ public class FlowerGimmick : MonoBehaviour, GimmickBase
 
         if (targetMaterial.HasProperty("_Color"))
         {
-            targetMaterial.SetColor(
-                "_Color",
-                color
-            );
+            targetMaterial.SetColor("_Color", color);
         }
 
-        if (targetMaterial.HasProperty(
-                "_EmissionColor"
-            ))
+        if (targetMaterial.HasProperty("_EmissionColor"))
         {
-            targetMaterial.EnableKeyword(
-                "_EMISSION"
-            );
-
+            targetMaterial.EnableKeyword("_EMISSION");
             targetMaterial.SetColor(
                 "_EmissionColor",
                 color * 0.35f
@@ -319,6 +331,27 @@ public class FlowerGimmick : MonoBehaviour, GimmickBase
         }
     }
 
+    private void OnDisable()
+    {
+        if (windCoroutine != null)
+        {
+            StopCoroutine(windCoroutine);
+            windCoroutine = null;
+        }
+
+        if (colorChangeCoroutine != null)
+        {
+            StopCoroutine(colorChangeCoroutine);
+            colorChangeCoroutine = null;
+        }
+
+        if (hasWindPivot)
+        {
+            transform.localPosition = originalLocalPosition;
+            transform.localRotation = originalLocalRotation;
+            hasWindPivot = false;
+        }
+    }
 
     private void OnDestroy()
     {
