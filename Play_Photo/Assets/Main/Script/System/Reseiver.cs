@@ -156,6 +156,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip glassBreakAudioClip;
 
+    [SerializeField]
+    private AudioClip boatAudioClip;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -767,6 +770,30 @@ public class Reseiver : MonoBehaviour
 
                 glassGimmick.SetAudioClip(
                     glassBreakAudioClip
+                );
+
+                break;
+                
+            case "boat":
+            case "ship":
+            case "sailboat":
+            case "sailing boat":
+            case "motorboat":
+            case "speedboat":
+            case "ferry":
+            case "yacht":
+            case "vessel":
+
+                BoatGimmick boatGimmick =
+                    GetOrAddComponent<BoatGimmick>(target);
+
+                boatGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                // ★船の音を渡す
+                boatGimmick.SetAudioClip(
+                    boatAudioClip
                 );
 
                 break;
