@@ -44,18 +44,17 @@ public class PythonLauncher : MonoBehaviour
 
     private IEnumerator StartPython()
     {
-        string pythonFolder = Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "Python"
-            )
-        );
+        MagicPhotoRuntimePaths.EnsureWorkingDirectories();
 
-        string pythonFilePath = Path.Combine(
-            pythonFolder,
-            pythonScriptName
-        );
+        bool usePackagedExecutable = !Application.isEditor;
+
+        string pythonFolder = usePackagedExecutable
+            ? MagicPhotoRuntimePaths.PackagedAnalyzerDirectory
+            : MagicPhotoRuntimePaths.PythonDirectory;
+
+        string pythonFilePath = usePackagedExecutable
+            ? MagicPhotoRuntimePaths.PackagedAnalyzerPath
+            : Path.Combine(pythonFolder, pythonScriptName);
 
         if (!File.Exists(pythonFilePath))
         {
@@ -68,9 +67,16 @@ public class PythonLauncher : MonoBehaviour
 
         List<string> errors = new List<string>();
 
+        List<PythonCommand> commands = usePackagedExecutable
+            ? new List<PythonCommand>
+            {
+                new PythonCommand(pythonFilePath)
+            }
+            : BuildPythonCandidates(pythonFolder);
+
         foreach (
             PythonCommand command
-            in BuildPythonCandidates(pythonFolder)
+            in commands
         )
         {
             Process candidateProcess = null;
@@ -78,8 +84,9 @@ public class PythonLauncher : MonoBehaviour
 
             try
             {
-                string arguments =
-                    string.IsNullOrWhiteSpace(
+                string arguments = usePackagedExecutable
+                    ? string.Empty
+                    : string.IsNullOrWhiteSpace(
                         command.argumentPrefix
                     )
                         ? $"\"{pythonFilePath}\""
@@ -99,6 +106,19 @@ public class PythonLauncher : MonoBehaviour
                         RedirectStandardOutput = true,
                         RedirectStandardError = true
                     };
+
+                startInfo.EnvironmentVariables[
+                    "MAGIC_PHOTO_DATA_DIR"
+                ] = MagicPhotoRuntimePaths.DownloadedImagesDirectory;
+                startInfo.EnvironmentVariables[
+                    "MAGIC_PHOTO_CUTOUT_DIR"
+                ] = MagicPhotoRuntimePaths.CutoutDirectory;
+                startInfo.EnvironmentVariables[
+                    "MAGIC_PHOTO_PROGRESS_FILE"
+                ] = MagicPhotoRuntimePaths.ProgressFilePath;
+                startInfo.EnvironmentVariables[
+                    "MAGIC_PHOTO_ANALYSIS_RESULT"
+                ] = MagicPhotoRuntimePaths.AnalysisResultPath;
 
                 candidateProcess = new Process
                 {

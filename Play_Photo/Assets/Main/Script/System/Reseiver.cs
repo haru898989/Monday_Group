@@ -1058,23 +1058,15 @@ public class Reseiver : MonoBehaviour
         string safeFileName =
             Path.GetFileName(backgroundPhotoFileName);
 
-        string originalPath = Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "downloaded_images",
-                safeFileName
-            )
+        string originalPath = Path.Combine(
+            MagicPhotoRuntimePaths.DownloadedImagesDirectory,
+            safeFileName
         );
         
-        string erasedPath = Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "Python",
-                "eraser_magic_output",
-                safeFileName
-            )
+        string erasedPath = Path.Combine(
+            MagicPhotoRuntimePaths.PythonDirectory,
+            "eraser_magic_output",
+            safeFileName
         );
         
         // 消しゴムマジック後の画像があればそちらを優先
@@ -1223,14 +1215,9 @@ public class Reseiver : MonoBehaviour
         string safeFileName =
             Path.GetFileName(obj.cutoutFileName);
 
-        string cutoutPath = Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "Python",
-                "objects",
-                safeFileName
-            )
+        string cutoutPath = Path.Combine(
+            MagicPhotoRuntimePaths.CutoutDirectory,
+            safeFileName
         );
 
         if (!File.Exists(cutoutPath))

@@ -27,7 +27,7 @@ public class ServerStarter : MonoBehaviour
     private IEnumerator StartLineServerAndNgrok()
     {
         // Unityプロジェクトのフォルダー
-        string projectPath = Directory.GetCurrentDirectory();
+        string projectPath = MagicPhotoRuntimePaths.RootDirectory;
 
         // Play_Photo/downloaded_images
         imageFolderPath = Path.Combine(
@@ -59,8 +59,17 @@ public class ServerStarter : MonoBehaviour
         {
             try
             {
+                ProcessStartInfo lineServerInfo =
+                    new ProcessStartInfo
+                    {
+                        FileName = lineServerPath,
+                        WorkingDirectory = projectPath,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
                 lineServerProcess =
-                    Process.Start(lineServerPath);
+                    Process.Start(lineServerInfo);
 
                 UnityEngine.Debug.Log(
                     "Line_Server.exe を起動しました"

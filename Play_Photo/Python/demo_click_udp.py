@@ -14,9 +14,52 @@ ml_detector.py の動作確認用デモ。
 """
 import sys
 import os
+import shutil
 from pathlib import Path
 from typing import Any, List, Sequence, Tuple
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+BUNDLE_DIR = Path(getattr(sys, "_MEIPASS", SCRIPT_DIR)).resolve()
+sys.path.insert(0, str(SCRIPT_DIR))
+
+
+def configure_packaged_model_paths() -> None:
+    """日本語パスを扱えないTorchモデルを英数字パスへ用意する。"""
+    source_directory = (
+        BUNDLE_DIR / "torch" / "hub" / "checkpoints"
+    )
+    public_directory = Path(
+        os.environ.get("PUBLIC", r"C:\Users\Public")
+    )
+    cache_root = public_directory / "MagicPhotoModelCache"
+    cache_directory = cache_root / "hub" / "checkpoints"
+    cache_directory.mkdir(parents=True, exist_ok=True)
+
+    for model_name in (
+        "big-lama.pt",
+        "deeplabv3_resnet50_coco-cd0a2569.pth",
+    ):
+        source_path = source_directory / model_name
+        target_path = cache_directory / model_name
+
+        if (
+            target_path.is_file()
+            and target_path.stat().st_size == source_path.stat().st_size
+        ):
+            continue
+
+        temporary_path = target_path.with_suffix(".tmp")
+        shutil.copyfile(source_path, temporary_path)
+        os.replace(temporary_path, target_path)
+
+    os.environ["TORCH_HOME"] = str(cache_root)
+    os.environ["LAMA_MODEL"] = str(
+        cache_directory / "big-lama.pt"
+    )
+
+
+if getattr(sys, "frozen", False):
+    configure_packaged_model_paths()
 
 import cv2
 import numpy as np
@@ -30,7 +73,13 @@ from magic_brain import MagicBrain
 from split_objects import create_object_cutouts
 from udp_sender import send_to_unity
 
-IMAGE_PATH = "../downloaded_images/sample.jpg"
+DATA_DIR = Path(
+    os.environ.get(
+        "MAGIC_PHOTO_DATA_DIR",
+        str(SCRIPT_DIR.parent / "downloaded_images"),
+    )
+).resolve()
+IMAGE_PATH = str(DATA_DIR / "sample.jpg")
 WINDOW_NAME = "ML Detector Demo"
 SHOW_DEBUG_WINDOW = False
 
@@ -38,12 +87,20 @@ SHOW_DEBUG_WINDOW = False
 UDP_SEND_MODE = "legacy"
 UNITY_HOST = "127.0.0.1"
 UNITY_PORT = 1140
-CUTOUT_DIR = Path(__file__).resolve().parent / "objects"
-ERASED_BACKGROUND = (
-    Path(__file__).resolve().parent.parent
-    / "downloaded_images"
-    / "sample_erased.png"
-)
+CUTOUT_DIR = Path(
+    os.environ.get(
+        "MAGIC_PHOTO_CUTOUT_DIR",
+        str(SCRIPT_DIR / "objects"),
+    )
+).resolve()
+ERASED_BACKGROUND = DATA_DIR / "sample_erased.png"
+ANALYSIS_RESULT = Path(
+    os.environ.get(
+        "MAGIC_PHOTO_ANALYSIS_RESULT",
+        str(SCRIPT_DIR / "analysis_result.json"),
+    )
+).resolve()
+YOLO_MODEL_PATH = BUNDLE_DIR / "yolov8s-world.pt"
 EXCLUDED_SCENE_CLASSES = {"sky", "wall"}
 LARGE_STATIC_BACKGROUND_CLASSES = {
     "desk",
@@ -54,9 +111,12 @@ LARGE_STATIC_BACKGROUND_CLASSES = {
     "pavement",
 }
 UNITY_PROGRESS_PREFIX = "UNITY_PROGRESS"
-UNITY_PROGRESS_FILE = (
-    Path(__file__).resolve().parent / "loading_progress.txt"
-)
+UNITY_PROGRESS_FILE = Path(
+    os.environ.get(
+        "MAGIC_PHOTO_PROGRESS_FILE",
+        str(SCRIPT_DIR / "loading_progress.txt"),
+    )
+).resolve()
 
 
 def report_progress(progress: float, message: str) -> None:
@@ -349,7 +409,10 @@ def draw_objects(img: Any, objects: Sequence[DetectedObject]) -> Any:
 
 def main() -> None:
     report_progress(0.03, "展示の準備を始めています")
-    detector = MagicPhotoDetector(confidence=0.12)
+    detector = MagicPhotoDetector(
+        model_path=str(YOLO_MODEL_PATH),
+        confidence=0.12,
+    )
 
     screen_w, screen_h = get_screen_size()
     print(f"画面サイズ: {screen_w} x {screen_h}")
@@ -427,7 +490,10 @@ def main() -> None:
         image_path=IMAGE_PATH,
         debug=detector.last_debug,
     )
-    output_path = MagicBrain.save_json(brain_result, "analysis_result.json")
+    output_path = MagicBrain.save_json(
+        brain_result,
+        str(ANALYSIS_RESULT),
+    )
 
     # UDP送信は専用モジュールへ分離。現在はReseiver.cs互換形式で送る。
     try:

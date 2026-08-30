@@ -1,88 +1,436 @@
 {
   "schema_version": "1.0",
   "image": {
-    "path": "../downloaded_images/sample.jpg",
-    "width": 547,
-    "height": 365,
+    "path": "C:\\Users\\hotat\\OneDrive - 大阪工業大学\\ゼミのやつ\\U-22\\月曜\\Play_Photo\\downloaded_images\\sample.jpg",
+    "width": 430,
+    "height": 764,
     "coordinate_space": "analysis_image"
   },
   "scene": {
-    "primary": "nature",
+    "primary": "transportation_scene",
     "scores": {
       "indoor": 0.0,
-      "outdoor": 0.2646,
-      "home": 0.0,
+      "outdoor": 0.8004,
+      "home": 0.1695,
       "office": 0.0,
       "restaurant": 0.0,
       "classroom": 0.0,
-      "park": 0.2023,
-      "nature": 0.2864,
+      "park": 0.3609,
+      "nature": 0.4612,
       "food_scene": 0.0,
       "animal_scene": 0.0,
-      "transportation_scene": 0.0,
+      "transportation_scene": 0.9668,
       "entertainment_scene": 0.0,
       "night_scene": 0.0,
-      "unknown": 0.3636
+      "unknown": 0.0
     }
   },
   "main_objects": [
     {
       "object_id": 1,
-      "name": "flower",
-      "importance": 0.6426
+      "name": "motorcycle",
+      "importance": 0.8933
+    },
+    {
+      "object_id": 5,
+      "name": "road",
+      "importance": 0.6116
+    },
+    {
+      "object_id": 3,
+      "name": "tree",
+      "importance": 0.5662
     }
   ],
   "objects": [
     {
       "object_id": 1,
-      "canonical_name": "flower",
-      "original_name": "flower",
+      "canonical_name": "motorcycle",
+      "original_name": "motorcycle",
       "aliases": [
-        "flower"
+        "motorcycle"
       ],
-      "category": "nature",
-      "confidence": 0.311281,
+      "category": "vehicle",
+      "confidence": 0.898465,
       "box": [
-        6,
-        10,
-        544,
-        362
+        14,
+        219,
+        415,
+        627
       ],
       "center": [
-        275,
-        186
+        214.5,
+        423
       ],
       "normalized_center": [
-        0.502742,
-        0.509589
+        0.498837,
+        0.553665
       ],
       "normalized_box": [
-        0.010969,
-        0.027397,
-        0.994516,
-        0.991781
+        0.032558,
+        0.286649,
+        0.965116,
+        0.820681
       ],
-      "width": 538,
-      "height": 352,
-      "area_ratio": 0.94851619,
+      "width": 401,
+      "height": 408,
+      "area_ratio": 0.49801534,
       "horizontal_position": "center",
       "vertical_position": "middle",
       "geometry_valid": true,
-      "importance": 0.6426,
-      "importance_score": 0.6426
+      "importance": 0.8933,
+      "importance_score": 0.8933
+    },
+    {
+      "object_id": 2,
+      "canonical_name": "car",
+      "original_name": "car",
+      "aliases": [
+        "car"
+      ],
+      "category": "vehicle",
+      "confidence": 0.693767,
+      "box": [
+        0,
+        157,
+        113,
+        240
+      ],
+      "center": [
+        56.5,
+        198.5
+      ],
+      "normalized_center": [
+        0.131395,
+        0.259817
+      ],
+      "normalized_box": [
+        0.0,
+        0.205497,
+        0.262791,
+        0.314136
+      ],
+      "width": 113,
+      "height": 83,
+      "area_ratio": 0.02854925,
+      "horizontal_position": "left",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.5477,
+      "importance_score": 0.5477
+    },
+    {
+      "object_id": 3,
+      "canonical_name": "tree",
+      "original_name": "tree",
+      "aliases": [
+        "tree"
+      ],
+      "category": "nature",
+      "confidence": 0.501252,
+      "box": [
+        232,
+        0,
+        429,
+        197
+      ],
+      "center": [
+        330.5,
+        98.5
+      ],
+      "normalized_center": [
+        0.768605,
+        0.128927
+      ],
+      "normalized_box": [
+        0.539535,
+        0.0,
+        0.997674,
+        0.257853
+      ],
+      "width": 197,
+      "height": 197,
+      "area_ratio": 0.11813284,
+      "horizontal_position": "right",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.5662,
+      "importance_score": 0.5662
+    },
+    {
+      "object_id": 4,
+      "canonical_name": "house",
+      "original_name": "house",
+      "aliases": [
+        "house"
+      ],
+      "category": "structure",
+      "confidence": 0.275246,
+      "box": [
+        171,
+        69,
+        362,
+        193
+      ],
+      "center": [
+        266.5,
+        131
+      ],
+      "normalized_center": [
+        0.619767,
+        0.171466
+      ],
+      "normalized_box": [
+        0.397674,
+        0.090314,
+        0.84186,
+        0.252618
+      ],
+      "width": 191,
+      "height": 124,
+      "area_ratio": 0.07209302,
+      "horizontal_position": "center",
+      "vertical_position": "top",
+      "geometry_valid": true,
+      "importance": 0.4559,
+      "importance_score": 0.4559
+    },
+    {
+      "object_id": 5,
+      "canonical_name": "road",
+      "original_name": "road",
+      "aliases": [
+        "road"
+      ],
+      "category": "transportation_infrastructure",
+      "confidence": 0.26108,
+      "box": [
+        11,
+        216,
+        429,
+        764
+      ],
+      "center": [
+        220,
+        490
+      ],
+      "normalized_center": [
+        0.511628,
+        0.641361
+      ],
+      "normalized_box": [
+        0.025581,
+        0.282723,
+        0.997674,
+        1.0
+      ],
+      "width": 418,
+      "height": 548,
+      "area_ratio": 0.69726044,
+      "horizontal_position": "center",
+      "vertical_position": "middle",
+      "geometry_valid": true,
+      "importance": 0.6116,
+      "importance_score": 0.6116
     }
   ],
-  "relations": [],
+  "relations": [
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "inside",
+      "score": 0.8711
+    },
+    {
+      "subject_id": 5,
+      "object_id": 1,
+      "type": "contains",
+      "score": 0.8711
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.8711
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "overlap",
+      "score": 0.8378
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "overlap",
+      "score": 0.3636
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "overlap",
+      "score": 0.3022
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "near",
+      "score": 0.9474
+    },
+    {
+      "subject_id": 1,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8711
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.8564
+    },
+    {
+      "subject_id": 3,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.8429
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "near",
+      "score": 0.5756
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.5449
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "near",
+      "score": 0.4699
+    },
+    {
+      "subject_id": 4,
+      "object_id": 5,
+      "type": "near",
+      "score": 0.4593
+    },
+    {
+      "subject_id": 2,
+      "object_id": 3,
+      "type": "left_of",
+      "score": 0.8974
+    },
+    {
+      "subject_id": 2,
+      "object_id": 4,
+      "type": "left_of",
+      "score": 0.8418
+    },
+    {
+      "subject_id": 3,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.8974
+    },
+    {
+      "subject_id": 4,
+      "object_id": 2,
+      "type": "right_of",
+      "score": 0.8418
+    },
+    {
+      "subject_id": 3,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.8404
+    },
+    {
+      "subject_id": 3,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.8049
+    },
+    {
+      "subject_id": 4,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.6976
+    },
+    {
+      "subject_id": 2,
+      "object_id": 5,
+      "type": "above",
+      "score": 0.6787
+    },
+    {
+      "subject_id": 2,
+      "object_id": 1,
+      "type": "above",
+      "score": 0.6381
+    },
+    {
+      "subject_id": 5,
+      "object_id": 3,
+      "type": "below",
+      "score": 0.8404
+    },
+    {
+      "subject_id": 1,
+      "object_id": 3,
+      "type": "below",
+      "score": 0.8049
+    },
+    {
+      "subject_id": 1,
+      "object_id": 4,
+      "type": "below",
+      "score": 0.6976
+    },
+    {
+      "subject_id": 5,
+      "object_id": 2,
+      "type": "below",
+      "score": 0.6787
+    },
+    {
+      "subject_id": 1,
+      "object_id": 2,
+      "type": "below",
+      "score": 0.6381
+    }
+  ],
   "summary": {
-    "object_count": 1,
+    "object_count": 5,
     "has_person": false,
     "categories": [
-      "nature"
+      "nature",
+      "structure",
+      "transportation_infrastructure",
+      "vehicle"
     ]
   },
   "debug": {
     "removed_duplicates": [],
-    "removed_low_confidence": [],
+    "removed_low_confidence": [
+      {
+        "original_name": "vehicle",
+        "canonical_name": "vehicle",
+        "confidence": 0.132931,
+        "box": [
+          172,
+          153,
+          230,
+          200
+        ],
+        "threshold": 0.16,
+        "reason": "low_confidence"
+      }
+    ],
     "removed_invalid": [],
     "warnings": []
   }

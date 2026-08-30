@@ -234,13 +234,7 @@ public class PhotoSelectGalleryController : MonoBehaviour
 
     private string GetPhotoLibraryPath()
     {
-        return Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "PhotoLibrary"
-            )
-        );
+        return MagicPhotoRuntimePaths.PhotoLibraryDirectory;
     }
 
 
@@ -587,13 +581,8 @@ public class PhotoSelectGalleryController : MonoBehaviour
                 );
             }
 
-            string downloadedImagesPath = Path.GetFullPath(
-                Path.Combine(
-                    Application.dataPath,
-                    "..",
-                    "downloaded_images"
-                )
-            );
+            string downloadedImagesPath =
+                MagicPhotoRuntimePaths.DownloadedImagesDirectory;
 
             Directory.CreateDirectory(downloadedImagesPath);
 

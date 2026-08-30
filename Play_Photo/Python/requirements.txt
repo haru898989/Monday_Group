@@ -9,4 +9,7 @@ transformers==4.55.4
 tokenizers==0.21.4
 safetensors==0.6.2
 huggingface-hub==0.34.4
+simple-lama-inpainting==0.1.2
+pyinstaller==6.15.0
+lap==0.5.13
 clip @ git+https://github.com/ultralytics/CLIP.git@488e81a6711eea7346872b46ea928b367da8889d

@@ -38,14 +38,8 @@ public class MuseumLoadingPresenter : MonoBehaviour
 
     private void Awake()
     {
-        progressFilePath = Path.GetFullPath(
-            Path.Combine(
-                Application.dataPath,
-                "..",
-                "Python",
-                "loading_progress.txt"
-            )
-        );
+        progressFilePath =
+            MagicPhotoRuntimePaths.ProgressFilePath;
 
         CreateView();
     }

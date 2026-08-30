@@ -12,6 +12,7 @@ using UnityEngine.Video;
 /// </summary>
 public class DualDisplayManager : MonoBehaviour
 {
+    private static readonly bool EnableSecondDisplay = false;
     private const string PlaySceneName = "Main";
 
     private static DualDisplayManager instance;
@@ -39,6 +40,11 @@ public class DualDisplayManager : MonoBehaviour
     )]
     private static void Initialize()
     {
+        if (!EnableSecondDisplay)
+        {
+            return;
+        }
+
         if (instance != null)
         {
             return;
