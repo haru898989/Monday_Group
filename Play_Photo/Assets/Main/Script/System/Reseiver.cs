@@ -158,6 +158,9 @@ public class Reseiver : MonoBehaviour
 
     [SerializeField]
     private AudioClip boatAudioClip;
+    
+    [SerializeField]
+    private AudioClip trainAudioClip;
 
     // Pythonから送られてくる物体情報
     [Serializable]
@@ -794,6 +797,26 @@ public class Reseiver : MonoBehaviour
                 // ★船の音を渡す
                 boatGimmick.SetAudioClip(
                     boatAudioClip
+                );
+
+                break;
+            
+            case "train":
+            case "railway train":
+            case "passenger train":
+            case "subway":
+            case "metro":
+            case "locomotive":
+
+                TrainGimmick trainGimmick =
+                    GetOrAddComponent<TrainGimmick>(target);
+
+                trainGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                trainGimmick.SetAudioClip(
+                    trainAudioClip
                 );
 
                 break;

@@ -1204,6 +1204,7 @@ MonoBehaviour:
   humanDanceAudioClip: {fileID: 8300000, guid: 8249811f84be6aa4a941ea59590d17fe, type: 3}
   glassBreakAudioClip: {fileID: 8300000, guid: e7b33c91a2514a14cb46c25ff72454c3, type: 3}
   boatAudioClip: {fileID: 8300000, guid: ab41789b366f71f4583b7ede5992d514, type: 3}
+  trainAudioClip: {fileID: 8300000, guid: 7b485114bcad4da4e9d576b0c76e7243, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
