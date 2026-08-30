@@ -162,6 +162,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip trainAudioClip;
 
+    [SerializeField]
+    private ParticleSystem balloonPopEffect;
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -547,6 +550,8 @@ public class Reseiver : MonoBehaviour
 
                 balloonGimmick.SetTargetRenderer(cutoutRenderer);
                 balloonGimmick.SetAudioClip(balloonAudioClip);
+                balloonGimmick.SetPopEffect(balloonPopEffect);
+
                 break;
 
             case "computer":
@@ -820,6 +825,8 @@ public class Reseiver : MonoBehaviour
                 );
 
                 break;
+
+
 
         }
     }
