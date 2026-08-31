@@ -165,6 +165,11 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private ParticleSystem balloonPopEffect;
 
+    [SerializeField]
+    private AudioClip cameraAudioClip;
+
+
+
     // Pythonから送られてくる物体情報
     [Serializable]
     public class ObjectData
@@ -826,7 +831,19 @@ public class Reseiver : MonoBehaviour
 
                 break;
 
+            case "camera":
+            case "digital camera":
+            case "dslr camera":
+                CameraGimmick cameraGimmick =
+                    GetOrAddComponent<CameraGimmick>(target);
 
+                cameraGimmick.SetAudioClip(
+                    cameraAudioClip
+                );
+
+                break;
+
+            
 
         }
     }
