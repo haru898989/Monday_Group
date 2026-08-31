@@ -171,6 +171,12 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip sofaAudioClip;
 
+    [SerializeField]
+    private AudioClip doorOpenAudioClip;
+
+    [SerializeField]
+    private AudioClip doorCloseAudioClip;
+
 
 
     // Pythonから送られてくる物体情報
@@ -857,6 +863,34 @@ public class Reseiver : MonoBehaviour
                 );
 
                 break;
+
+            case "door":
+            case "doors":
+            case "front door":
+            case "wooden door":
+            case "sliding door":
+
+                Debug.Log(
+                    "★ ドアとして認識されました：" +
+                    objectName
+                );
+
+                DoorGimmick doorGimmick =
+                    GetOrAddComponent<DoorGimmick>(
+                        target
+                    );
+
+                doorGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                doorGimmick.SetAudioClips(
+                    doorOpenAudioClip,
+                    doorCloseAudioClip
+                );
+
+                break;
+                
 
 
 
