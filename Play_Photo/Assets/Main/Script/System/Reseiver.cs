@@ -168,6 +168,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip cameraAudioClip;
 
+    [SerializeField]
+    private AudioClip sofaAudioClip;
+
 
 
     // Pythonから送られてくる物体情報
@@ -844,6 +847,18 @@ public class Reseiver : MonoBehaviour
                 break;
 
             
+            case "couch":
+            case "sofa":
+                SofaGimmick sofaGimmick =
+                    GetOrAddComponent<SofaGimmick>(target);
+
+                sofaGimmick.SetAudioClip(
+                    sofaAudioClip
+                );
+
+                break;
+
+
 
         }
     }

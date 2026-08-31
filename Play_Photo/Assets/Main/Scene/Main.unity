@@ -1087,6 +1087,7 @@ MonoBehaviour:
   trainAudioClip: {fileID: 8300000, guid: 7b485114bcad4da4e9d576b0c76e7243, type: 3}
   balloonPopEffect: {fileID: 0}
   cameraAudioClip: {fileID: 8300000, guid: ab098332a125f7d47bcf5b24fb5879cd, type: 3}
+  sofaAudioClip: {fileID: 8300000, guid: 5317b47fbf14f8d4690568f5af406d2d, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
