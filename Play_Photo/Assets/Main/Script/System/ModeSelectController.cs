@@ -8,12 +8,17 @@ public class ModeSelectController : MonoBehaviour
     [SerializeField] private float uiFadeInDuration = 1.2f;
     [SerializeField] private float uiFadeOutDuration = 0.5f;
 
+    [Header("NoMode表示演出")]
+    [SerializeField] private float noModeFadeDelay = 0.4f;
+    [SerializeField] private float noModeFadeDuration = 1.8f;
+
     [Header("選択後のカメラ演出")]
     [SerializeField] private float cameraZoomDistance = 300f;
     [SerializeField] private float cameraZoomDuration = 1.8f;
     [SerializeField] private float fadeOutStartDelay = 0.85f;
 
     private CanvasGroup uiCanvasGroup;
+    private CanvasGroup noModeCanvasGroup;
     private Transform mainCameraTransform;
     private Vector3 cameraStartPosition;
     private bool isTransitioning;
@@ -26,6 +31,13 @@ public class ModeSelectController : MonoBehaviour
         {
             uiCanvasGroup.alpha = 0f;
             SetUIInteraction(false);
+        }
+
+        if (noModeCanvasGroup != null)
+        {
+            noModeCanvasGroup.alpha = 0f;
+            noModeCanvasGroup.interactable = false;
+            noModeCanvasGroup.blocksRaycasts = false;
         }
 
         if (mainCameraTransform != null)
@@ -59,6 +71,28 @@ public class ModeSelectController : MonoBehaviour
             {
                 uiCanvasGroup =
                     canvas.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            break;
+        }
+
+        Transform[] sceneTransforms = FindObjectsOfType<Transform>(true);
+
+        foreach (Transform sceneTransform in sceneTransforms)
+        {
+            if (sceneTransform.gameObject.scene != gameObject.scene ||
+                sceneTransform.name != "NoMode")
+            {
+                continue;
+            }
+
+            noModeCanvasGroup =
+                sceneTransform.GetComponent<CanvasGroup>();
+
+            if (noModeCanvasGroup == null)
+            {
+                noModeCanvasGroup =
+                    sceneTransform.gameObject.AddComponent<CanvasGroup>();
             }
 
             break;
@@ -98,7 +132,54 @@ public class ModeSelectController : MonoBehaviour
         if (!isTransitioning)
         {
             SetUIInteraction(true);
+            yield return FadeInNoMode();
         }
+    }
+
+    private IEnumerator FadeInNoMode()
+    {
+        if (noModeCanvasGroup == null)
+        {
+            yield break;
+        }
+
+        if (noModeFadeDelay > 0f)
+        {
+            yield return new WaitForSecondsRealtime(noModeFadeDelay);
+        }
+
+        if (isTransitioning)
+        {
+            yield break;
+        }
+
+        if (noModeFadeDuration <= 0f)
+        {
+            noModeCanvasGroup.alpha = 1f;
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < noModeFadeDuration)
+        {
+            if (isTransitioning)
+            {
+                yield break;
+            }
+
+            elapsedTime += Time.unscaledDeltaTime;
+
+            float t = Mathf.Clamp01(
+                elapsedTime / noModeFadeDuration
+            );
+            t = Mathf.SmoothStep(0f, 1f, t);
+            noModeCanvasGroup.alpha = t;
+
+            yield return null;
+        }
+
+        noModeCanvasGroup.alpha = 1f;
     }
 
     // 自分の写真を使う
