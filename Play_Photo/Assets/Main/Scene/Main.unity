@@ -757,6 +757,7 @@ MonoBehaviour:
   doorOpenAudioClip: {fileID: 8300000, guid: 559fc87d6e715c44fb6cdbff7dc36f6e, type: 3}
   doorCloseAudioClip: {fileID: 8300000, guid: a4f8bb4873a46b14e8b8b0fb0e2bb4fb, type: 3}
   tableAudioClip: {fileID: 8300000, guid: 116c77b656ffbae48994ba7754654d62, type: 3}
+  fishAudioClip: {fileID: 8300000, guid: d312e20173bb96e49a9d44cab62995e0, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
