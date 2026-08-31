@@ -907,6 +907,23 @@ public class Reseiver : MonoBehaviour
             case "table":
             case "dining table":
             case "desk":
+            case "coffee table":
+            case "side table":
+            case "wooden table":
+            case "office desk":
+            case "study desk":
+            case "computer desk":
+            case "work desk":
+            case "chair":
+            case "office chair":
+            case "desk chair":
+            case "dining chair":
+            case "wooden chair":
+            case "folding chair":
+            case "armchair":
+            case "stool":
+            case "seat":
+            case "bench":
                 TableGimmick tableGimmick =
                     GetOrAddComponent<TableGimmick>(target);
 
