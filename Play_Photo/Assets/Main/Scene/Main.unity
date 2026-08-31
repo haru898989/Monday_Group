@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1090,6 +1090,7 @@ MonoBehaviour:
   sofaAudioClip: {fileID: 8300000, guid: 5317b47fbf14f8d4690568f5af406d2d, type: 3}
   doorOpenAudioClip: {fileID: 8300000, guid: 559fc87d6e715c44fb6cdbff7dc36f6e, type: 3}
   doorCloseAudioClip: {fileID: 8300000, guid: a4f8bb4873a46b14e8b8b0fb0e2bb4fb, type: 3}
+  tableAudioClip: {fileID: 8300000, guid: 116c77b656ffbae48994ba7754654d62, type: 3}
 --- !u!114 &596323922
 MonoBehaviour:
   m_ObjectHideFlags: 0
