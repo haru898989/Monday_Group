@@ -9,7 +9,7 @@ public class ModeSelectController : MonoBehaviour
     [SerializeField] private float uiFadeOutDuration = 0.5f;
 
     [Header("NoMode表示演出")]
-    [SerializeField] private float noModeFadeDelay = 0.4f;
+    [SerializeField] private float noModeFadeDelay = 0f;
     [SerializeField] private float noModeFadeDuration = 1.8f;
 
     [Header("選択後のカメラ演出")]
@@ -22,6 +22,7 @@ public class ModeSelectController : MonoBehaviour
     private Transform mainCameraTransform;
     private Vector3 cameraStartPosition;
     private bool isTransitioning;
+    private bool canAcceptSelection;
 
     private void Awake()
     {
@@ -185,12 +186,22 @@ public class ModeSelectController : MonoBehaviour
     // 自分の写真を使う
     public void UseMyPhoto()
     {
+        if (!canAcceptSelection)
+        {
+            return;
+        }
+
         BeginTransition("LoadingLINE");
     }
 
     // 写真を選んで遊ぶ
     public void SelectPreparedPhoto()
     {
+        if (!canAcceptSelection)
+        {
+            return;
+        }
+
         BeginTransition("PhotoSelect");
     }
 
@@ -343,12 +354,16 @@ public class ModeSelectController : MonoBehaviour
 
     private void SetUIInteraction(bool enabled)
     {
+        canAcceptSelection = enabled;
+
         if (uiCanvasGroup == null)
         {
             return;
         }
 
-        uiCanvasGroup.interactable = enabled;
+        // 親CanvasGroupを操作不可にするとButtonが無効色へ変わるため、
+        // 見た目は通常色のまま維持し、Raycastとメソッド側で入力を止める。
+        uiCanvasGroup.interactable = true;
         uiCanvasGroup.blocksRaycasts = enabled;
     }
 }
