@@ -180,6 +180,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip tableAudioClip;
 
+    [SerializeField]
+    private AudioClip fishAudioClip;
+
 
 
     // Pythonから送られてくる物体情報
@@ -619,7 +622,14 @@ public class Reseiver : MonoBehaviour
                 FishGlowGimmick fishGimmick =
                     GetOrAddComponent<FishGlowGimmick>(target);
 
-                fishGimmick.SetTargetRenderer(cutoutRenderer);
+                fishGimmick.SetTargetRenderer(
+                    cutoutRenderer
+                );
+
+                fishGimmick.SetAudioClip(
+                    fishAudioClip
+                );
+
                 break;
 
             case "flower":
@@ -905,6 +915,8 @@ public class Reseiver : MonoBehaviour
                 );
 
                 break;
+
+
 
 
 

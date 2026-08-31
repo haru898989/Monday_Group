@@ -37,6 +37,7 @@ MonoImporter:
   - doorOpenAudioClip: {instanceID: 0}
   - doorCloseAudioClip: {instanceID: 0}
   - tableAudioClip: {fileID: 8300000, guid: 116c77b656ffbae48994ba7754654d62, type: 3}
+  - fishAudioClip: {fileID: 8300000, guid: d312e20173bb96e49a9d44cab62995e0, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
