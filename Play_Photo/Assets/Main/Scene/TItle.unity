@@ -6784,18 +6784,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1381352921}
-        m_TargetAssemblyTypeName: SoundManager, Assembly-CSharp
-        m_MethodName: PlaySE
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1816805550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6850,6 +6838,7 @@ MonoBehaviour:
   titleImage: {fileID: 2038186389}
   startButton: {fileID: 1816805547}
   fadeOutDuration: 0.5
+  doorOpenSeIndex: 1
 --- !u!114 &1816805553
 MonoBehaviour:
   m_ObjectHideFlags: 0
