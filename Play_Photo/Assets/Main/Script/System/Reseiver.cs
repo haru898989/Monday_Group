@@ -177,6 +177,9 @@ public class Reseiver : MonoBehaviour
     [SerializeField]
     private AudioClip doorCloseAudioClip;
 
+    [SerializeField]
+    private AudioClip tableAudioClip;
+
 
 
     // Pythonから送られてくる物体情報
@@ -890,7 +893,20 @@ public class Reseiver : MonoBehaviour
                 );
 
                 break;
-                
+
+            case "table":
+            case "dining table":
+            case "desk":
+                TableGimmick tableGimmick =
+                    GetOrAddComponent<TableGimmick>(target);
+
+                tableGimmick.SetAudioClip(
+                    tableAudioClip
+                );
+
+                break;
+
+
 
 
 

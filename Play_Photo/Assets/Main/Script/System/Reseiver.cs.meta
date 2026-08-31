@@ -34,6 +34,9 @@ MonoImporter:
   - balloonPopEffect: {instanceID: 0}
   - cameraAudioClip: {fileID: 8300000, guid: ab098332a125f7d47bcf5b24fb5879cd, type: 3}
   - sofaAudioClip: {fileID: 8300000, guid: 5317b47fbf14f8d4690568f5af406d2d, type: 3}
+  - doorOpenAudioClip: {instanceID: 0}
+  - doorCloseAudioClip: {instanceID: 0}
+  - tableAudioClip: {fileID: 8300000, guid: 116c77b656ffbae48994ba7754654d62, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
