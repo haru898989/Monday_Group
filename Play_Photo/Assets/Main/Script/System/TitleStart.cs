@@ -12,6 +12,9 @@ public class TitleStart : MonoBehaviour
     [Header("フェードアウト設定")]
     [SerializeField] private float fadeOutDuration = 0.5f;
 
+    [Header("ドア効果音")]
+    [SerializeField] private int doorOpenSeIndex = 1;
+
     private bool isStarting = false;
 
     public void StartLoadingLINE()
@@ -40,6 +43,11 @@ public class TitleStart : MonoBehaviour
         {
             ButtonInteraction(false);
         }
+
+        // シーンをまたいで生きているSoundManagerから効果音を鳴らす。
+        // ButtonのUnityEventでシーン内SoundManagerを直接参照すると、
+        // タイトルへ戻った際に重複側が破棄され、参照切れになるため。
+        PlayDoorOpenSound();
 
         // ドアを開き始める
         doorController.StartEntranceAnimation();
@@ -100,6 +108,17 @@ public class TitleStart : MonoBehaviour
         {
             buttonGroup.alpha = 0f;
         }
+    }
+
+    private void PlayDoorOpenSound()
+    {
+        if (SoundManager.Instance == null)
+        {
+            Debug.LogWarning("SoundManagerが見つからないため、ドア効果音を再生できません。");
+            return;
+        }
+
+        SoundManager.Instance.PlaySE(doorOpenSeIndex);
     }
 
     private void ButtonInteraction(bool enabled)
